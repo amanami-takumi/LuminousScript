@@ -1,0 +1,30 @@
+# タイトル設定
+### titleは必須。sub_titleは任意で、不要な場合はコメントアウトすること。
+adv_title: "Sparkle!"
+adv_sub_title: "ごく平凡なアンドロイドだった私が学園のヒロインになるまで"
+### タイトル画面の背景を指定する。画像はinput/assets/backgrounds/に配置すること。
+title_bg_image: "bg_title.png"
+### タイトルを画像に変更したい場合は下をコメントアウトする。両方コメントアウトした場合はテキストが優先される。
+# adv_title_image: ""
+
+
+# ブランディング
+creator_name: "天波たくみ"
+### クレジット欄に記載される。Licenseは任意の指定。
+# License: ""
+### クレジット欄に記載される。リンク類の設定。不要な場合はコメントアウトする。
+x_account_url: "https://x.com/amanami_takumi2"
+vrchat_account_url: "https://vrchat.com/home/user/usr_dc60d17d-d529-4c3b-8be7-1d259df0227f"
+fediverse_account_url: "https://misskey.seitendan.com/@takumin3211"
+web_url: "https://wallog.seitendan.com"
+# booth_url: ""
+### タイトル画面の背景を指定する。画像はinput/assets/backgrounds/に配置すること。
+favicon_url: "favicon.ico"
+
+
+# 色などの設定。sub_colorはグラデーションやアクセントに使われる色
+theme_color: "#667EEA"
+sub_color: "#754CA3"
+text_color: "#FFFFFF"
+### GoogleFontsのインポートURLを指定する。不要な場合はコメントアウトする。
+text_font_importURL: "https://fonts.googleapis.com/css2?family=Kosugi+Maru&display=swap"
