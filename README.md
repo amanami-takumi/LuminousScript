@@ -1,13 +1,15 @@
+↓なんか勝手に書かれてました
+
 # LuminasScript - ビジュアルノベルゲーム生成ツール
 
 CSVファイルから、ビジュアルノベル形式のウェブゲームを自動生成するPythonツールです。
 
-## 📋 必要要件
+## 必要要件
 
 - Python 3.6以上
 - 標準ライブラリのみ使用（追加インストール不要）
 
-## 🚀 使い方
+## 使い方
 
 ### 1. ディレクトリ構成を準備
 
@@ -70,7 +72,7 @@ python luminas_script.py memo.csv
 
 `output/game.html` をブラウザで開いてください！
 
-## 🎮 ゲームの機能
+## ゲームの機能
 
 ### タイトル画面
 - ニューゲーム
@@ -89,7 +91,7 @@ python luminas_script.py memo.csv
 - BGM音量調整（将来実装）
 - SE音量調整（将来実装）
 
-## 📝 CSVの例
+## CSVの例
 
 ```csv
 scene_id,person_name,text,background_image,center_standing_portrait_image,left_standing_portrait_image,right_standing_portrait_image
@@ -108,7 +110,7 @@ B それもそうだね",bg_myroom_1,,,
 でもさ、学校とか行ってみない？",bg_myroom_1,,sp_amanamitakumi_nigawarai,
 ```
 
-## 🎨 デザインの特徴
+## デザインの特徴
 
 - モダンなグラデーション背景
 - スムーズなトランジション効果
@@ -116,11 +118,11 @@ B それもそうだね",bg_myroom_1,,,
 - ダークテーマのUI
 - アニメーション付きボタン
 
-## 📄 ライセンス
+## ライセンス
 
 Apache 2.0
 
-## 🔧 トラブルシューティング
+## トラブルシューティング
 
 ### 画像が表示されない
 - ファイル名が正確か確認
@@ -135,7 +137,7 @@ Apache 2.0
 - UTF-8エンコーディングで保存されているか確認
 - CSVの形式が正しいか確認（カラム名など）
 
-## 🚀 将来の拡張予定
+## 将来の拡張予定
 
 - [ ] BGM/SE再生機能
 - [ ] 画面エフェクト（フェード、振動等）
