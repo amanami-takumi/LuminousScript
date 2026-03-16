@@ -160,3 +160,1070 @@ Traceback (most recent call last):
            ~~~~~~^^
   File "<frozen codecs>", line 325, in decode
 UnicodeDecodeError: 'utf-8' codec can't decode byte 0xff in position 0: invalid start byte
+2026-02-03 22:27:06,317 [INFO] Build start: sample.csv
+2026-02-03 22:27:07,160 [INFO] Build stdout:
+============================================================
+  LuminasScript - Visual Novel Game Generator
+============================================================
+
+✓ config.ymlを読み込みました
+✓ 31行のシナリオデータを読み込みました (encoding: utf-16)
+✓ 14個のアセットをエンコードしました
+✓ ゲームファイルを生成しました: output/game.html
+  ファイルサイズ: 67852.2 KB
+
+============================================================
+  ✓ 生成完了!
+============================================================
+
+生成されたファイル: output/game.html
+ブラウザで開いてゲームをお楽しみください!
+2026-02-03 22:39:19,489 [INFO] Build start: sample.csv
+2026-02-03 22:39:20,356 [INFO] Build stdout:
+============================================================
+  LuminasScript - Visual Novel Game Generator
+============================================================
+
+✓ config.ymlを読み込みました
+✓ 31行のシナリオデータを読み込みました (encoding: utf-16)
+✓ 14個のアセットをエンコードしました
+✓ ゲームファイルを生成しました: output/game.html
+  ファイルサイズ: 67853.7 KB
+
+============================================================
+  ✓ 生成完了!
+============================================================
+
+生成されたファイル: output/game.html
+ブラウザで開いてゲームをお楽しみください!
+2026-02-03 22:46:22,764 [INFO] Scene ID check start: sample.csv
+2026-02-03 22:46:22,815 [INFO] Scene ID check stdout:
+WARNINGS:
+  line 21: '1-M-Q' - 末尾の T/Q/E は動作するが非推奨です (例: 1-T)
+  line 21: '1-M-Q' - M 以降は数字のみを推奨します
+  line 24: '1-M-A-Q' - 末尾の T/Q/E は動作するが非推奨です (例: 1-T)
+  line 24: '1-M-A-Q' - M 以降は数字のみを推奨します
+  line 25: '1-M-A-A‐1' - M 以降は数字のみを推奨します
+  line 26: '1-M-A-A‐2' - M 以降は数字のみを推奨します
+  line 27: '1-M-A-A‐E' - M 以降は数字のみを推奨します
+  line 28: '1-M-A-B‐1' - M 以降は数字のみを推奨します
+  line 29: '1-M-A-B‐2' - M 以降は数字のみを推奨します
+  line 30: '1-M-A-B‐E' - M 以降は数字のみを推奨します
+ERRORS:
+  line 22: '1‐M‐A‐1' - パーツ数が不足しています (例: 1-1)
+  line 23: '1‐M‐A‐2' - パーツ数が不足しています (例: 1-1)
+  line 31: '1‐M‐B‐1' - パーツ数が不足しています (例: 1-1)
+  line 32: '1‐M‐B‐E' - パーツ数が不足しています (例: 1-1)
+  line 21: '1-M-Q' - 分岐先が見つかりません: 1-M-A-1
+  line 21: '1-M-Q' - 分岐先が見つかりません: 1-M-B-1
+  line 24: '1-M-A-Q' - 分岐先が見つかりません: 1-M-A-A-1
+  line 24: '1-M-A-Q' - 分岐先が見つかりません: 1-M-A-B-1
+2026-02-03 22:47:13,971 [INFO] Scene ID check start: sample.csv
+2026-02-03 22:47:14,021 [INFO] Scene ID check stdout:
+WARNINGS:
+  line 21: '1-M-Q' - 末尾の T/Q/E は動作するが非推奨です (例: 1-T)
+  line 21: '1-M-Q' - M 以降は数字のみを推奨します
+  line 24: '1-M-A-Q' - 末尾の T/Q/E は動作するが非推奨です (例: 1-T)
+  line 24: '1-M-A-Q' - M 以降は数字のみを推奨します
+  line 25: '1-M-A-A‐1' - M 以降は数字のみを推奨します
+  line 26: '1-M-A-A‐2' - M 以降は数字のみを推奨します
+  line 27: '1-M-A-A‐E' - M 以降は数字のみを推奨します
+  line 28: '1-M-A-B‐1' - M 以降は数字のみを推奨します
+  line 29: '1-M-A-B‐2' - M 以降は数字のみを推奨します
+  line 30: '1-M-A-B‐E' - M 以降は数字のみを推奨します
+ERRORS:
+  line 22: '1‐M‐A‐1' - パーツ数が不足しています (例: 1-1)
+  line 23: '1‐M‐A‐2' - パーツ数が不足しています (例: 1-1)
+  line 31: '1‐M‐B‐1' - パーツ数が不足しています (例: 1-1)
+  line 32: '1‐M‐B‐E' - パーツ数が不足しています (例: 1-1)
+  line 21: '1-M-Q' - 分岐先が見つかりません: 1-M-A-1
+  line 21: '1-M-Q' - 分岐先が見つかりません: 1-M-B-1
+  line 24: '1-M-A-Q' - 分岐先が見つかりません: 1-M-A-A-1
+  line 24: '1-M-A-Q' - 分岐先が見つかりません: 1-M-A-B-1
+2026-02-03 22:51:02,095 [INFO] Scene ID check start: sample.csv
+2026-02-03 22:51:02,142 [INFO] Scene ID check stdout:
+WARNINGS:
+  line 22: '1‐M‐A‐1' - scene_id の区切り文字は「-」です
+  line 23: '1‐M‐A‐2' - scene_id の区切り文字は「-」です
+  line 25: '1-M-A-A‐1' - scene_id の区切り文字は「-」です
+  line 26: '1-M-A-A‐2' - scene_id の区切り文字は「-」です
+  line 27: '1-M-A-A‐E' - scene_id の区切り文字は「-」です
+  line 28: '1-M-A-B‐1' - scene_id の区切り文字は「-」です
+  line 29: '1-M-A-B‐2' - scene_id の区切り文字は「-」です
+  line 30: '1-M-A-B‐E' - scene_id の区切り文字は「-」です
+  line 31: '1‐M‐B‐1' - scene_id の区切り文字は「-」です
+  line 32: '1‐M‐B‐E' - scene_id の区切り文字は「-」です
+ERRORS:
+  line 18: '1-M-1' - 2番目のパーツが想定外です
+  line 19: '1-M-2' - 2番目のパーツが想定外です
+  line 20: '1-M-3' - 2番目のパーツが想定外です
+  line 21: '1-M-Q' - 2番目のパーツが想定外です
+  line 22: '1‐M‐A‐1' - パーツ数が不足しています (例: 1-1)
+  line 23: '1‐M‐A‐2' - パーツ数が不足しています (例: 1-1)
+  line 24: '1-M-A-Q' - 2番目のパーツが想定外です
+  line 25: '1-M-A-A‐1' - 2番目のパーツが想定外です
+  line 26: '1-M-A-A‐2' - 2番目のパーツが想定外です
+  line 27: '1-M-A-A‐E' - 2番目のパーツが想定外です
+  line 28: '1-M-A-B‐1' - 2番目のパーツが想定外です
+  line 29: '1-M-A-B‐2' - 2番目のパーツが想定外です
+  line 30: '1-M-A-B‐E' - 2番目のパーツが想定外です
+  line 31: '1‐M‐B‐1' - パーツ数が不足しています (例: 1-1)
+  line 32: '1‐M‐B‐E' - パーツ数が不足しています (例: 1-1)
+  line 21: '1-M-Q' - 分岐先が見つかりません: 1-M-A-1
+  line 21: '1-M-Q' - 分岐先が見つかりません: 1-M-B-1
+  line 24: '1-M-A-Q' - 分岐先が見つかりません: 1-M-A-A-1
+  line 24: '1-M-A-Q' - 分岐先が見つかりません: 1-M-A-B-1
+2026-02-03 22:52:43,013 [INFO] Scene ID check start: sample.csv
+2026-02-03 22:52:43,063 [ERROR] Scene ID check stderr:
+Traceback (most recent call last):
+  File "/usr/src/LuminousScript/check_scene_id.py", line 191, in <module>
+    sys.exit(main())
+             ~~~~^^
+  File "/usr/src/LuminousScript/check_scene_id.py", line 140, in main
+    scene_id = validate_scene_id(scene_id_raw, line_no, errors, warnings)
+  File "/usr/src/LuminousScript/check_scene_id.py", line 88, in validate_scene_id
+    second = parts[1]
+             ~~~~~^^^
+IndexError: list index out of range
+2026-02-03 22:54:04,027 [INFO] Scene ID check start: sample.csv
+2026-02-03 22:54:04,080 [ERROR] Scene ID check stderr:
+Traceback (most recent call last):
+  File "/usr/src/LuminousScript/check_scene_id.py", line 195, in <module>
+    sys.exit(main())
+             ~~~~^^
+  File "/usr/src/LuminousScript/check_scene_id.py", line 144, in main
+    scene_id = validate_scene_id(scene_id_raw, line_no, errors, warnings)
+  File "/usr/src/LuminousScript/check_scene_id.py", line 88, in validate_scene_id
+    second = parts[1]
+             ~~~~~^^^
+IndexError: list index out of range
+2026-02-03 22:55:28,468 [INFO] Scene ID check start: sample.csv
+2026-02-03 22:55:28,520 [INFO] Scene ID check stdout:
+WARNINGS:
+  line 22: '1‐M‐A‐1' - scene_id の区切り文字は「-」です
+  line 23: '1‐M‐A‐2' - scene_id の区切り文字は「-」です
+  line 25: '1-M-A-A‐1' - scene_id の区切り文字は「-」です
+  line 26: '1-M-A-A‐2' - scene_id の区切り文字は「-」です
+  line 27: '1-M-A-A‐E' - scene_id の区切り文字は「-」です
+  line 28: '1-M-A-B‐1' - scene_id の区切り文字は「-」です
+  line 29: '1-M-A-B‐2' - scene_id の区切り文字は「-」です
+  line 30: '1-M-A-B‐E' - scene_id の区切り文字は「-」です
+  line 31: '1‐M‐B‐1' - scene_id の区切り文字は「-」です
+  line 32: '1‐M‐B‐E' - scene_id の区切り文字は「-」です
+ERRORS:
+  line 22: '1‐M‐A‐1' - パーツ数が不足しています (例: 1-1)
+  line 23: '1‐M‐A‐2' - パーツ数が不足しています (例: 1-1)
+  line 31: '1‐M‐B‐1' - パーツ数が不足しています (例: 1-1)
+  line 32: '1‐M‐B‐E' - パーツ数が不足しています (例: 1-1)
+2026-02-03 22:55:33,783 [INFO] Scene ID check start: sample.csv
+2026-02-03 22:55:33,833 [INFO] Scene ID check stdout:
+WARNINGS:
+  line 22: '1‐M‐A‐1' - scene_id の区切り文字は「-」です
+  line 23: '1‐M‐A‐2' - scene_id の区切り文字は「-」です
+  line 25: '1-M-A-A‐1' - scene_id の区切り文字は「-」です
+  line 26: '1-M-A-A‐2' - scene_id の区切り文字は「-」です
+  line 27: '1-M-A-A‐E' - scene_id の区切り文字は「-」です
+  line 28: '1-M-A-B‐1' - scene_id の区切り文字は「-」です
+  line 29: '1-M-A-B‐2' - scene_id の区切り文字は「-」です
+  line 30: '1-M-A-B‐E' - scene_id の区切り文字は「-」です
+  line 31: '1‐M‐B‐1' - scene_id の区切り文字は「-」です
+  line 32: '1‐M‐B‐E' - scene_id の区切り文字は「-」です
+ERRORS:
+  line 22: '1‐M‐A‐1' - パーツ数が不足しています (例: 1-1)
+  line 23: '1‐M‐A‐2' - パーツ数が不足しています (例: 1-1)
+  line 31: '1‐M‐B‐1' - パーツ数が不足しています (例: 1-1)
+  line 32: '1‐M‐B‐E' - パーツ数が不足しています (例: 1-1)
+2026-02-03 22:56:01,774 [INFO] Scene ID check start: sample.csv
+2026-02-03 22:56:01,824 [INFO] Scene ID check stdout:
+✓ scene_id チェック完了 (encoding: utf-16)
+2026-02-03 22:56:08,904 [INFO] Build start: sample.csv
+2026-02-03 22:56:09,749 [INFO] Build stdout:
+============================================================
+  LuminasScript - Visual Novel Game Generator
+============================================================
+
+✓ config.ymlを読み込みました
+✓ 31行のシナリオデータを読み込みました (encoding: utf-16)
+✓ 14個のアセットをエンコードしました
+✓ ゲームファイルを生成しました: output/game.html
+  ファイルサイズ: 67853.7 KB
+
+============================================================
+  ✓ 生成完了!
+============================================================
+
+生成されたファイル: output/game.html
+ブラウザで開いてゲームをお楽しみください!
+2026-02-04 08:58:36,900 [INFO] Scene ID check start: sample.csv
+2026-02-04 08:58:36,949 [INFO] Scene ID check stdout:
+✓ scene_id チェック完了 (encoding: utf-16)
+2026-02-04 08:58:41,347 [INFO] Build start: sample.csv
+2026-02-04 08:58:48,899 [INFO] Build stdout:
+============================================================
+  LuminasScript - Visual Novel Game Generator
+============================================================
+
+✓ config.ymlを読み込みました
+✓ 31行のシナリオデータを読み込みました (encoding: utf-16)
+✓ 14個のアセットをエンコードしました
+✓ ゲームファイルを生成しました: output/sample202602040858.html
+  ファイルサイズ: 5832.5 KB
+
+============================================================
+  ✓ 生成完了!
+============================================================
+
+生成されたファイル: output/sample202602040858.html
+ブラウザで開いてゲームをお楽しみください!
+2026-02-04 18:14:43,481 [INFO] Scene ID check start: sample.csv
+2026-02-04 18:14:43,607 [INFO] Scene ID check stdout:
+✓ scene_id チェック完了 (encoding: utf-16)
+2026-02-04 18:14:46,328 [INFO] Build start: sample.csv
+2026-02-04 18:14:56,509 [INFO] Build stdout:
+============================================================
+  LuminasScript - Visual Novel Game Generator
+============================================================
+
+✓ config.ymlを読み込みました
+✓ 37行のシナリオデータを読み込みました (encoding: utf-16)
+✓ 16個のアセットをエンコードしました
+✓ ゲームファイルを生成しました: output/sample202602041814.html
+  ファイルサイズ: 7990.1 KB
+
+============================================================
+  ✓ 生成完了!
+============================================================
+
+生成されたファイル: output/sample202602041814.html
+ブラウザで開いてゲームをお楽しみください!
+2026-02-04 19:37:20,566 [INFO] Build start: scenario.csv
+2026-02-04 19:37:21,699 [INFO] Build stdout:
+============================================================
+  LuminasScript - Visual Novel Game Generator
+============================================================
+
+✓ config.ymlを読み込みました
+✓ 10行のシナリオデータを読み込みました (encoding: utf-16)
+✓ 1個のアセットをエンコードしました
+✓ ゲームファイルを生成しました: output/scenario202602041937.html
+  ファイルサイズ: 988.7 KB
+
+============================================================
+  ✓ 生成完了!
+============================================================
+
+生成されたファイル: output/scenario202602041937.html
+ブラウザで開いてゲームをお楽しみください!
+2026-02-04 19:39:05,347 [INFO] Build start: sample.csv
+2026-02-04 19:39:16,520 [INFO] Build stdout:
+============================================================
+  LuminasScript - Visual Novel Game Generator
+============================================================
+
+✓ config.ymlを読み込みました
+✓ 45行のシナリオデータを読み込みました (encoding: utf-16)
+✓ 17個のアセットをエンコードしました
+✓ ゲームファイルを生成しました: output/sample202602041939.html
+  ファイルサイズ: 8862.3 KB
+
+============================================================
+  ✓ 生成完了!
+============================================================
+
+生成されたファイル: output/sample202602041939.html
+ブラウザで開いてゲームをお楽しみください!
+2026-02-04 19:39:46,476 [INFO] Scene ID check start: sample.csv
+2026-02-04 19:39:46,522 [INFO] Scene ID check stdout:
+✓ scene_id チェック完了 (encoding: utf-16)
+2026-02-04 19:45:55,914 [INFO] Scene ID check start: sample.csv
+2026-02-04 19:45:55,963 [INFO] Scene ID check stdout:
+✓ scene_id チェック完了 (encoding: utf-16)
+2026-02-04 19:45:56,637 [INFO] Build start: sample.csv
+2026-02-04 19:46:08,196 [INFO] Build stdout:
+============================================================
+  LuminasScript - Visual Novel Game Generator
+============================================================
+
+✓ config.ymlを読み込みました
+✓ 45行のシナリオデータを読み込みました (encoding: utf-16)
+✓ 17個のアセットをエンコードしました
+✓ ゲームファイルを生成しました: output/sample202602041945.html
+  ファイルサイズ: 8862.3 KB
+
+============================================================
+  ✓ 生成完了!
+============================================================
+
+生成されたファイル: output/sample202602041945.html
+ブラウザで開いてゲームをお楽しみください!
+2026-02-13 21:23:21,344 [ERROR] GET error
+Traceback (most recent call last):
+  File "/usr/src/LuminousScript/web_gui.py", line 1331, in do_GET
+    self._send_file(path, inline=inline)
+    ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/src/LuminousScript/web_gui.py", line 1265, in _send_file
+    self.wfile.write(data)
+    ~~~~~~~~~~~~~~~~^^^^^^
+  File "/usr/local/lib/python3.14/socketserver.py", line 845, in write
+    self._sock.sendall(b)
+    ~~~~~~~~~~~~~~~~~~^^^
+BrokenPipeError: [Errno 32] Broken pipe
+2026-02-13 21:23:55,123 [ERROR] GET error
+Traceback (most recent call last):
+  File "/usr/src/LuminousScript/web_gui.py", line 1331, in do_GET
+    self._send_file(path, inline=inline)
+    ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/src/LuminousScript/web_gui.py", line 1265, in _send_file
+    self.wfile.write(data)
+    ~~~~~~~~~~~~~~~~^^^^^^
+  File "/usr/local/lib/python3.14/socketserver.py", line 845, in write
+    self._sock.sendall(b)
+    ~~~~~~~~~~~~~~~~~~^^^
+BrokenPipeError: [Errno 32] Broken pipe
+2026-02-13 21:23:55,157 [ERROR] GET error
+Traceback (most recent call last):
+  File "/usr/src/LuminousScript/web_gui.py", line 1331, in do_GET
+    self._send_file(path, inline=inline)
+    ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/src/LuminousScript/web_gui.py", line 1265, in _send_file
+    self.wfile.write(data)
+    ~~~~~~~~~~~~~~~~^^^^^^
+  File "/usr/local/lib/python3.14/socketserver.py", line 845, in write
+    self._sock.sendall(b)
+    ~~~~~~~~~~~~~~~~~~^^^
+BrokenPipeError: [Errno 32] Broken pipe
+2026-02-13 21:23:55,183 [ERROR] GET error
+Traceback (most recent call last):
+  File "/usr/src/LuminousScript/web_gui.py", line 1331, in do_GET
+    self._send_file(path, inline=inline)
+    ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/src/LuminousScript/web_gui.py", line 1265, in _send_file
+    self.wfile.write(data)
+    ~~~~~~~~~~~~~~~~^^^^^^
+  File "/usr/local/lib/python3.14/socketserver.py", line 845, in write
+    self._sock.sendall(b)
+    ~~~~~~~~~~~~~~~~~~^^^
+BrokenPipeError: [Errno 32] Broken pipe
+2026-02-13 21:23:55,210 [ERROR] GET error
+Traceback (most recent call last):
+  File "/usr/src/LuminousScript/web_gui.py", line 1331, in do_GET
+    self._send_file(path, inline=inline)
+    ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/src/LuminousScript/web_gui.py", line 1265, in _send_file
+    self.wfile.write(data)
+    ~~~~~~~~~~~~~~~~^^^^^^
+  File "/usr/local/lib/python3.14/socketserver.py", line 845, in write
+    self._sock.sendall(b)
+    ~~~~~~~~~~~~~~~~~~^^^
+BrokenPipeError: [Errno 32] Broken pipe
+2026-02-13 21:23:55,236 [ERROR] GET error
+Traceback (most recent call last):
+  File "/usr/src/LuminousScript/web_gui.py", line 1331, in do_GET
+    self._send_file(path, inline=inline)
+    ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/src/LuminousScript/web_gui.py", line 1265, in _send_file
+    self.wfile.write(data)
+    ~~~~~~~~~~~~~~~~^^^^^^
+  File "/usr/local/lib/python3.14/socketserver.py", line 845, in write
+    self._sock.sendall(b)
+    ~~~~~~~~~~~~~~~~~~^^^
+BrokenPipeError: [Errno 32] Broken pipe
+2026-02-13 21:23:55,264 [ERROR] GET error
+Traceback (most recent call last):
+  File "/usr/src/LuminousScript/web_gui.py", line 1331, in do_GET
+    self._send_file(path, inline=inline)
+    ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/src/LuminousScript/web_gui.py", line 1265, in _send_file
+    self.wfile.write(data)
+    ~~~~~~~~~~~~~~~~^^^^^^
+  File "/usr/local/lib/python3.14/socketserver.py", line 845, in write
+    self._sock.sendall(b)
+    ~~~~~~~~~~~~~~~~~~^^^
+BrokenPipeError: [Errno 32] Broken pipe
+2026-02-13 21:23:55,293 [ERROR] GET error
+Traceback (most recent call last):
+  File "/usr/src/LuminousScript/web_gui.py", line 1331, in do_GET
+    self._send_file(path, inline=inline)
+    ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/src/LuminousScript/web_gui.py", line 1265, in _send_file
+    self.wfile.write(data)
+    ~~~~~~~~~~~~~~~~^^^^^^
+  File "/usr/local/lib/python3.14/socketserver.py", line 845, in write
+    self._sock.sendall(b)
+    ~~~~~~~~~~~~~~~~~~^^^
+BrokenPipeError: [Errno 32] Broken pipe
+2026-02-13 21:23:55,319 [ERROR] GET error
+Traceback (most recent call last):
+  File "/usr/src/LuminousScript/web_gui.py", line 1331, in do_GET
+    self._send_file(path, inline=inline)
+    ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/src/LuminousScript/web_gui.py", line 1265, in _send_file
+    self.wfile.write(data)
+    ~~~~~~~~~~~~~~~~^^^^^^
+  File "/usr/local/lib/python3.14/socketserver.py", line 845, in write
+    self._sock.sendall(b)
+    ~~~~~~~~~~~~~~~~~~^^^
+BrokenPipeError: [Errno 32] Broken pipe
+2026-02-13 21:23:55,344 [ERROR] GET error
+Traceback (most recent call last):
+  File "/usr/src/LuminousScript/web_gui.py", line 1331, in do_GET
+    self._send_file(path, inline=inline)
+    ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/src/LuminousScript/web_gui.py", line 1265, in _send_file
+    self.wfile.write(data)
+    ~~~~~~~~~~~~~~~~^^^^^^
+  File "/usr/local/lib/python3.14/socketserver.py", line 845, in write
+    self._sock.sendall(b)
+    ~~~~~~~~~~~~~~~~~~^^^
+BrokenPipeError: [Errno 32] Broken pipe
+2026-02-13 21:23:55,368 [ERROR] GET error
+Traceback (most recent call last):
+  File "/usr/src/LuminousScript/web_gui.py", line 1331, in do_GET
+    self._send_file(path, inline=inline)
+    ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/src/LuminousScript/web_gui.py", line 1265, in _send_file
+    self.wfile.write(data)
+    ~~~~~~~~~~~~~~~~^^^^^^
+  File "/usr/local/lib/python3.14/socketserver.py", line 845, in write
+    self._sock.sendall(b)
+    ~~~~~~~~~~~~~~~~~~^^^
+BrokenPipeError: [Errno 32] Broken pipe
+2026-02-13 21:23:55,393 [ERROR] GET error
+Traceback (most recent call last):
+  File "/usr/src/LuminousScript/web_gui.py", line 1331, in do_GET
+    self._send_file(path, inline=inline)
+    ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/src/LuminousScript/web_gui.py", line 1265, in _send_file
+    self.wfile.write(data)
+    ~~~~~~~~~~~~~~~~^^^^^^
+  File "/usr/local/lib/python3.14/socketserver.py", line 845, in write
+    self._sock.sendall(b)
+    ~~~~~~~~~~~~~~~~~~^^^
+BrokenPipeError: [Errno 32] Broken pipe
+2026-02-13 21:23:55,435 [ERROR] GET error
+Traceback (most recent call last):
+  File "/usr/src/LuminousScript/web_gui.py", line 1331, in do_GET
+    self._send_file(path, inline=inline)
+    ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/src/LuminousScript/web_gui.py", line 1265, in _send_file
+    self.wfile.write(data)
+    ~~~~~~~~~~~~~~~~^^^^^^
+  File "/usr/local/lib/python3.14/socketserver.py", line 845, in write
+    self._sock.sendall(b)
+    ~~~~~~~~~~~~~~~~~~^^^
+BrokenPipeError: [Errno 32] Broken pipe
+2026-02-13 21:23:55,705 [ERROR] GET error
+Traceback (most recent call last):
+  File "/usr/src/LuminousScript/web_gui.py", line 1331, in do_GET
+    self._send_file(path, inline=inline)
+    ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/src/LuminousScript/web_gui.py", line 1265, in _send_file
+    self.wfile.write(data)
+    ~~~~~~~~~~~~~~~~^^^^^^
+  File "/usr/local/lib/python3.14/socketserver.py", line 845, in write
+    self._sock.sendall(b)
+    ~~~~~~~~~~~~~~~~~~^^^
+BrokenPipeError: [Errno 32] Broken pipe
+2026-02-13 21:23:55,730 [ERROR] GET error
+Traceback (most recent call last):
+  File "/usr/src/LuminousScript/web_gui.py", line 1331, in do_GET
+    self._send_file(path, inline=inline)
+    ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/src/LuminousScript/web_gui.py", line 1265, in _send_file
+    self.wfile.write(data)
+    ~~~~~~~~~~~~~~~~^^^^^^
+  File "/usr/local/lib/python3.14/socketserver.py", line 845, in write
+    self._sock.sendall(b)
+    ~~~~~~~~~~~~~~~~~~^^^
+BrokenPipeError: [Errno 32] Broken pipe
+2026-02-13 21:23:55,756 [ERROR] GET error
+Traceback (most recent call last):
+  File "/usr/src/LuminousScript/web_gui.py", line 1331, in do_GET
+    self._send_file(path, inline=inline)
+    ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/src/LuminousScript/web_gui.py", line 1265, in _send_file
+    self.wfile.write(data)
+    ~~~~~~~~~~~~~~~~^^^^^^
+  File "/usr/local/lib/python3.14/socketserver.py", line 845, in write
+    self._sock.sendall(b)
+    ~~~~~~~~~~~~~~~~~~^^^
+BrokenPipeError: [Errno 32] Broken pipe
+2026-02-13 21:23:55,779 [ERROR] GET error
+Traceback (most recent call last):
+  File "/usr/src/LuminousScript/web_gui.py", line 1331, in do_GET
+    self._send_file(path, inline=inline)
+    ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/src/LuminousScript/web_gui.py", line 1265, in _send_file
+    self.wfile.write(data)
+    ~~~~~~~~~~~~~~~~^^^^^^
+  File "/usr/local/lib/python3.14/socketserver.py", line 845, in write
+    self._sock.sendall(b)
+    ~~~~~~~~~~~~~~~~~~^^^
+BrokenPipeError: [Errno 32] Broken pipe
+2026-02-13 21:23:55,806 [ERROR] GET error
+Traceback (most recent call last):
+  File "/usr/src/LuminousScript/web_gui.py", line 1331, in do_GET
+    self._send_file(path, inline=inline)
+    ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/src/LuminousScript/web_gui.py", line 1265, in _send_file
+    self.wfile.write(data)
+    ~~~~~~~~~~~~~~~~^^^^^^
+  File "/usr/local/lib/python3.14/socketserver.py", line 845, in write
+    self._sock.sendall(b)
+    ~~~~~~~~~~~~~~~~~~^^^
+BrokenPipeError: [Errno 32] Broken pipe
+2026-02-13 21:23:55,829 [ERROR] GET error
+Traceback (most recent call last):
+  File "/usr/src/LuminousScript/web_gui.py", line 1331, in do_GET
+    self._send_file(path, inline=inline)
+    ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/src/LuminousScript/web_gui.py", line 1265, in _send_file
+    self.wfile.write(data)
+    ~~~~~~~~~~~~~~~~^^^^^^
+  File "/usr/local/lib/python3.14/socketserver.py", line 845, in write
+    self._sock.sendall(b)
+    ~~~~~~~~~~~~~~~~~~^^^
+BrokenPipeError: [Errno 32] Broken pipe
+2026-02-13 21:24:01,792 [ERROR] GET error
+Traceback (most recent call last):
+  File "/usr/src/LuminousScript/web_gui.py", line 1331, in do_GET
+    self._send_file(path, inline=inline)
+    ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/src/LuminousScript/web_gui.py", line 1265, in _send_file
+    self.wfile.write(data)
+    ~~~~~~~~~~~~~~~~^^^^^^
+  File "/usr/local/lib/python3.14/socketserver.py", line 845, in write
+    self._sock.sendall(b)
+    ~~~~~~~~~~~~~~~~~~^^^
+BrokenPipeError: [Errno 32] Broken pipe
+2026-02-13 21:24:01,825 [ERROR] GET error
+Traceback (most recent call last):
+  File "/usr/src/LuminousScript/web_gui.py", line 1331, in do_GET
+    self._send_file(path, inline=inline)
+    ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/src/LuminousScript/web_gui.py", line 1265, in _send_file
+    self.wfile.write(data)
+    ~~~~~~~~~~~~~~~~^^^^^^
+  File "/usr/local/lib/python3.14/socketserver.py", line 845, in write
+    self._sock.sendall(b)
+    ~~~~~~~~~~~~~~~~~~^^^
+BrokenPipeError: [Errno 32] Broken pipe
+2026-02-13 21:24:01,863 [ERROR] GET error
+Traceback (most recent call last):
+  File "/usr/src/LuminousScript/web_gui.py", line 1331, in do_GET
+    self._send_file(path, inline=inline)
+    ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/src/LuminousScript/web_gui.py", line 1265, in _send_file
+    self.wfile.write(data)
+    ~~~~~~~~~~~~~~~~^^^^^^
+  File "/usr/local/lib/python3.14/socketserver.py", line 845, in write
+    self._sock.sendall(b)
+    ~~~~~~~~~~~~~~~~~~^^^
+BrokenPipeError: [Errno 32] Broken pipe
+2026-02-13 21:24:01,903 [ERROR] GET error
+Traceback (most recent call last):
+  File "/usr/src/LuminousScript/web_gui.py", line 1331, in do_GET
+    self._send_file(path, inline=inline)
+    ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/src/LuminousScript/web_gui.py", line 1265, in _send_file
+    self.wfile.write(data)
+    ~~~~~~~~~~~~~~~~^^^^^^
+  File "/usr/local/lib/python3.14/socketserver.py", line 845, in write
+    self._sock.sendall(b)
+    ~~~~~~~~~~~~~~~~~~^^^
+BrokenPipeError: [Errno 32] Broken pipe
+2026-02-13 21:24:01,938 [ERROR] GET error
+Traceback (most recent call last):
+  File "/usr/src/LuminousScript/web_gui.py", line 1331, in do_GET
+    self._send_file(path, inline=inline)
+    ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/src/LuminousScript/web_gui.py", line 1265, in _send_file
+    self.wfile.write(data)
+    ~~~~~~~~~~~~~~~~^^^^^^
+  File "/usr/local/lib/python3.14/socketserver.py", line 845, in write
+    self._sock.sendall(b)
+    ~~~~~~~~~~~~~~~~~~^^^
+BrokenPipeError: [Errno 32] Broken pipe
+2026-02-16 14:04:45,787 [INFO] Scene ID check start: common.csv
+2026-02-16 14:04:45,895 [INFO] Scene ID check stdout:
+ERRORS:
+  line 16: '' - scene_id が空です
+2026-02-16 14:05:12,757 [INFO] Scene ID check start: common.csv
+2026-02-16 14:05:12,800 [INFO] Scene ID check stdout:
+ERRORS:
+  line 16: '' - scene_id が空です
+2026-02-16 14:05:17,655 [INFO] Scene ID check start: common.csv
+2026-02-16 14:05:17,705 [INFO] Scene ID check stdout:
+ERRORS:
+  line 16: '' - scene_id が空です
+2026-02-16 14:06:04,685 [INFO] Scene ID check start: sample.csv
+2026-02-16 14:06:04,748 [INFO] Scene ID check stdout:
+✓ scene_id チェック完了 (encoding: utf-16)
+2026-02-16 14:37:03,546 [INFO] Scene ID check start: sample.csv
+2026-02-16 14:37:03,596 [INFO] Scene ID check stdout:
+✓ scene_id チェック完了 (encoding: utf-16)
+2026-02-16 14:37:08,386 [INFO] Build start: sample.csv
+2026-02-16 14:37:09,618 [INFO] Build stdout:
+============================================================
+  LuminasScript - Visual Novel Game Generator
+============================================================
+
+⚠ config.ymlの読み込みに失敗しました: while scanning for the next token
+found character '@' that cannot start any token
+  in "input/config.yml", line 52, column 694
+✓ 45行のシナリオデータを読み込みました (encoding: utf-16)
+✓ 16個のアセットをエンコードしました
+✓ ゲームファイルを生成しました: output/sample202602161437.html
+  ファイルサイズ: 95412.5 KB
+
+============================================================
+  ✓ 生成完了!
+============================================================
+
+生成されたファイル: output/sample202602161437.html
+ブラウザで開いてゲームをお楽しみください!
+2026-02-16 14:38:02,732 [INFO] Scene ID check start: common.csv
+2026-02-16 14:38:02,780 [INFO] Scene ID check stdout:
+ERRORS:
+  line 16: '' - scene_id が空です
+2026-02-16 14:38:05,829 [INFO] Scene ID check start: sample.csv
+2026-02-16 14:38:05,877 [INFO] Scene ID check stdout:
+✓ scene_id チェック完了 (encoding: utf-16)
+2026-02-16 14:38:08,675 [INFO] Build start: sample.csv
+2026-02-16 14:38:19,957 [INFO] Build stdout:
+============================================================
+  LuminasScript - Visual Novel Game Generator
+============================================================
+
+✓ config.ymlを読み込みました
+✓ 45行のシナリオデータを読み込みました (encoding: utf-16)
+✓ 17個のアセットをエンコードしました
+✓ ゲームファイルを生成しました: output/sample202602161438.html
+  ファイルサイズ: 8873.3 KB
+
+============================================================
+  ✓ 生成完了!
+============================================================
+
+生成されたファイル: output/sample202602161438.html
+ブラウザで開いてゲームをお楽しみください!
+2026-02-16 14:41:07,654 [INFO] Build start: sample.csv
+2026-02-16 14:41:18,957 [INFO] Build stdout:
+============================================================
+  LuminasScript - Visual Novel Game Generator
+============================================================
+
+✓ config.ymlを読み込みました
+✓ 45行のシナリオデータを読み込みました (encoding: utf-16)
+✓ 17個のアセットをエンコードしました
+✓ ゲームファイルを生成しました: output/sample202602161441.html
+  ファイルサイズ: 8873.3 KB
+
+============================================================
+  ✓ 生成完了!
+============================================================
+
+生成されたファイル: output/sample202602161441.html
+ブラウザで開いてゲームをお楽しみください!
+2026-02-16 14:51:15,984 [INFO] Build start: common.csv
+2026-02-16 14:51:17,093 [INFO] Build stdout:
+============================================================
+  LuminasScript - Visual Novel Game Generator
+============================================================
+
+✓ config.ymlを読み込みました
+✓ 43行のシナリオデータを読み込みました (encoding: utf-16)
+✓ 1個のアセットをエンコードしました
+✓ ゲームファイルを生成しました: output/common202602161451.html
+  ファイルサイズ: 1011.9 KB
+
+============================================================
+  ✓ 生成完了!
+============================================================
+
+生成されたファイル: output/common202602161451.html
+ブラウザで開いてゲームをお楽しみください!
+2026-02-16 14:51:59,394 [INFO] Build start: sample.csv
+2026-02-16 14:52:10,715 [INFO] Build stdout:
+============================================================
+  LuminasScript - Visual Novel Game Generator
+============================================================
+
+✓ config.ymlを読み込みました
+✓ 45行のシナリオデータを読み込みました (encoding: utf-16)
+✓ 17個のアセットをエンコードしました
+✓ ゲームファイルを生成しました: output/sample202602161451.html
+  ファイルサイズ: 8873.4 KB
+
+============================================================
+  ✓ 生成完了!
+============================================================
+
+生成されたファイル: output/sample202602161451.html
+ブラウザで開いてゲームをお楽しみください!
+2026-03-12 00:07:12,889 [INFO] Build start: common.csv
+2026-03-12 00:07:14,086 [INFO] Build stdout:
+============================================================
+  LuminasScript - Visual Novel Game Generator
+============================================================
+
+✓ config.ymlを読み込みました
+✓ 43行のシナリオデータを読み込みました (encoding: utf-16)
+✓ 1個のアセットをエンコードしました
+✓ ゲームファイルを生成しました: output/common202603120007.html
+  ファイルサイズ: 1011.9 KB
+
+============================================================
+  ✓ 生成完了!
+============================================================
+
+生成されたファイル: output/common202603120007.html
+ブラウザで開いてゲームをお楽しみください!
+2026-03-12 00:07:30,611 [INFO] Build start: test_.csv
+2026-03-12 00:07:41,249 [INFO] Build stdout:
+============================================================
+  LuminasScript - Visual Novel Game Generator
+============================================================
+
+✓ config.ymlを読み込みました
+✓ 20行のシナリオデータを読み込みました (encoding: utf-16)
+✓ 16個のアセットをエンコードしました
+✓ ゲームファイルを生成しました: output/test_202603120007.html
+  ファイルサイズ: 8228.2 KB
+
+============================================================
+  ✓ 生成完了!
+============================================================
+
+生成されたファイル: output/test_202603120007.html
+ブラウザで開いてゲームをお楽しみください!
+2026-03-12 10:12:50,749 [ERROR] GET error
+Traceback (most recent call last):
+  File "/usr/src/LuminousScript/web_gui.py", line 1399, in do_GET
+    self._send_file(path, inline=inline)
+    ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/src/LuminousScript/web_gui.py", line 1333, in _send_file
+    self.wfile.write(data)
+    ~~~~~~~~~~~~~~~~^^^^^^
+  File "/usr/local/lib/python3.14/socketserver.py", line 845, in write
+    self._sock.sendall(b)
+    ~~~~~~~~~~~~~~~~~~^^^
+BrokenPipeError: [Errno 32] Broken pipe
+2026-03-12 10:12:50,800 [ERROR] GET error
+Traceback (most recent call last):
+  File "/usr/src/LuminousScript/web_gui.py", line 1399, in do_GET
+    self._send_file(path, inline=inline)
+    ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/src/LuminousScript/web_gui.py", line 1333, in _send_file
+    self.wfile.write(data)
+    ~~~~~~~~~~~~~~~~^^^^^^
+  File "/usr/local/lib/python3.14/socketserver.py", line 845, in write
+    self._sock.sendall(b)
+    ~~~~~~~~~~~~~~~~~~^^^
+BrokenPipeError: [Errno 32] Broken pipe
+2026-03-12 10:12:50,849 [ERROR] GET error
+Traceback (most recent call last):
+  File "/usr/src/LuminousScript/web_gui.py", line 1399, in do_GET
+    self._send_file(path, inline=inline)
+    ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/src/LuminousScript/web_gui.py", line 1333, in _send_file
+    self.wfile.write(data)
+    ~~~~~~~~~~~~~~~~^^^^^^
+  File "/usr/local/lib/python3.14/socketserver.py", line 845, in write
+    self._sock.sendall(b)
+    ~~~~~~~~~~~~~~~~~~^^^
+BrokenPipeError: [Errno 32] Broken pipe
+2026-03-12 10:12:50,931 [ERROR] GET error
+Traceback (most recent call last):
+  File "/usr/src/LuminousScript/web_gui.py", line 1399, in do_GET
+    self._send_file(path, inline=inline)
+    ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/src/LuminousScript/web_gui.py", line 1333, in _send_file
+    self.wfile.write(data)
+    ~~~~~~~~~~~~~~~~^^^^^^
+  File "/usr/local/lib/python3.14/socketserver.py", line 845, in write
+    self._sock.sendall(b)
+    ~~~~~~~~~~~~~~~~~~^^^
+BrokenPipeError: [Errno 32] Broken pipe
+2026-03-12 10:12:51,014 [ERROR] GET error
+Traceback (most recent call last):
+  File "/usr/src/LuminousScript/web_gui.py", line 1399, in do_GET
+    self._send_file(path, inline=inline)
+    ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/src/LuminousScript/web_gui.py", line 1333, in _send_file
+    self.wfile.write(data)
+    ~~~~~~~~~~~~~~~~^^^^^^
+  File "/usr/local/lib/python3.14/socketserver.py", line 845, in write
+    self._sock.sendall(b)
+    ~~~~~~~~~~~~~~~~~~^^^
+BrokenPipeError: [Errno 32] Broken pipe
+2026-03-12 10:12:53,053 [ERROR] GET error
+Traceback (most recent call last):
+  File "/usr/src/LuminousScript/web_gui.py", line 1399, in do_GET
+    self._send_file(path, inline=inline)
+    ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/src/LuminousScript/web_gui.py", line 1333, in _send_file
+    self.wfile.write(data)
+    ~~~~~~~~~~~~~~~~^^^^^^
+  File "/usr/local/lib/python3.14/socketserver.py", line 845, in write
+    self._sock.sendall(b)
+    ~~~~~~~~~~~~~~~~~~^^^
+BrokenPipeError: [Errno 32] Broken pipe
+2026-03-12 10:12:53,126 [ERROR] GET error
+Traceback (most recent call last):
+  File "/usr/src/LuminousScript/web_gui.py", line 1399, in do_GET
+    self._send_file(path, inline=inline)
+    ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/src/LuminousScript/web_gui.py", line 1333, in _send_file
+    self.wfile.write(data)
+    ~~~~~~~~~~~~~~~~^^^^^^
+  File "/usr/local/lib/python3.14/socketserver.py", line 845, in write
+    self._sock.sendall(b)
+    ~~~~~~~~~~~~~~~~~~^^^
+BrokenPipeError: [Errno 32] Broken pipe
+2026-03-12 10:12:53,166 [ERROR] GET error
+Traceback (most recent call last):
+  File "/usr/src/LuminousScript/web_gui.py", line 1399, in do_GET
+    self._send_file(path, inline=inline)
+    ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/src/LuminousScript/web_gui.py", line 1333, in _send_file
+    self.wfile.write(data)
+    ~~~~~~~~~~~~~~~~^^^^^^
+  File "/usr/local/lib/python3.14/socketserver.py", line 845, in write
+    self._sock.sendall(b)
+    ~~~~~~~~~~~~~~~~~~^^^
+BrokenPipeError: [Errno 32] Broken pipe
+2026-03-12 10:12:53,220 [ERROR] GET error
+Traceback (most recent call last):
+  File "/usr/src/LuminousScript/web_gui.py", line 1399, in do_GET
+    self._send_file(path, inline=inline)
+    ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/src/LuminousScript/web_gui.py", line 1333, in _send_file
+    self.wfile.write(data)
+    ~~~~~~~~~~~~~~~~^^^^^^
+  File "/usr/local/lib/python3.14/socketserver.py", line 845, in write
+    self._sock.sendall(b)
+    ~~~~~~~~~~~~~~~~~~^^^
+BrokenPipeError: [Errno 32] Broken pipe
+2026-03-12 10:12:53,813 [ERROR] GET error
+Traceback (most recent call last):
+  File "/usr/src/LuminousScript/web_gui.py", line 1399, in do_GET
+    self._send_file(path, inline=inline)
+    ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/src/LuminousScript/web_gui.py", line 1333, in _send_file
+    self.wfile.write(data)
+    ~~~~~~~~~~~~~~~~^^^^^^
+  File "/usr/local/lib/python3.14/socketserver.py", line 845, in write
+    self._sock.sendall(b)
+    ~~~~~~~~~~~~~~~~~~^^^
+BrokenPipeError: [Errno 32] Broken pipe
+2026-03-12 10:13:03,022 [ERROR] GET error
+Traceback (most recent call last):
+  File "/usr/src/LuminousScript/web_gui.py", line 1399, in do_GET
+    self._send_file(path, inline=inline)
+    ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/src/LuminousScript/web_gui.py", line 1333, in _send_file
+    self.wfile.write(data)
+    ~~~~~~~~~~~~~~~~^^^^^^
+  File "/usr/local/lib/python3.14/socketserver.py", line 845, in write
+    self._sock.sendall(b)
+    ~~~~~~~~~~~~~~~~~~^^^
+BrokenPipeError: [Errno 32] Broken pipe
+2026-03-12 10:13:03,083 [ERROR] GET error
+Traceback (most recent call last):
+  File "/usr/src/LuminousScript/web_gui.py", line 1399, in do_GET
+    self._send_file(path, inline=inline)
+    ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/src/LuminousScript/web_gui.py", line 1333, in _send_file
+    self.wfile.write(data)
+    ~~~~~~~~~~~~~~~~^^^^^^
+  File "/usr/local/lib/python3.14/socketserver.py", line 845, in write
+    self._sock.sendall(b)
+    ~~~~~~~~~~~~~~~~~~^^^
+BrokenPipeError: [Errno 32] Broken pipe
+2026-03-12 10:13:03,142 [ERROR] GET error
+Traceback (most recent call last):
+  File "/usr/src/LuminousScript/web_gui.py", line 1399, in do_GET
+    self._send_file(path, inline=inline)
+    ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/src/LuminousScript/web_gui.py", line 1333, in _send_file
+    self.wfile.write(data)
+    ~~~~~~~~~~~~~~~~^^^^^^
+  File "/usr/local/lib/python3.14/socketserver.py", line 845, in write
+    self._sock.sendall(b)
+    ~~~~~~~~~~~~~~~~~~^^^
+BrokenPipeError: [Errno 32] Broken pipe
+2026-03-12 10:13:03,180 [ERROR] GET error
+Traceback (most recent call last):
+  File "/usr/src/LuminousScript/web_gui.py", line 1399, in do_GET
+    self._send_file(path, inline=inline)
+    ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/src/LuminousScript/web_gui.py", line 1333, in _send_file
+    self.wfile.write(data)
+    ~~~~~~~~~~~~~~~~^^^^^^
+  File "/usr/local/lib/python3.14/socketserver.py", line 845, in write
+    self._sock.sendall(b)
+    ~~~~~~~~~~~~~~~~~~^^^
+BrokenPipeError: [Errno 32] Broken pipe
+2026-03-12 10:13:03,227 [ERROR] GET error
+Traceback (most recent call last):
+  File "/usr/src/LuminousScript/web_gui.py", line 1399, in do_GET
+    self._send_file(path, inline=inline)
+    ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/src/LuminousScript/web_gui.py", line 1333, in _send_file
+    self.wfile.write(data)
+    ~~~~~~~~~~~~~~~~^^^^^^
+  File "/usr/local/lib/python3.14/socketserver.py", line 845, in write
+    self._sock.sendall(b)
+    ~~~~~~~~~~~~~~~~~~^^^
+BrokenPipeError: [Errno 32] Broken pipe
+2026-03-12 10:13:03,266 [ERROR] GET error
+Traceback (most recent call last):
+  File "/usr/src/LuminousScript/web_gui.py", line 1399, in do_GET
+    self._send_file(path, inline=inline)
+    ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/src/LuminousScript/web_gui.py", line 1333, in _send_file
+    self.wfile.write(data)
+    ~~~~~~~~~~~~~~~~^^^^^^
+  File "/usr/local/lib/python3.14/socketserver.py", line 845, in write
+    self._sock.sendall(b)
+    ~~~~~~~~~~~~~~~~~~^^^
+BrokenPipeError: [Errno 32] Broken pipe
+2026-03-12 10:13:03,305 [ERROR] GET error
+Traceback (most recent call last):
+  File "/usr/src/LuminousScript/web_gui.py", line 1399, in do_GET
+    self._send_file(path, inline=inline)
+    ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/src/LuminousScript/web_gui.py", line 1333, in _send_file
+    self.wfile.write(data)
+    ~~~~~~~~~~~~~~~~^^^^^^
+  File "/usr/local/lib/python3.14/socketserver.py", line 845, in write
+    self._sock.sendall(b)
+    ~~~~~~~~~~~~~~~~~~^^^
+BrokenPipeError: [Errno 32] Broken pipe
+2026-03-12 10:13:03,356 [ERROR] GET error
+Traceback (most recent call last):
+  File "/usr/src/LuminousScript/web_gui.py", line 1399, in do_GET
+    self._send_file(path, inline=inline)
+    ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/src/LuminousScript/web_gui.py", line 1333, in _send_file
+    self.wfile.write(data)
+    ~~~~~~~~~~~~~~~~^^^^^^
+  File "/usr/local/lib/python3.14/socketserver.py", line 845, in write
+    self._sock.sendall(b)
+    ~~~~~~~~~~~~~~~~~~^^^
+BrokenPipeError: [Errno 32] Broken pipe
+2026-03-12 10:47:08,443 [INFO] Build start: test_.csv
+2026-03-12 10:47:18,798 [INFO] Build stdout:
+============================================================
+  LuminasScript - Visual Novel Game Generator
+============================================================
+
+✓ config.ymlを読み込みました
+✓ 20行のシナリオデータを読み込みました (encoding: utf-16)
+✓ 15個のアセットをエンコードしました
+✓ ゲームファイルを生成しました: output/test_202603121047.html
+  ファイルサイズ: 7630.6 KB
+
+============================================================
+  ✓ 生成完了!
+============================================================
+
+生成されたファイル: output/test_202603121047.html
+ブラウザで開いてゲームをお楽しみください!
+2026-03-13 15:45:48,403 [ERROR] GET error
+Traceback (most recent call last):
+  File "/usr/src/LuminousScript/web_gui.py", line 1399, in do_GET
+    self._send_file(path, inline=inline)
+    ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/src/LuminousScript/web_gui.py", line 1330, in _send_file
+    self.send_header("Content-Disposition", f"{disposition}; filename=\"{path.name}\"")
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.14/http/server.py", line 575, in send_header
+    ("%s: %s\r\n" % (keyword, value)).encode('latin-1', 'strict'))
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^
+UnicodeEncodeError: 'latin-1' codec can't encode characters in position 39-42: ordinal not in range(256)
+2026-03-13 15:45:48,445 [ERROR] GET error
+Traceback (most recent call last):
+  File "/usr/src/LuminousScript/web_gui.py", line 1399, in do_GET
+    self._send_file(path, inline=inline)
+    ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/src/LuminousScript/web_gui.py", line 1330, in _send_file
+    self.send_header("Content-Disposition", f"{disposition}; filename=\"{path.name}\"")
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.14/http/server.py", line 575, in send_header
+    ("%s: %s\r\n" % (keyword, value)).encode('latin-1', 'strict'))
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^
+UnicodeEncodeError: 'latin-1' codec can't encode characters in position 39-42: ordinal not in range(256)
+2026-03-13 15:45:52,985 [ERROR] GET error
+Traceback (most recent call last):
+  File "/usr/src/LuminousScript/web_gui.py", line 1399, in do_GET
+    self._send_file(path, inline=inline)
+    ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/src/LuminousScript/web_gui.py", line 1330, in _send_file
+    self.send_header("Content-Disposition", f"{disposition}; filename=\"{path.name}\"")
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.14/http/server.py", line 575, in send_header
+    ("%s: %s\r\n" % (keyword, value)).encode('latin-1', 'strict'))
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^
+UnicodeEncodeError: 'latin-1' codec can't encode characters in position 39-42: ordinal not in range(256)
+2026-03-13 15:45:59,904 [ERROR] GET error
+Traceback (most recent call last):
+  File "/usr/src/LuminousScript/web_gui.py", line 1399, in do_GET
+    self._send_file(path, inline=inline)
+    ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/src/LuminousScript/web_gui.py", line 1330, in _send_file
+    self.send_header("Content-Disposition", f"{disposition}; filename=\"{path.name}\"")
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.14/http/server.py", line 575, in send_header
+    ("%s: %s\r\n" % (keyword, value)).encode('latin-1', 'strict'))
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^
+UnicodeEncodeError: 'latin-1' codec can't encode characters in position 39-42: ordinal not in range(256)
+2026-03-13 15:46:09,548 [ERROR] GET error
+Traceback (most recent call last):
+  File "/usr/src/LuminousScript/web_gui.py", line 1399, in do_GET
+    self._send_file(path, inline=inline)
+    ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/src/LuminousScript/web_gui.py", line 1330, in _send_file
+    self.send_header("Content-Disposition", f"{disposition}; filename=\"{path.name}\"")
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.14/http/server.py", line 575, in send_header
+    ("%s: %s\r\n" % (keyword, value)).encode('latin-1', 'strict'))
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^
+UnicodeEncodeError: 'latin-1' codec can't encode characters in position 39-42: ordinal not in range(256)
+2026-03-13 15:46:12,040 [ERROR] GET error
+Traceback (most recent call last):
+  File "/usr/src/LuminousScript/web_gui.py", line 1399, in do_GET
+    self._send_file(path, inline=inline)
+    ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/src/LuminousScript/web_gui.py", line 1330, in _send_file
+    self.send_header("Content-Disposition", f"{disposition}; filename=\"{path.name}\"")
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.14/http/server.py", line 575, in send_header
+    ("%s: %s\r\n" % (keyword, value)).encode('latin-1', 'strict'))
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^
+UnicodeEncodeError: 'latin-1' codec can't encode characters in position 39-42: ordinal not in range(256)
+2026-03-13 15:46:16,807 [ERROR] GET error
+Traceback (most recent call last):
+  File "/usr/src/LuminousScript/web_gui.py", line 1399, in do_GET
+    self._send_file(path, inline=inline)
+    ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/src/LuminousScript/web_gui.py", line 1330, in _send_file
+    self.send_header("Content-Disposition", f"{disposition}; filename=\"{path.name}\"")
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.14/http/server.py", line 575, in send_header
+    ("%s: %s\r\n" % (keyword, value)).encode('latin-1', 'strict'))
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^
+UnicodeEncodeError: 'latin-1' codec can't encode characters in position 39-42: ordinal not in range(256)
+2026-03-13 15:46:21,822 [ERROR] GET error
+Traceback (most recent call last):
+  File "/usr/src/LuminousScript/web_gui.py", line 1399, in do_GET
+    self._send_file(path, inline=inline)
+    ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/src/LuminousScript/web_gui.py", line 1330, in _send_file
+    self.send_header("Content-Disposition", f"{disposition}; filename=\"{path.name}\"")
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.14/http/server.py", line 575, in send_header
+    ("%s: %s\r\n" % (keyword, value)).encode('latin-1', 'strict'))
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^
+UnicodeEncodeError: 'latin-1' codec can't encode characters in position 39-42: ordinal not in range(256)

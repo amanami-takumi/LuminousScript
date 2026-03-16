@@ -7,6 +7,7 @@ import json
 import logging
 import mimetypes
 import os
+import shutil
 import subprocess
 import sys
 from http.server import BaseHTTPRequestHandler, HTTPServer
@@ -39,6 +40,9 @@ INDEX_HTML = r"""<!DOCTYPE html>
       --accent-2: #0F172B;
       --danger: #ff6b6b;
       --border: #232a3a;
+      --asset-tile-size: 96px;
+      --asset-icon-size: 28px;
+      --asset-media-max: 70px;
     }
 
     * { box-sizing: border-box; }
@@ -81,7 +85,8 @@ INDEX_HTML = r"""<!DOCTYPE html>
       gap: 16px;
       grid-template-columns: repeat(2, minmax(280px, 1fr));
       grid-template-areas:
-        "assets input"
+        "assets assets"
+        "input input"
         "build output"
         "logs logs";
     }
@@ -110,6 +115,11 @@ INDEX_HTML = r"""<!DOCTYPE html>
       border-radius: 8px;
       padding: 6px 8px;
       font-size: 12px;
+    }
+
+    input[type="range"] {
+      accent-color: #2f384d;
+      height: 4px;
     }
 
     textarea { width: 100%; height: 180px; resize: vertical; }
@@ -174,7 +184,7 @@ INDEX_HTML = r"""<!DOCTYPE html>
     .preview-grid {
       display: grid;
       gap: 8px;
-      grid-template-columns: repeat(auto-fill, minmax(96px, 1fr));
+      grid-template-columns: repeat(auto-fill, minmax(var(--asset-tile-size), 1fr));
     }
 
     .preview-tile {
@@ -189,14 +199,27 @@ INDEX_HTML = r"""<!DOCTYPE html>
       gap: 6px;
       cursor: pointer;
       text-align: center;
+      min-height: var(--asset-tile-size);
     }
 
     .preview-tile:hover { background: #141c2a; }
     .preview-tile.active { outline: 2px solid var(--accent); }
+    .preview-tile.drop-target {
+      outline: 2px dashed #5d7298;
+      background: #182235;
+    }
+    .preview-tile.dragging {
+      opacity: 0.55;
+    }
 
     .preview-tile img, .preview-tile audio {
       max-width: 100%;
-      max-height: 70px;
+      max-height: var(--asset-media-max);
+    }
+
+    .preview-icon {
+      font-size: var(--asset-icon-size);
+      line-height: 1;
     }
 
     .preview-name {
@@ -237,6 +260,21 @@ INDEX_HTML = r"""<!DOCTYPE html>
       font-size: 11px;
     }
 
+    .header-link {
+      font-size: 11px;
+      color: var(--muted);
+      text-decoration: none;
+      border: 1px solid var(--border);
+      padding: 6px 10px;
+      border-radius: 8px;
+      background: #121826;
+    }
+
+    .header-link:hover {
+      color: var(--text);
+      border-color: #2f384d;
+    }
+
     .overlay {
       position: fixed;
       inset: 0;
@@ -266,6 +304,113 @@ INDEX_HTML = r"""<!DOCTYPE html>
       margin: 8px 0 12px 0;
     }
 
+    .preview-modal {
+      width: min(720px, 92vw);
+    }
+
+    .preview-title {
+      font-size: 12px;
+      font-weight: 600;
+    }
+
+    .preview-media {
+      margin-top: 10px;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 12px;
+      background: #0C0A09;
+      min-height: 220px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+    }
+
+    .preview-media img {
+      max-width: 100%;
+      max-height: 60vh;
+      border-radius: 8px;
+    }
+
+    .preview-media audio {
+      width: min(520px, 100%);
+    }
+
+    .preview-meta {
+      margin-top: 8px;
+      font-size: 11px;
+      color: var(--muted);
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    .preview-form {
+      margin-top: 12px;
+      display: grid;
+      gap: 8px;
+    }
+
+    .preview-form label {
+      font-size: 11px;
+      color: var(--muted);
+    }
+
+    .preview-form .row {
+      flex-wrap: nowrap;
+    }
+
+    .preview-form input {
+      margin: 0;
+    }
+
+    .range-value {
+      font-size: 11px;
+      color: var(--muted);
+      min-width: 62px;
+      text-align: right;
+    }
+
+    .csv-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 12px;
+      table-layout: fixed;
+      border: 1px solid #2a3347;
+    }
+
+    .csv-table th,
+    .csv-table td {
+      border: 1px solid #2a3347;
+      padding: 0;
+      background: #0C0A09;
+    }
+
+    .csv-table input {
+      width: 100%;
+      background: transparent;
+      color: var(--text);
+      border: none;
+      border-radius: 0;
+      padding: 6px 8px;
+      font-size: 12px;
+    }
+
+    .csv-table th {
+      background: #10151e;
+      color: var(--muted);
+      font-weight: 600;
+      text-align: left;
+    }
+
+    footer {
+      padding: 10px 24px 24px;
+      color: var(--muted);
+      font-size: 11px;
+      text-align: center;
+    }
+
     .assets-card { grid-area: assets; }
     .input-card { grid-area: input; }
     .build-card { grid-area: build; }
@@ -292,7 +437,8 @@ INDEX_HTML = r"""<!DOCTYPE html>
       <div class="subtitle">assets / CSV / config / output / build / logs</div>
     </div>
     <div class="header-actions">
-      <button class="secondary" onclick="resetPassword()">パスワード変更</button>
+      <a class="header-link" href="https://github.com/amanami-takumi/LuminousScript" target="_blank" rel="noopener">GitHub</a>
+      <button class="secondary" onclick="resetPassword()">パスワード再入力</button>
     </div>
   </header>
 
@@ -305,23 +451,61 @@ INDEX_HTML = r"""<!DOCTYPE html>
     </div>
   </div>
 
+  <div class="overlay" id="assetPreviewOverlay" style="display:none">
+    <div class="overlay-card preview-modal" onclick="event.stopPropagation()">
+      <div class="row" style="justify-content: space-between;">
+        <div class="preview-title" id="assetPreviewTitle">Preview</div>
+        <button class="secondary" onclick="closeAssetPreview()">閉じる</button>
+      </div>
+      <div class="preview-media" id="assetPreviewMedia"></div>
+      <div class="preview-meta" id="assetPreviewMeta"></div>
+      <div class="preview-form">
+        <label for="assetPreviewFilename">ファイル名</label>
+        <div class="row">
+          <input type="text" id="assetPreviewFilename" placeholder="example.png" />
+          <button class="secondary" onclick="renameAssetFromPreview()">変更</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="overlay" id="inputEditorOverlay" style="display:none">
+    <div class="overlay-card preview-modal" onclick="event.stopPropagation()">
+      <div class="row" style="justify-content: space-between;">
+        <div class="preview-title" id="inputEditorTitle">Editor</div>
+        <div class="row">
+          <button class="secondary" onclick="saveInputEditorModal()">保存</button>
+          <button class="secondary" onclick="closeInputEditorModal()">閉じる</button>
+        </div>
+      </div>
+      <div class="preview-media" id="inputEditorBody"></div>
+    </div>
+  </div>
+
   <div class="container">
     <section class="card assets-card">
       <h2>Assets 管理</h2>
       <div class="path" id="assetsPath"></div>
-      <div class="list" id="assetsList"></div>
+      <div class="muted">単クリックで選択、ダブルクリックでフォルダを開くかファイルをプレビューします。</div>
+      <div class="row">
+        <span class="badge">アイコンサイズ</span>
+        <input type="range" id="assetsIconSize" min="60" max="320" step="4" />
+        <span class="range-value" id="assetsIconSizeValue">96px</span>
+      </div>
+      <div class="preview" id="assetsList"></div>
       <div class="row">
         <input type="file" id="assetsUpload" multiple style="display:none" />
         <button onclick="openAssetsPicker()">アップロード</button>
+        <button class="secondary" onclick="createAssetDirectory()">フォルダ作成</button>
         <button class="secondary" onclick="downloadSelectedAsset()">ダウンロード</button>
         <button class="danger" onclick="deleteSelectedAsset()">削除</button>
+        <button class="secondary" id="assetsCopyToggle" onclick="toggleAssetCopy()">コピー: OFF</button>
       </div>
       <div class="row">
-        <input type="text" id="renameFrom" placeholder="old/path.png" />
-        <input type="text" id="renameTo" placeholder="new/path.png" />
+        <input type="text" id="renameFrom" placeholder="old/path" />
+        <input type="text" id="renameTo" placeholder="new/path" />
         <button class="secondary" onclick="renameAsset()">名前変更</button>
       </div>
-      <div class="preview" id="assetsPreview"></div>
     </section>
 
     <section class="card input-card">
@@ -330,17 +514,13 @@ INDEX_HTML = r"""<!DOCTYPE html>
       <div class="row">
         <span class="badge" id="inputSelectedName">未選択</span>
         <button class="secondary" onclick="downloadSelectedInput()">ダウンロード</button>
-        <button onclick="saveInputText()">保存</button>
+        <button onclick="openInputEditorModal()">編集</button>
       </div>
       <div class="row">
-        <input type="file" id="csvUpload" accept=".csv" style="display:none" />
-        <button onclick="openCsvPicker()">CSVアップロード</button>
+        <input type="file" id="inputUpload" accept=".csv,.yml,.yaml" style="display:none" />
+        <button onclick="openInputPicker()">アップロード</button>
       </div>
-      <div class="row">
-        <input type="file" id="configUpload" accept=".yml,.yaml" style="display:none" />
-        <button onclick="openConfigPicker()">config.ymlアップロード</button>
-      </div>
-      <textarea id="inputEditor" placeholder="CSV / config.yml を編集"></textarea>
+      <textarea id="inputEditor" placeholder="CSV / config.yml を編集" style="display:none"></textarea>
     </section>
 
     <section class="card output-card">
@@ -358,6 +538,9 @@ INDEX_HTML = r"""<!DOCTYPE html>
         <select id="buildCsv"></select>
         <button onclick="buildGame()">ゲームをビルド</button>
       </div>
+      <div class="row">
+        <button class="secondary" onclick="checkSceneId()">scene_idチェック</button>
+      </div>
       <div class="status" id="buildStatus">待機中</div>
     </section>
 
@@ -370,16 +553,23 @@ INDEX_HTML = r"""<!DOCTYPE html>
     </section>
   </div>
 
+  <footer>Project Luminous / 天波たくみ（amanami-takumi） / 星海天測団</footer>
+
   <script>
     const state = {
       assetsDir: "",
       outputDir: "",
       assetsSelected: null,
+      assetsPreview: null,
+      assetsDragging: null,
       inputSelected: null,
+      assetsCopyEnabled: false,
+      assetsIconSize: 96,
     };
 
     const PASSWORD = "luminous";
     const PASSWORD_KEY = "luminous_gui_password";
+    const ASSETS_ICON_SIZE_KEY = "luminous_assets_icon_size";
 
     function setStatus(message) {
       const el = document.getElementById("buildStatus");
@@ -405,13 +595,14 @@ INDEX_HTML = r"""<!DOCTYPE html>
     }
 
     function renderList(el, entries, onClick, options = {}) {
-      const { includeParent = false, currentDir = "" } = options;
+      const { includeParent = false, currentDir = "", onDoubleClick = null } = options;
       el.innerHTML = "";
       if (includeParent && currentDir) {
         const parent = document.createElement("div");
         parent.className = "list-item";
         parent.innerHTML = `<span>📁 ..</span><span class="badge">dir</span>`;
         parent.onclick = () => onClick({ type: "dir", rel_path: parentPath(currentDir), name: ".." });
+        if (onDoubleClick) parent.ondblclick = () => onDoubleClick({ type: "dir", rel_path: parentPath(currentDir), name: ".." });
         el.appendChild(parent);
       }
       if (!entries.length) {
@@ -426,6 +617,7 @@ INDEX_HTML = r"""<!DOCTYPE html>
         row.className = "list-item";
         row.innerHTML = `<span>${entry.type === "dir" ? "📁" : "📄"} ${entry.name}</span><span class="badge">${entry.type}</span>`;
         row.onclick = () => onClick(entry);
+        if (onDoubleClick) row.ondblclick = () => onDoubleClick(entry);
         el.appendChild(row);
       });
     }
@@ -436,74 +628,446 @@ INDEX_HTML = r"""<!DOCTYPE html>
       return parts.join("/");
     }
 
-    async function refreshAssets() {
-      const data = await apiGet("/api/assets/list", { dir: state.assetsDir });
-      document.getElementById("assetsPath").textContent = `input/assets/${data.dir || ""}`;
-      renderList(document.getElementById("assetsList"), data.entries, (entry) => {
-        if (entry.type === "dir") {
-          state.assetsDir = entry.rel_path;
-          refreshAssets();
-        } else {
-          state.assetsSelected = entry;
-          selectAsset(entry);
-        }
-      }, { includeParent: true, currentDir: data.dir });
-      renderAssetsPreview(data.entries);
+    function joinAssetPath(dir, name) {
+      return normalizeRelPath(dir ? `${dir}/${name}` : name);
     }
 
-    function renderAssetsPreview(entries) {
-      const preview = document.getElementById("assetsPreview");
-      preview.innerHTML = "";
-      const files = entries.filter((entry) => entry.type === "file");
-      if (!files.length) {
-        preview.textContent = "この階層にはファイルがありません";
-        return;
+    function normalizeRelPath(path) {
+      const normalized = `${path || ""}`.replace(/\\/g, "/");
+      const parts = [];
+      for (const part of normalized.split("/")) {
+        if (!part || part === ".") continue;
+        if (part === "..") {
+          throw new Error("親ディレクトリは指定できません");
+        }
+        parts.push(part);
       }
+      return parts.join("/");
+    }
+
+    function formatBytes(bytes) {
+      if (!Number.isFinite(bytes)) return "-";
+      const units = ["B", "KB", "MB", "GB", "TB"];
+      let value = bytes;
+      let index = 0;
+      while (value >= 1024 && index < units.length - 1) {
+        value /= 1024;
+        index += 1;
+      }
+      const precision = value >= 10 || index === 0 ? 0 : 1;
+      return `${value.toFixed(precision)} ${units[index]}`;
+    }
+
+    function updateAssetCopyButton() {
+      const button = document.getElementById("assetsCopyToggle");
+      if (!button) return;
+      button.textContent = state.assetsCopyEnabled ? "コピー: ON" : "コピー: OFF";
+    }
+
+    function applyAssetsIconSize(value) {
+      const size = Math.max(60, Math.min(320, Number(value) || 96));
+      state.assetsIconSize = size;
+      const iconSize = Math.max(18, Math.round(size * 0.3));
+      const mediaSize = Math.max(40, Math.round(size * 0.75));
+      document.documentElement.style.setProperty("--asset-tile-size", `${size}px`);
+      document.documentElement.style.setProperty("--asset-icon-size", `${iconSize}px`);
+      document.documentElement.style.setProperty("--asset-media-max", `${mediaSize}px`);
+      const label = document.getElementById("assetsIconSizeValue");
+      if (label) label.textContent = `${size}px`;
+    }
+
+    function loadAssetsIconSize() {
+      const saved = Number(localStorage.getItem(ASSETS_ICON_SIZE_KEY));
+      const initial = Number.isFinite(saved) && saved > 0 ? saved : state.assetsIconSize;
+      const slider = document.getElementById("assetsIconSize");
+      if (slider) slider.value = String(initial);
+      applyAssetsIconSize(initial);
+    }
+
+    function handleAssetsIconSizeChange(event) {
+      const value = Number(event.target.value);
+      applyAssetsIconSize(value);
+      localStorage.setItem(ASSETS_ICON_SIZE_KEY, String(state.assetsIconSize));
+    }
+
+    function toggleAssetCopy() {
+      state.assetsCopyEnabled = !state.assetsCopyEnabled;
+      updateAssetCopyButton();
+    }
+
+    async function copyAssetBasename(entry) {
+      if (!entry || entry.type !== "file") return;
+      const name = entry.name || "";
+      const base = name.includes(".") ? name.slice(0, name.lastIndexOf(".")) : name;
+      try {
+        await navigator.clipboard.writeText(base);
+      } catch (err) {
+        alert("クリップボードにコピーできませんでした");
+      }
+    }
+
+    async function refreshAssets() {
+      const data = await apiGet("/api/assets/list", { dir: state.assetsDir });
+      if (data.dir !== undefined) {
+        state.assetsDir = data.dir || "";
+      }
+      document.getElementById("assetsPath").textContent = `input/assets/${data.dir || ""}`;
+      renderAssetsExplorer(document.getElementById("assetsList"), data.entries, {
+        includeParent: true,
+        currentDir: data.dir,
+      });
+    }
+
+    function renderAssetsExplorer(container, entries, options = {}) {
+      const { includeParent = false, currentDir = "" } = options;
+      container.innerHTML = "";
       const grid = document.createElement("div");
       grid.className = "preview-grid";
-      files.forEach((entry) => {
+
+      if (includeParent && currentDir) {
+        const parent = document.createElement("div");
+        parent.className = "preview-tile";
+        parent.dataset.type = "dir";
+        parent.dataset.dropDir = parentPath(currentDir);
+        parent.innerHTML = `<div class="preview-icon">📁</div><div class="preview-name">..</div>`;
+        parent.onclick = () => {
+          state.assetsDir = parentPath(currentDir);
+          refreshAssets();
+        };
+        attachAssetDropTarget(parent, parentPath(currentDir));
+        grid.appendChild(parent);
+      }
+
+      if (!entries.length && !(includeParent && currentDir)) {
+        const empty = document.createElement("div");
+        empty.className = "muted";
+        empty.textContent = "空";
+        container.appendChild(empty);
+        return;
+      }
+
+      entries.forEach((entry) => {
         const tile = document.createElement("div");
         tile.className = "preview-tile";
-        tile.onclick = () => selectAsset(entry);
-        const url = `/api/download?base=assets&path=${encodeURIComponent(entry.rel_path)}&inline=1`;
-        const ext = entry.name.split(".").pop().toLowerCase();
-        if (["png", "jpg", "jpeg", "gif", "webp", "svg"].includes(ext)) {
-          tile.innerHTML = `<img src="${url}" alt="${entry.name}" /><div class="preview-name">${entry.name}</div>`;
-        } else if (["mp3", "wav", "ogg"].includes(ext)) {
-          tile.innerHTML = `<audio controls src="${url}"></audio><div class="preview-name">${entry.name}</div>`;
+        tile.dataset.path = entry.rel_path;
+        tile.dataset.type = entry.type;
+        if (entry.type === "dir") {
+          tile.dataset.dropDir = entry.rel_path;
+          tile.innerHTML = `<div class="preview-icon">📁</div><div class="preview-name">${entry.name}</div>`;
+          tile.onclick = () => selectAssetEntry(entry);
+          tile.ondblclick = () => {
+            state.assetsDir = entry.rel_path;
+            refreshAssets();
+          };
+          attachAssetDropTarget(tile, entry.rel_path);
         } else {
-          tile.innerHTML = `<div>📄</div><div class="preview-name">${entry.name}</div>`;
+          const url = `/api/download?base=assets&path=${encodeURIComponent(entry.rel_path)}&inline=1`;
+          const ext = entry.name.split(".").pop().toLowerCase();
+          if (["png", "jpg", "jpeg", "gif", "webp", "svg"].includes(ext)) {
+            tile.innerHTML = `<img src="${url}" alt="${entry.name}" /><div class="preview-name">${entry.name}</div>`;
+          } else if (["mp3", "wav", "ogg"].includes(ext)) {
+            tile.innerHTML = `<div class="preview-icon">🎵</div><div class="preview-name">${entry.name}</div>`;
+          } else {
+            tile.innerHTML = `<div class="preview-icon">📄</div><div class="preview-name">${entry.name}</div>`;
+          }
+          tile.draggable = true;
+          tile.onclick = () => selectAssetEntry(entry);
+          tile.ondblclick = () => openAssetPreview(entry);
+          tile.ondragstart = (event) => handleAssetDragStart(event, entry);
+          tile.ondragend = () => handleAssetDragEnd(tile);
         }
         grid.appendChild(tile);
       });
-      preview.appendChild(grid);
+
+      container.appendChild(grid);
     }
 
-    function selectAsset(entry) {
+    function selectAssetEntry(entry) {
       state.assetsSelected = entry;
       const renameFrom = document.getElementById("renameFrom");
-      renameFrom.value = entry.rel_path;
+      const selectedPath = entry?.rel_path;
+      renameFrom.value = selectedPath || "";
+      document.getElementById("renameTo").value = selectedPath || "";
       const tiles = document.querySelectorAll(".preview-tile");
       tiles.forEach((tile) => tile.classList.remove("active"));
-      const matching = Array.from(tiles).find((tile) => {
-        const name = tile.querySelector(".preview-name");
-        return name && name.textContent === entry.name;
-      });
+      const matching = Array.from(tiles).find((tile) => tile.dataset.path === entry.rel_path);
       if (matching) matching.classList.add("active");
+      if (state.assetsCopyEnabled && entry?.type === "file") copyAssetBasename(entry);
+    }
+
+    function handleAssetDragStart(event, entry) {
+      state.assetsDragging = entry;
+      if (event.dataTransfer) {
+        event.dataTransfer.effectAllowed = "move";
+        event.dataTransfer.setData("text/plain", entry.rel_path);
+      }
+      event.currentTarget.classList.add("dragging");
+    }
+
+    function handleAssetDragEnd(tile) {
+      state.assetsDragging = null;
+      tile.classList.remove("dragging");
+      document.querySelectorAll(".preview-tile.drop-target").forEach((node) => {
+        node.classList.remove("drop-target");
+      });
+    }
+
+    function attachAssetDropTarget(tile, targetDir) {
+      tile.ondragover = (event) => {
+        if (!state.assetsDragging || state.assetsDragging.type !== "file") return;
+        event.preventDefault();
+        if (event.dataTransfer) event.dataTransfer.dropEffect = "move";
+        tile.classList.add("drop-target");
+      };
+      tile.ondragleave = () => {
+        tile.classList.remove("drop-target");
+      };
+      tile.ondrop = async (event) => {
+        if (!state.assetsDragging || state.assetsDragging.type !== "file") return;
+        event.preventDefault();
+        tile.classList.remove("drop-target");
+        const source = state.assetsDragging;
+        state.assetsDragging = null;
+        await moveAssetToDirectory(source, targetDir);
+      };
+    }
+
+    async function moveAssetToDirectory(entry, targetDir) {
+      if (!entry || entry.type !== "file") return;
+      const sourceDir = parentPath(entry.rel_path);
+      const normalizedTarget = normalizeRelPath(targetDir);
+      if (sourceDir === normalizedTarget) return;
+      const destination = joinAssetPath(normalizedTarget, entry.name);
+      await apiPost("/api/rename/assets", { old: entry.rel_path, new: destination });
+      state.assetsSelected = {
+        ...entry,
+        rel_path: destination,
+      };
+      await refreshAssets();
+    }
+
+    function openAssetPreview(entry) {
+      if (!entry || entry.type !== "file") return;
+      selectAssetEntry(entry);
+      state.assetsPreview = entry;
+      const overlay = document.getElementById("assetPreviewOverlay");
+      const title = document.getElementById("assetPreviewTitle");
+      const media = document.getElementById("assetPreviewMedia");
+      const meta = document.getElementById("assetPreviewMeta");
+      const filenameInput = document.getElementById("assetPreviewFilename");
+      const sizeText = formatBytes(entry.size);
+      const url = `/api/download?base=assets&path=${encodeURIComponent(entry.rel_path)}&inline=1`;
+      const ext = entry.name.split(".").pop().toLowerCase();
+
+      title.textContent = entry.name;
+      media.innerHTML = "";
+      meta.innerHTML = "";
+      filenameInput.value = entry.name;
+      const sizeSpan = document.createElement("span");
+      sizeSpan.textContent = `サイズ: ${sizeText}`;
+      const dimSpan = document.createElement("span");
+      dimSpan.textContent = "寸法: -";
+      const dirSpan = document.createElement("span");
+      dirSpan.textContent = `ディレクトリ: ${parentPath(entry.rel_path) || "."}`;
+      meta.appendChild(sizeSpan);
+      meta.appendChild(dimSpan);
+      meta.appendChild(dirSpan);
+
+      if (["png", "jpg", "jpeg", "gif", "webp", "svg"].includes(ext)) {
+        const img = new Image();
+        img.onload = () => {
+          dimSpan.textContent = `寸法: ${img.naturalWidth} x ${img.naturalHeight}`;
+        };
+        img.src = url;
+        media.appendChild(img);
+      } else if (["mp3", "wav", "ogg"].includes(ext)) {
+        const audio = document.createElement("audio");
+        audio.controls = true;
+        audio.src = url;
+        media.appendChild(audio);
+      } else {
+        const icon = document.createElement("div");
+        icon.className = "preview-icon";
+        icon.textContent = "📄";
+        const name = document.createElement("div");
+        name.className = "preview-name";
+        name.textContent = entry.name;
+        media.appendChild(icon);
+        media.appendChild(name);
+      }
+
+      overlay.style.display = "flex";
+    }
+
+    function closeAssetPreview() {
+      const overlay = document.getElementById("assetPreviewOverlay");
+      overlay.style.display = "none";
+      state.assetsPreview = null;
+    }
+
+    function parseCsv(text) {
+      const rows = [];
+      let row = [];
+      let value = "";
+      let inQuotes = false;
+      for (let i = 0; i < text.length; i += 1) {
+        const char = text[i];
+        const next = text[i + 1];
+        if (inQuotes) {
+          if (char === "\"" && next === "\"") {
+            value += "\"";
+            i += 1;
+          } else if (char === "\"") {
+            inQuotes = false;
+          } else {
+            value += char;
+          }
+          continue;
+        }
+        if (char === "\"") {
+          inQuotes = true;
+          continue;
+        }
+        if (char === ",") {
+          row.push(value);
+          value = "";
+          continue;
+        }
+        if (char === "\n") {
+          row.push(value);
+          rows.push(row);
+          row = [];
+          value = "";
+          continue;
+        }
+        if (char === "\r") {
+          continue;
+        }
+        value += char;
+      }
+      row.push(value);
+      rows.push(row);
+      if (rows.length === 1 && rows[0].length === 1 && rows[0][0] === "") return [];
+      return rows;
+    }
+
+    function serializeCsv(rows) {
+      return rows.map((row) => row.map((cell) => {
+        const text = `${cell ?? ""}`;
+        if (/[",\n\r]/.test(text)) {
+          return `"${text.replace(/"/g, "\"\"")}"`;
+        }
+        return text;
+      }).join(",")).join("\n");
+    }
+
+    function buildCsvTable(rows) {
+      const table = document.createElement("table");
+      table.className = "csv-table";
+      const tbody = document.createElement("tbody");
+      rows.forEach((row) => {
+        const tr = document.createElement("tr");
+        row.forEach((cell) => {
+          const td = document.createElement("td");
+          const input = document.createElement("input");
+          input.type = "text";
+          input.value = cell ?? "";
+          td.appendChild(input);
+          tr.appendChild(td);
+        });
+        tbody.appendChild(tr);
+      });
+      table.appendChild(tbody);
+      return table;
+    }
+
+    async function openInputEditorModal(entry = null) {
+      if (entry) {
+        state.inputSelected = entry;
+        document.getElementById("inputSelectedName").textContent = entry.name;
+        if (entry.name === "config.yml" || entry.name.endsWith(".csv")) {
+          await loadInputText(entry.name);
+        }
+      }
+      if (!state.inputSelected) return alert("ファイルを選択してください");
+      const overlay = document.getElementById("inputEditorOverlay");
+      const title = document.getElementById("inputEditorTitle");
+      const body = document.getElementById("inputEditorBody");
+      const content = document.getElementById("inputEditor").value;
+      const isCsv = state.inputSelected.name.endsWith(".csv");
+
+      title.textContent = state.inputSelected.name;
+      body.innerHTML = "";
+      body.style.alignItems = "stretch";
+      body.style.justifyContent = "flex-start";
+      body.style.overflow = "auto";
+      if (isCsv) {
+        const rows = parseCsv(content);
+        if (!rows.length) rows.push([""]);
+        const table = buildCsvTable(rows);
+        table.id = "csvEditorTable";
+        body.appendChild(table);
+      } else {
+        const textarea = document.createElement("textarea");
+        textarea.id = "inputEditorModalText";
+        textarea.value = content;
+        textarea.style.width = "100%";
+        textarea.style.height = "320px";
+        body.appendChild(textarea);
+      }
+      overlay.style.display = "flex";
+    }
+
+    function closeInputEditorModal() {
+      const overlay = document.getElementById("inputEditorOverlay");
+      overlay.style.display = "none";
+    }
+
+    async function saveInputEditorModal() {
+      if (!state.inputSelected) return alert("ファイルを選択してください");
+      const isCsv = state.inputSelected.name.endsWith(".csv");
+      if (isCsv) {
+        const table = document.getElementById("csvEditorTable");
+        const rows = Array.from(table.querySelectorAll("tr")).map((tr) => (
+          Array.from(tr.querySelectorAll("input")).map((input) => input.value)
+        ));
+        document.getElementById("inputEditor").value = serializeCsv(rows);
+      } else {
+        const textarea = document.getElementById("inputEditorModalText");
+        document.getElementById("inputEditor").value = textarea.value;
+      }
+      await saveInputText();
+      closeInputEditorModal();
     }
 
     async function downloadSelectedAsset() {
-      if (!state.assetsSelected) return alert("ファイルを選択してください");
+      if (!state.assetsSelected || state.assetsSelected.type !== "file") return alert("ファイルを選択してください");
       window.open(`/api/download?base=assets&path=${encodeURIComponent(state.assetsSelected.rel_path)}`, "_blank");
     }
 
     async function deleteSelectedAsset() {
-      if (!state.assetsSelected) return alert("ファイルを選択してください");
+      if (!state.assetsSelected) return alert("対象を選択してください");
       if (!confirm(`削除しますか？\\n${state.assetsSelected.rel_path}`)) return;
       await apiPost("/api/delete/assets", { path: state.assetsSelected.rel_path });
       state.assetsSelected = null;
       document.getElementById("renameFrom").value = "";
+      document.getElementById("renameTo").value = "";
       refreshAssets();
+    }
+
+    async function createAssetDirectory() {
+      const name = prompt("作成するフォルダ名を入力してください", "");
+      if (name === null) return;
+      let relPath;
+      try {
+        relPath = joinAssetPath(state.assetsDir, name.trim());
+      } catch (err) {
+        alert(err.message);
+        return;
+      }
+      if (!relPath) return alert("フォルダ名を入力してください");
+      await apiPost("/api/mkdir/assets", { path: relPath });
+      await refreshAssets();
     }
 
     function openAssetsPicker() {
@@ -523,13 +1087,49 @@ INDEX_HTML = r"""<!DOCTYPE html>
     }
 
     async function renameAsset() {
-      const oldPath = document.getElementById("renameFrom").value.trim();
-      const newPath = document.getElementById("renameTo").value.trim();
+      let oldPath;
+      let newPath;
+      try {
+        oldPath = normalizeRelPath(document.getElementById("renameFrom").value.trim());
+        newPath = normalizeRelPath(document.getElementById("renameTo").value.trim());
+      } catch (err) {
+        alert(err.message);
+        return;
+      }
       if (!oldPath || !newPath) return alert("旧/新パスを入力してください");
       await apiPost("/api/rename/assets", { old: oldPath, new: newPath });
       document.getElementById("renameFrom").value = "";
       document.getElementById("renameTo").value = "";
-      refreshAssets();
+      state.assetsSelected = null;
+      await refreshAssets();
+    }
+
+    async function renameAssetFromPreview() {
+      const entry = state.assetsPreview;
+      if (!entry || entry.type !== "file") return alert("ファイルを開いてください");
+      const filenameInput = document.getElementById("assetPreviewFilename");
+      const newName = filenameInput.value.trim();
+      if (!newName) return alert("ファイル名を入力してください");
+      if (newName === "." || newName === ".." || newName.includes("/") || newName.includes("\\")) {
+        return alert("ファイル名のみ変更できます");
+      }
+      if (newName === entry.name) return;
+
+      const currentDir = parentPath(entry.rel_path);
+      const newPath = joinAssetPath(currentDir, newName);
+      await apiPost("/api/rename/assets", { old: entry.rel_path, new: newPath });
+
+      const updatedEntry = {
+        ...entry,
+        name: newName,
+        rel_path: newPath,
+      };
+      state.assetsPreview = updatedEntry;
+      state.assetsSelected = updatedEntry;
+      document.getElementById("renameFrom").value = newPath;
+      document.getElementById("renameTo").value = newPath;
+      await refreshAssets();
+      openAssetPreview(updatedEntry);
     }
 
     async function refreshInput() {
@@ -539,7 +1139,11 @@ INDEX_HTML = r"""<!DOCTYPE html>
         if (entry.type === "file") {
           selectInput(entry);
         }
-      });
+      }, { onDoubleClick: (entry) => {
+        if (entry.type === "file") {
+          openInputEditorModal(entry);
+        }
+      }});
       const select = document.getElementById("buildCsv");
       select.innerHTML = "";
       data.entries
@@ -565,32 +1169,27 @@ INDEX_HTML = r"""<!DOCTYPE html>
       document.getElementById("inputEditor").value = content;
     }
 
-    function openCsvPicker() {
-      const input = document.getElementById("csvUpload");
+    function openInputPicker() {
+      const input = document.getElementById("inputUpload");
       input.click();
     }
 
-    async function uploadCsv() {
-      const input = document.getElementById("csvUpload");
+    async function uploadInput() {
+      const input = document.getElementById("inputUpload");
       if (!input.files.length) return;
+      const file = input.files[0];
+      const name = (file.name || "").toLowerCase();
+      let endpoint = "/api/upload/input";
+      if (name.endsWith(".yml") || name.endsWith(".yaml")) {
+        endpoint = "/api/upload/input?force=config.yml";
+      } else if (!name.endsWith(".csv")) {
+        alert("CSV か config.yml を選択してください");
+        input.value = "";
+        return;
+      }
       const form = new FormData();
-      form.append("file", input.files[0]);
-      await apiPost("/api/upload/input", form, false);
-      input.value = "";
-      refreshInput();
-    }
-
-    function openConfigPicker() {
-      const input = document.getElementById("configUpload");
-      input.click();
-    }
-
-    async function uploadConfig() {
-      const input = document.getElementById("configUpload");
-      if (!input.files.length) return;
-      const form = new FormData();
-      form.append("file", input.files[0]);
-      await apiPost("/api/upload/input?force=config.yml", form, false);
+      form.append("file", file);
+      await apiPost(endpoint, form, false);
       input.value = "";
       refreshInput();
     }
@@ -629,6 +1228,19 @@ INDEX_HTML = r"""<!DOCTYPE html>
         const result = await apiPost("/api/build", { csv });
         setStatus(result.message || "完了");
         refreshOutput();
+        refreshLogs();
+      } catch (err) {
+        setStatus(`失敗: ${err.message}`);
+      }
+    }
+
+    async function checkSceneId() {
+      const csv = document.getElementById("buildCsv").value;
+      if (!csv) return alert("CSVを選択してください");
+      setStatus("scene_idチェック中...");
+      try {
+        const result = await apiPost("/api/check_scene_id", { csv });
+        setStatus(result.message || "チェック完了");
         refreshLogs();
       } catch (err) {
         setStatus(`失敗: ${err.message}`);
@@ -678,8 +1290,13 @@ INDEX_HTML = r"""<!DOCTYPE html>
 
     async function init() {
       document.getElementById("assetsUpload").addEventListener("change", uploadAssets);
-      document.getElementById("csvUpload").addEventListener("change", uploadCsv);
-      document.getElementById("configUpload").addEventListener("change", uploadConfig);
+      document.getElementById("inputUpload").addEventListener("change", uploadInput);
+      document.getElementById("assetPreviewOverlay").addEventListener("click", closeAssetPreview);
+      document.getElementById("inputEditorOverlay").addEventListener("click", closeInputEditorModal);
+      document.getElementById("assetsIconSize").addEventListener("input", handleAssetsIconSizeChange);
+      document.getElementById("assetsIconSize").addEventListener("change", handleAssetsIconSizeChange);
+      updateAssetCopyButton();
+      loadAssetsIconSize();
       await ensurePassword();
     }
 
@@ -694,8 +1311,22 @@ def ensure_dir(path: Path) -> None:
     path.mkdir(parents=True, exist_ok=True)
 
 
+def normalize_rel_path(rel: str) -> str:
+    rel = str(rel or "").replace("\\", "/").strip()
+    if not rel:
+        return ""
+    parts = []
+    for part in rel.split("/"):
+        if not part or part == ".":
+            continue
+        if part == "..":
+            raise ValueError("Invalid path")
+        parts.append(part)
+    return "/".join(parts)
+
+
 def safe_path(base: Path, rel: str) -> Path:
-    rel = rel.lstrip("/")
+    rel = normalize_rel_path(rel)
     target = (base / rel).resolve()
     base_resolved = base.resolve()
     if str(target) == str(base_resolved):
@@ -706,6 +1337,7 @@ def safe_path(base: Path, rel: str) -> Path:
 
 
 def list_dir(base: Path, rel: str) -> dict:
+    rel = normalize_rel_path(rel)
     target = safe_path(base, rel)
     if not target.exists():
         return {"dir": rel, "entries": []}
@@ -919,6 +1551,17 @@ class GUIHandler(BaseHTTPRequestHandler):
                 self._send_json({"ok": True})
                 return
 
+            if parsed.path == "/api/mkdir/assets":
+                data = self._parse_json()
+                rel = data.get("path", "")
+                if not rel:
+                    self._send_text("Missing fields", status=400)
+                    return
+                target = safe_path(ASSETS_DIR, rel)
+                ensure_dir(target)
+                self._send_json({"ok": True})
+                return
+
             if parsed.path.startswith("/api/upload/input"):
                 params = parse_qs(parsed.query)
                 force_name = params.get("force", [""])[0]
@@ -947,6 +1590,12 @@ class GUIHandler(BaseHTTPRequestHandler):
                     return
                 src = safe_path(ASSETS_DIR, old)
                 dst = safe_path(ASSETS_DIR, new)
+                if not src.exists():
+                    self._send_text("Source not found", status=404)
+                    return
+                if dst.exists():
+                    self._send_text("Destination already exists", status=409)
+                    return
                 ensure_dir(dst.parent)
                 src.rename(dst)
                 self._send_json({"ok": True})
@@ -959,11 +1608,11 @@ class GUIHandler(BaseHTTPRequestHandler):
                     self._send_text("Missing fields", status=400)
                     return
                 target = safe_path(ASSETS_DIR, rel)
-                if target.is_dir():
-                    self._send_text("Cannot delete directory", status=400)
-                    return
                 if target.exists():
-                    target.unlink()
+                    if target.is_dir():
+                        shutil.rmtree(target)
+                    else:
+                        target.unlink()
                 self._send_json({"ok": True})
                 return
 
@@ -1002,6 +1651,31 @@ class GUIHandler(BaseHTTPRequestHandler):
                     self._send_text("Build failed", status=500)
                     return
                 self._send_json({"ok": True, "message": "ビルド完了"})
+                return
+
+            if parsed.path == "/api/check_scene_id":
+                data = self._parse_json()
+                csv_name = data.get("csv", "scenario.csv")
+                csv_path = safe_path(INPUT_DIR, csv_name)
+                if not csv_path.exists():
+                    self._send_text("CSV not found", status=404)
+                    return
+                cmd = [
+                    os.environ.get("PYTHON", sys.executable),
+                    str(PROJECT_ROOT / "check_scene_id.py"),
+                    csv_name,
+                ]
+                logging.info("Scene ID check start: %s", csv_name)
+                result = subprocess.run(cmd, cwd=str(PROJECT_ROOT), capture_output=True, text=True)
+                stdout = (result.stdout or "").strip()
+                if stdout:
+                    logging.info("Scene ID check stdout:\n%s", stdout)
+                if result.stderr:
+                    logging.error("Scene ID check stderr:\n%s", result.stderr.strip())
+                if result.returncode != 0:
+                    self._send_text("Scene ID check failed", status=500)
+                    return
+                self._send_json({"ok": True, "message": "scene_idチェック完了"})
                 return
 
             self._send_text("Not Found", status=404)

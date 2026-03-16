@@ -10,6 +10,8 @@ import base64
 import os
 import json
 import yaml
+from datetime import datetime
+from io import BytesIO
 from pathlib import Path
 from typing import List, Dict, Optional
 
@@ -32,6 +34,12 @@ class LuminasScript:
             'adv_sub_title': '',
             'title_bg_image': '',
             'creator_name': '',
+            'License': '',
+            'custom_name': '',
+            'forbidden_word': [],
+            'target_size': '',
+            'optimization': '',
+            'optimization_level': '',
             'theme_color': '#667EEA',
             'sub_color': '#754CA3',
             'text_color': '#FFFFFF',
@@ -105,10 +113,39 @@ class LuminasScript:
         if not image_path.exists():
             print(f"⚠ 画像が見つかりません: {image_path}")
             return None
-        
+
+        target_size = self._parse_target_size(self.config.get('target_size'))
+        optimization_enabled = self._parse_bool(self.config.get('optimization'))
+        optimization_level = self._parse_optimization_level(self.config.get('optimization_level'))
+
+        if target_size or optimization_enabled:
+            try:
+                from PIL import Image
+            except Exception as e:
+                print(f"⚠ 画像の最適化にPillowが必要です。オリジナルで処理します: {e}")
+                target_size = None
+                optimization_enabled = False
+
         try:
-            with open(image_path, 'rb') as f:
-                encoded = base64.b64encode(f.read()).decode('utf-8')
+            if target_size or optimization_enabled:
+                with Image.open(image_path) as img:
+                    img = img.convert("RGBA") if img.mode in ("P", "LA") else img
+                    img = img.convert("RGB") if img.mode not in ("RGB", "RGBA") else img
+
+                    if target_size and img.width > target_size:
+                        new_height = int(img.height * (target_size / img.width))
+                        img = img.resize((target_size, new_height), Image.LANCZOS)
+
+                    if optimization_enabled:
+                        if optimization_level is not None:
+                            payload, mime_type = self._encode_webp_with_quality(img, optimization_level)
+                        else:
+                            payload, mime_type = self._encode_webp_approx_200kb(img)
+                    else:
+                        payload, mime_type = self._encode_original_format(img, image_path.suffix.lower())
+            else:
+                with open(image_path, 'rb') as f:
+                    payload = f.read()
                 ext = image_path.suffix.lower()
                 mime_type = {
                     '.jpg': 'image/jpeg',
@@ -117,72 +154,241 @@ class LuminasScript:
                     '.gif': 'image/gif',
                     '.webp': 'image/webp'
                 }.get(ext, 'image/png')
-                
-                return f"data:{mime_type};base64,{encoded}"
+
+            encoded = base64.b64encode(payload).decode('utf-8')
+            return f"data:{mime_type};base64,{encoded}"
         except Exception as e:
             print(f"⚠ 画像のエンコードに失敗: {image_path} - {e}")
             return None
+
+    def encode_audio_to_base64(self, audio_path: Path) -> Optional[str]:
+        """音声ファイルをBase64エンコードする"""
+        if not audio_path.exists():
+            print(f"⚠ 音声が見つかりません: {audio_path}")
+            return None
+
+        try:
+            with open(audio_path, 'rb') as f:
+                payload = f.read()
+
+            ext = audio_path.suffix.lower()
+            mime_type = {
+                '.mp3': 'audio/mpeg',
+                '.wav': 'audio/wav',
+                '.ogg': 'audio/ogg',
+                '.m4a': 'audio/mp4'
+            }.get(ext, 'application/octet-stream')
+
+            encoded = base64.b64encode(payload).decode('utf-8')
+            return f"data:{mime_type};base64,{encoded}"
+        except Exception as e:
+            print(f"⚠ 音声のエンコードに失敗: {audio_path} - {e}")
+            return None
+
+    def _parse_target_size(self, value) -> Optional[int]:
+        """target_sizeを整数に変換"""
+        if value is None:
+            return None
+        if isinstance(value, int):
+            return value if value > 0 else None
+        text = str(value).strip()
+        if not text:
+            return None
+        try:
+            size = int(text)
+            return size if size > 0 else None
+        except ValueError:
+            print(f"⚠ target_sizeが不正です: {value}")
+            return None
+
+    def _parse_bool(self, value) -> bool:
+        """文字列・数値から真偽値を判定"""
+        if isinstance(value, bool):
+            return value
+        if value is None:
+            return False
+        text = str(value).strip().lower()
+        return text in ("1", "true", "yes", "on")
+
+    def _parse_optimization_level(self, value) -> Optional[int]:
+        """optimization_levelを1〜99の整数に変換"""
+        if value is None:
+            return None
+        if isinstance(value, int):
+            return value if 1 <= value <= 99 else None
+        text = str(value).strip()
+        if not text:
+            return None
+        try:
+            level = int(text)
+        except ValueError:
+            print(f"⚠ optimization_levelが不正です: {value}")
+            return None
+        return level if 1 <= level <= 99 else None
+
+    def _encode_original_format(self, img, ext: str) -> (bytes, str):
+        """元形式で画像をバイト列に変換"""
+        buffer = BytesIO()
+        if ext in ('.jpg', '.jpeg'):
+            img.convert("RGB").save(buffer, format="JPEG", quality=95)
+            mime_type = 'image/jpeg'
+        elif ext == '.webp':
+            img.save(buffer, format="WEBP", quality=90, method=6)
+            mime_type = 'image/webp'
+        elif ext == '.gif':
+            img.save(buffer, format="GIF")
+            mime_type = 'image/gif'
+        else:
+            img.save(buffer, format="PNG", optimize=True)
+            mime_type = 'image/png'
+        return buffer.getvalue(), mime_type
+
+    def _encode_webp_with_quality(self, img, quality: int) -> (bytes, str):
+        """WebPへ変換し、指定品質で出力"""
+        buffer = BytesIO()
+        img.save(buffer, format="WEBP", quality=quality, method=6)
+        return buffer.getvalue(), 'image/webp'
+
+    def _encode_webp_approx_200kb(self, img) -> (bytes, str):
+        """WebPへ変換し、200KB程度まで品質を調整"""
+        target_bytes = 200 * 1024
+        quality = 90
+        best_payload = None
+
+        while quality >= 30:
+            buffer = BytesIO()
+            img.save(buffer, format="WEBP", quality=quality, method=6)
+            payload = buffer.getvalue()
+            best_payload = payload
+            if len(payload) <= target_bytes:
+                break
+            quality -= 5
+
+        return best_payload or b"", 'image/webp'
     
-    def collect_assets(self) -> Dict[str, str]:
-        """使用されているすべてのアセットを収集してBase64エンコード"""
-        assets = {}
-        
-        def get_image_path(directory: Path, filename: str) -> Optional[Path]:
-            """画像ファイルのパスを取得（拡張子の自動補完付き）"""
-            if not filename:
-                return None
-            
-            # 拡張子がない場合は.pngを追加
-            if not Path(filename).suffix:
-                filename = filename + '.png'
-            
-            path = directory / filename
+    def _find_asset_path(self, directory: Path, filename: str, default_extensions: List[str]) -> Optional[Path]:
+        """アセットファイルのパスを取得（拡張子の自動補完付き）"""
+        normalized = self._normalize_asset_reference(filename)
+        if not normalized:
+            return None
+
+        candidate_names = [normalized]
+        normalized_path = Path(normalized)
+        if not normalized_path.suffix:
+            candidate_names.extend(f"{normalized}{ext}" for ext in default_extensions)
+
+        for candidate in candidate_names:
+            path = directory / candidate
             if path.exists():
                 return path
-            
-            # 拡張子なしでも試す
-            path_without_ext = directory / Path(filename).stem
-            if path_without_ext.exists():
-                return path_without_ext
-            
-            return None
+
+        path_without_ext = normalized_path.with_suffix("")
+        fallback_path = directory / path_without_ext
+        if fallback_path.exists():
+            return fallback_path
+
+        legacy_path = directory / normalized_path.stem
+        if legacy_path.exists():
+            return legacy_path
+
+        return None
+
+    def _normalize_asset_reference(self, filename: str) -> str:
+        """CSV上のアセット参照を安全な相対パスへ正規化"""
+        if not filename:
+            return ""
+
+        normalized = str(filename).strip().replace("\\", "/")
+        while "//" in normalized:
+            normalized = normalized.replace("//", "/")
+        normalized = normalized.lstrip("/")
+        if not normalized or normalized in {".", ".."}:
+            return ""
+
+        parts = []
+        for part in normalized.split("/"):
+            if not part or part == ".":
+                continue
+            if part == "..":
+                print(f"⚠ アセット参照で親ディレクトリは使用できません: {filename}")
+                return ""
+            parts.append(part)
+
+        return "/".join(parts)
+
+
+    def collect_assets(self) -> Dict[str, Dict[str, str]]:
+        """使用されているすべてのアセットを収集してBase64エンコード"""
+        image_assets = {}
+        audio_assets = {}
         
         # 背景画像
         bg_dir = self.assets_dir / "backgrounds"
         if bg_dir.exists():
             for row in self.scenario_data:
-                bg_name = row.get('background_image', '').strip()
-                if bg_name and bg_name not in assets:
-                    bg_path = get_image_path(bg_dir, bg_name)
+                bg_name_raw = row.get('background_image', '').strip()
+                bg_name = self._extract_asset_name(bg_name_raw)
+                if bg_name and bg_name not in image_assets:
+                    bg_path = self._find_asset_path(bg_dir, bg_name, ['.png', '.jpg', '.jpeg', '.webp', '.gif'])
                     if bg_path:
                         encoded = self.encode_image_to_base64(bg_path)
                         if encoded:
-                            assets[bg_name] = encoded
+                            image_assets[bg_name] = encoded
             
             # タイトル背景
-            title_bg = self.config.get('title_bg_image', '').strip()
-            if title_bg and title_bg not in assets:
-                bg_path = get_image_path(bg_dir, title_bg)
+            title_bg_raw = self.config.get('title_bg_image', '').strip()
+            title_bg = self._extract_asset_name(title_bg_raw)
+            if title_bg and title_bg not in image_assets:
+                bg_path = self._find_asset_path(bg_dir, title_bg, ['.png', '.jpg', '.jpeg', '.webp', '.gif'])
                 if bg_path:
                     encoded = self.encode_image_to_base64(bg_path)
                     if encoded:
-                        assets[title_bg] = encoded
+                        image_assets[title_bg] = encoded
         
         # キャラクター立ち絵
         char_dir = self.assets_dir / "characters"
         if char_dir.exists():
             for row in self.scenario_data:
                 for pos in ['center_standing_portrait_image', 'left_standing_portrait_image', 'right_standing_portrait_image']:
-                    char_name = row.get(pos, '').strip()
-                    if char_name and char_name not in assets:
-                        char_path = get_image_path(char_dir, char_name)
+                    char_name_raw = row.get(pos, '').strip()
+                    char_name = self._extract_asset_name(char_name_raw)
+                    if char_name and char_name not in image_assets:
+                        char_path = self._find_asset_path(char_dir, char_name, ['.png', '.jpg', '.jpeg', '.webp', '.gif'])
                         if char_path:
                             encoded = self.encode_image_to_base64(char_path)
                             if encoded:
-                                assets[char_name] = encoded
-        
-        print(f"✓ {len(assets)}個のアセットをエンコードしました")
-        return assets
+                                image_assets[char_name] = encoded
+
+        # BGM
+        bgm_dir = self.assets_dir / "bgms"
+        if bgm_dir.exists():
+            for row in self.scenario_data:
+                bgm_name_raw = row.get('bgm', '').strip()
+                bgm_name = self._extract_asset_name(bgm_name_raw)
+                if bgm_name and bgm_name not in audio_assets:
+                    bgm_path = self._find_asset_path(bgm_dir, bgm_name, ['.mp3', '.wav', '.ogg', '.m4a'])
+                    if bgm_path:
+                        encoded = self.encode_audio_to_base64(bgm_path)
+                        if encoded:
+                            audio_assets[bgm_name] = encoded
+
+        print(f"✓ 画像{len(image_assets)}個 / 音声{len(audio_assets)}個のアセットをエンコードしました")
+        return {
+            'images': image_assets,
+            'audio': audio_assets
+        }
+
+    def _extract_asset_name(self, spec: str) -> str:
+        """<FileName|...>形式からファイル名を抽出"""
+        if not spec:
+            return ''
+        text = str(spec).strip()
+        if len(text) >= 2 and text.startswith('<') and text.endswith('>'):
+            inner = text[1:-1].strip()
+            if '|' in inner:
+                return inner.split('|', 1)[0].strip()
+            return inner
+        return text
     
     def generate_html(self, output_filename: str = "game.html") -> None:
         """HTMLファイルを生成"""
@@ -194,11 +400,12 @@ class LuminasScript:
         
         # シナリオデータをJSON形式に変換
         scenario_json = json.dumps(self.scenario_data, ensure_ascii=False, indent=2)
-        assets_json = json.dumps(assets, ensure_ascii=False)
+        image_assets_json = json.dumps(assets['images'], ensure_ascii=False)
+        audio_assets_json = json.dumps(assets['audio'], ensure_ascii=False)
         config_json = json.dumps(self.config, ensure_ascii=False)
         
         # HTMLテンプレートを生成
-        html_content = self._generate_html_template(scenario_json, assets_json, config_json)
+        html_content = self._generate_html_template(scenario_json, image_assets_json, audio_assets_json, config_json)
         
         # 出力ディレクトリを作成
         self.output_dir.mkdir(parents=True, exist_ok=True)
@@ -211,7 +418,7 @@ class LuminasScript:
         print(f"✓ ゲームファイルを生成しました: {output_path}")
         print(f"  ファイルサイズ: {output_path.stat().st_size / 1024:.1f} KB")
     
-    def _generate_html_template(self, scenario_json: str, assets_json: str, config_json: str) -> str:
+    def _generate_html_template(self, scenario_json: str, image_assets_json: str, audio_assets_json: str, config_json: str) -> str:
         """HTMLテンプレートを生成"""
         font_import = ""
         if self.config.get('text_font_importURL'):
@@ -325,7 +532,41 @@ class LuminasScript:
                     <label>SE音量</label>
                     <input type="range" id="se-volume" min="0" max="100" value="70">
                 </div>
+                <div id="custom-name-setting" class="setting-item hidden">
+                    <label>ユーザー名</label>
+                    <input type="text" id="custom-name-input" class="text-input" placeholder="ユーザー名を入力">
+                    <p class="input-help">ハイフンやスペースなどの記号は無視されます。</p>
+                </div>
                 <button class="menu-btn" onclick="closeSettings()">閉じる</button>
+            </div>
+        </div>
+
+        <!-- ライセンス同意 -->
+        <div id="license-modal" class="modal hidden">
+            <div class="modal-content license-content">
+                <h2>ライセンス</h2>
+                <div id="license-text" class="license-text"></div>
+                <div class="license-actions">
+                    <button class="menu-btn" onclick="acceptLicense()">同意して開始</button>
+                    <button class="menu-btn" onclick="declineLicense()">同意しない</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- ユーザー名設定 -->
+        <div id="custom-name-modal" class="modal hidden">
+            <div class="modal-content">
+                <h2>ユーザー名設定</h2>
+                <div class="setting-item">
+                    <label>ユーザー名</label>
+                    <input type="text" id="custom-name-modal-input" class="text-input" placeholder="ユーザー名を入力">
+                    <p class="input-help">ハイフンやスペースなどの記号は無視されます。</p>
+                    <p id="custom-name-error" class="input-error hidden"></p>
+                </div>
+                <div class="license-actions">
+                    <button class="menu-btn" onclick="confirmCustomName()">決定</button>
+                    <button class="menu-btn" onclick="skipCustomName()">後で設定</button>
+                </div>
             </div>
         </div>
         
@@ -340,6 +581,12 @@ class LuminasScript:
                     {f'<p><a href="{self.config.get("fediverse_account_url")}" target="_blank">Fediverse</a></p>' if self.config.get('fediverse_account_url') else ''}
                     {f'<p><a href="{self.config.get("web_url")}" target="_blank">Website</a></p>' if self.config.get('web_url') else ''}
                     {f'<p><a href="{self.config.get("booth_url")}" target="_blank">BOOTH</a></p>' if self.config.get('booth_url') else ''}
+                    {f'''
+                    <div class="credits-license">
+                        <p><strong>ライセンス:</strong></p>
+                        <button class="menu-btn" onclick="showLicenseModal(true)">ライセンスを表示</button>
+                    </div>
+                    ''' if (self.config.get('License') or self.config.get('license') or '').strip() else ''}
                     <hr>
                     <p><strong>Generated by Luminous Script</strong></p>
                     <p class="license-info">このスクリプトは Apache License 2.0 の下でライセンスされています。</p>
@@ -351,7 +598,7 @@ class LuminasScript:
     </div>
     
     <script>
-        {self._get_javascript(scenario_json, assets_json, config_json)}
+        {self._get_javascript(scenario_json, image_assets_json, audio_assets_json, config_json)}
     </script>
 </body>
 </html>"""
@@ -679,6 +926,27 @@ class LuminasScript:
             text-align: center;
             font-size: 2rem;
         }}
+
+        .license-content {{
+            max-width: 720px;
+        }}
+
+        .license-text {{
+            background: rgba(0, 0, 0, 0.25);
+            padding: 1.2rem;
+            border-radius: 10px;
+            line-height: 1.6;
+            white-space: pre-wrap;
+            max-height: 50vh;
+            overflow-y: auto;
+            margin-bottom: 1.5rem;
+        }}
+
+        .license-actions {{
+            display: flex;
+            gap: 0.8rem;
+            justify-content: center;
+        }}
         
         .history-content {{
             max-width: 800px;
@@ -726,6 +994,28 @@ class LuminasScript:
         .setting-item input[type="range"] {{
             width: 100%;
         }}
+
+        .text-input {{
+            width: 100%;
+            padding: 0.8rem 1rem;
+            border-radius: 8px;
+            border: 1px solid rgba(255, 255, 255, 0.4);
+            background: rgba(0, 0, 0, 0.2);
+            color: white;
+            font-size: 1rem;
+        }}
+
+        .input-help {{
+            margin-top: 0.5rem;
+            font-size: 0.85rem;
+            opacity: 0.8;
+        }}
+
+        .input-error {{
+            margin-top: 0.6rem;
+            font-size: 0.9rem;
+            color: #ffd0d0;
+        }}
         
         .credits-content {{
             text-align: center;
@@ -744,6 +1034,14 @@ class LuminasScript:
             margin: 2rem 0;
             border: none;
             border-top: 1px solid rgba(255, 255, 255, 0.3);
+        }}
+
+        .credits-license {{
+            margin: 1rem 0 0.5rem;
+        }}
+
+        .credits-license .menu-btn {{
+            margin-top: 0.4rem;
         }}
         
         .license-info {{
@@ -777,13 +1075,21 @@ class LuminasScript:
         }}
         """
     
-    def _get_javascript(self, scenario_json: str, assets_json: str, config_json: str) -> str:
+    def _get_javascript(self, scenario_json: str, image_assets_json: str, audio_assets_json: str, config_json: str) -> str:
         """JavaScriptコードを返す"""
         return f"""
         // ゲームデータ
         const SCENARIO_DATA = {scenario_json};
-        const ASSETS = {assets_json};
+        const ASSETS = {image_assets_json};
+        const AUDIO_ASSETS = {audio_assets_json};
         const CONFIG = {config_json};
+        const DEFAULT_SETTINGS = {{
+            textSpeed: 5,
+            bgmVolume: 70,
+            seVolume: 70,
+            customName: ''
+        }};
+        const BGM_FADE_DURATION = 1000;
         
         // ゲーム状態
         let currentSceneIndex = 0;
@@ -793,6 +1099,11 @@ class LuminasScript:
         let clickDelayTimer = null;
         let canClick = false;
         const CLICK_DELAY = 500; // クリック可能になるまでの時間（ミリ秒）
+        let licenseAccepted = false;
+        const LICENSE_ACCEPT_KEY = 'luminas_license_accepted';
+        let bgmAudio = null;
+        let bgmFadeInterval = null;
+        let currentBgmName = '';
         
         let gameState = {{
             currentSceneId: null,
@@ -801,7 +1112,8 @@ class LuminasScript:
             settings: {{
                 textSpeed: 5,
                 bgmVolume: 70,
-                seVolume: 70
+                seVolume: 70,
+                customName: ''
             }}
         }};
         
@@ -810,12 +1122,15 @@ class LuminasScript:
             console.log('LuminasScript initialized');
             console.log(`Loaded ${{SCENARIO_DATA.length}} scenes`);
             console.log(`Loaded ${{Object.keys(ASSETS).length}} assets`);
+            console.log(`Loaded ${{Object.keys(AUDIO_ASSETS).length}} bgm assets`);
             
             // 設定を読み込み
             loadSettings();
+            loadLicenseAcceptance();
+            initCustomNameUI();
             
             // タイトル背景を設定
-            const titleBg = CONFIG.title_bg_image;
+            const titleBg = extractAssetName(CONFIG.title_bg_image);
             if (titleBg && ASSETS[titleBg]) {{
                 document.getElementById('title-screen').style.backgroundImage = `url(${{ASSETS[titleBg]}})`;
             }}
@@ -826,6 +1141,11 @@ class LuminasScript:
                 setTimeout(() => {{
                     document.getElementById('loading-screen').style.display = 'none';
                     document.getElementById('game-container').classList.remove('hidden');
+                    if (isLicenseRequired() && !licenseAccepted) {{
+                        showLicenseModal(true);
+                    }} else {{
+                        maybePromptCustomName();
+                    }}
                 }}, 500);
             }}, 1000);
         }});
@@ -876,9 +1196,80 @@ class LuminasScript:
             const delay = 3000; // 3秒後に自動で進む
             autoModeTimeout = setTimeout(() => {{
                 if (isAutoMode && canClick) {{
-                    loadScene(currentSceneIndex + 1);
+                    loadScene(findNextSceneIndex(currentSceneIndex));
                 }}
             }}, delay);
+        }}
+
+        function normalizeSceneId(sceneId) {{
+            return (sceneId || '').trim();
+        }}
+
+        function extractAssetName(spec) {{
+            const text = String(spec || '').trim();
+            if (text.startsWith('<') && text.endsWith('>')) {{
+                const inner = text.slice(1, -1).trim();
+                const separatorIndex = inner.indexOf('|');
+                return (separatorIndex >= 0 ? inner.slice(0, separatorIndex) : inner).trim();
+            }}
+            return text;
+        }}
+
+        function escapeHtml(text) {{
+            return String(text)
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;')
+                .replace(/'/g, '&#39;');
+        }}
+
+        function formatText(raw) {{
+            if (!raw) return '';
+            const src = String(raw);
+            const token = /<([^|<>]+)\\|([^<>]+)>/g;
+            let result = '';
+            let lastIndex = 0;
+            let match;
+
+            while ((match = token.exec(src)) !== null) {{
+                result += escapeHtml(src.slice(lastIndex, match.index));
+                const body = match[1];
+                const styleRaw = match[2].trim();
+                const safeText = escapeHtml(body);
+                const parts = styleRaw.split(',').map(s => s.trim()).filter(Boolean);
+                let color = null;
+                let underline = false;
+                let ruby = null;
+
+                parts.forEach(p => {{
+                    if (/^#([0-9a-fA-F]{{3}}|[0-9a-fA-F]{{6}})$/.test(p)) {{
+                        if (!color) color = p;
+                    }} else if (p.toUpperCase() === 'U') {{
+                        underline = true;
+                    }} else if (!ruby) {{
+                        ruby = p;
+                    }}
+                }});
+
+                let formatted = safeText;
+                if (ruby) {{
+                    const safeRuby = escapeHtml(ruby);
+                    formatted = `<ruby>${{formatted}}<rt>${{safeRuby}}</rt></ruby>`;
+                }}
+                if (underline) {{
+                    formatted = `<span style="text-decoration: underline;">${{formatted}}</span>`;
+                }}
+                if (color) {{
+                    formatted = `<span style="color:${{color}}">${{formatted}}</span>`;
+                }}
+                result += formatted;
+
+                lastIndex = token.lastIndex;
+            }}
+
+            result += escapeHtml(src.slice(lastIndex));
+            return result.replace(/\\n/g, '<br>');
         }}
         
         // 会話履歴の追加
@@ -907,7 +1298,7 @@ class LuminasScript:
                 
                 const text = document.createElement('div');
                 text.className = 'history-text';
-                text.textContent = item.text;
+                text.innerHTML = formatText(item.text);
                 div.appendChild(text);
                 
                 historyList.appendChild(div);
@@ -924,6 +1315,10 @@ class LuminasScript:
         
         // ゲーム開始
         function startNewGame() {{
+            if (isLicenseRequired() && !licenseAccepted) {{
+                showLicenseModal(true);
+                return;
+            }}
             currentSceneIndex = 0;
             conversationHistory = [];
             gameState.visitedScenes = [];
@@ -951,18 +1346,22 @@ class LuminasScript:
             
             currentSceneIndex = index;
             const scene = SCENARIO_DATA[index];
-            gameState.currentSceneId = scene.scene_id;
-            gameState.visitedScenes.push(scene.scene_id);
+            const sceneId = normalizeSceneId(scene.scene_id);
+            gameState.currentSceneId = sceneId;
+            gameState.visitedScenes.push(sceneId);
+            updateBgm(scene.bgm);
             
-            console.log(`Loading scene: ${{scene.scene_id}}`);
+            console.log(`Loading scene: ${{sceneId}}`);
             
             // scene_idの解析
-            const sceneType = getSceneType(scene.scene_id);
+            const sceneType = getSceneType(sceneId);
             
             if (sceneType === 'title') {{
                 showChapterTitle(scene);
             }} else if (sceneType === 'choice') {{
                 showChoices(scene);
+            }} else if (sceneType === 'ending') {{
+                showEnding(scene);
             }} else {{
                 showDialogue(scene);
             }}
@@ -970,14 +1369,51 @@ class LuminasScript:
         
         // scene_idのタイプを判定
         function getSceneType(sceneId) {{
-            const parts = sceneId.split('-');
+            const parts = normalizeSceneId(sceneId).split('-');
             if (parts.length >= 2) {{
-                const type = parts[1];
-                if (type === 'T') return 'title';
-                if (type === 'Q') return 'choice';
-                if (type === 'E') return 'ending';
+                const last = parts[parts.length - 1];
+                const second = parts[1];
+                if (last === 'T' || second === 'T') return 'title';
+                if (last === 'Q' || second === 'Q') return 'choice';
+                if (last === 'E' || second === 'E') return 'ending';
             }}
             return 'dialogue';
+        }}
+
+        function isBranchRoute(sceneId) {{
+            const parts = normalizeSceneId(sceneId).split('-');
+            if (parts.length < 3) return false;
+            const branch = parts[1];
+            return /^[A-Z]$/.test(branch) && branch !== 'M' && branch !== 'Q' && branch !== 'T' && branch !== 'E';
+        }}
+
+        function findNextSceneIndex(currentIndex) {{
+            const currentScene = SCENARIO_DATA[currentIndex];
+            if (!currentScene || !currentScene.scene_id) return currentIndex + 1;
+            
+            const sceneId = normalizeSceneId(currentScene.scene_id);
+            if (!isBranchRoute(sceneId)) return currentIndex + 1;
+            
+            const parts = sceneId.split('-');
+            const chapter = parts[0];
+            const branch = parts[1];
+            const branchPrefix = `${{chapter}}-${{branch}}-`;
+            
+            for (let i = currentIndex + 1; i < SCENARIO_DATA.length; i++) {{
+                const id = normalizeSceneId(SCENARIO_DATA[i].scene_id);
+                if (id.startsWith(branchPrefix)) return i;
+            }}
+            
+            const mergePrefix = `${{chapter}}-M-`;
+            const mergeIndex = SCENARIO_DATA.findIndex(s => {{
+                const id = normalizeSceneId(s.scene_id);
+                return id === `${{chapter}}-M` || id.startsWith(mergePrefix);
+            }});
+            if (mergeIndex !== -1 && mergeIndex > currentIndex) {{
+                return mergeIndex;
+            }}
+            
+            return currentIndex + 1;
         }}
         
         // チャプタータイトルを表示
@@ -987,7 +1423,8 @@ class LuminasScript:
             const dialogueText = document.getElementById('dialogue-text');
             
             speakerName.textContent = '';
-            dialogueText.textContent = scene.text || '';
+            const chapterText = applyCustomName(scene.text || '');
+            dialogueText.innerHTML = formatText(chapterText);
             dialogueText.style.fontSize = '2.5rem';
             dialogueText.style.textAlign = 'center';
             dialogueText.style.fontWeight = 'bold';
@@ -995,7 +1432,7 @@ class LuminasScript:
             updateBackground(scene.background_image);
             clearCharacters();
             
-            addToHistory('', scene.text);
+            addToHistory('', chapterText);
             
             // 自動で次へ
             setTimeout(() => {{
@@ -1017,7 +1454,7 @@ class LuminasScript:
             choicesContainer.innerHTML = '';
             
             // テキストを選択肢に分割
-            const choiceText = scene.text || '';
+            const choiceText = applyCustomName(scene.text || '');
             const choices = choiceText.split('\\n').filter(c => c.trim());
             
             addToHistory('', '【選択肢】');
@@ -1025,8 +1462,9 @@ class LuminasScript:
             choices.forEach((choice, index) => {{
                 const btn = document.createElement('button');
                 btn.className = 'choice-btn';
-                btn.textContent = choice.trim();
-                btn.onclick = () => selectChoice(scene.scene_id, index, choice);
+                const trimmedChoice = choice.trim();
+                btn.innerHTML = formatText(trimmedChoice);
+                btn.onclick = () => selectChoice(scene.scene_id, index, trimmedChoice);
                 choicesContainer.appendChild(btn);
             }});
             
@@ -1047,15 +1485,55 @@ class LuminasScript:
             
             // 選択肢に応じた分岐を探す
             const branchLetter = String.fromCharCode(65 + choiceIndex); // A, B, C...
-            const nextSceneId = sceneId.split('-')[0] + '-' + branchLetter + '-1';
+            const parts = normalizeSceneId(sceneId).split('-');
+            const baseParts = parts.slice(0, -1);
+            const nextSceneId = baseParts.concat(branchLetter, '1').join('-');
             
             // 次のシーンを探す
-            const nextIndex = SCENARIO_DATA.findIndex(s => s.scene_id === nextSceneId);
+            const nextIndex = SCENARIO_DATA.findIndex(s => normalizeSceneId(s.scene_id) === nextSceneId);
             if (nextIndex !== -1) {{
                 loadScene(nextIndex);
             }} else {{
                 // 見つからない場合は次のシーンへ
                 loadScene(currentSceneIndex + 1);
+            }}
+        }}
+
+        function showEnding(scene) {{
+            const speakerName = document.getElementById('speaker-name');
+            const dialogueText = document.getElementById('dialogue-text');
+            const textBox = document.getElementById('text-box');
+
+            textBox.style.display = 'block';
+            document.getElementById('choice-box').classList.add('hidden');
+
+            speakerName.textContent = scene.person_name || '';
+
+            let text = applyCustomName(scene.text || '');
+            const lines = text.split('\\n');
+            if (lines.length > 4) {{
+                text = lines.slice(0, 4).join('\\n');
+            }}
+            dialogueText.innerHTML = formatText(text);
+
+            updateBackground(scene.background_image);
+            updateCharacters(scene);
+
+            addToHistory(scene.person_name, text);
+
+            startClickDelay();
+            textBox.onclick = () => {{
+                if (canClick) {{
+                    returnToTitle();
+                }}
+            }};
+
+            if (isAutoMode) {{
+                autoModeTimeout = setTimeout(() => {{
+                    if (isAutoMode) {{
+                        returnToTitle();
+                    }}
+                }}, 3000);
             }}
         }}
         
@@ -1071,12 +1549,12 @@ class LuminasScript:
             speakerName.textContent = scene.person_name || '';
             
             // テキストを4行に制限
-            let text = scene.text || '';
+            let text = applyCustomName(scene.text || '');
             const lines = text.split('\\n');
             if (lines.length > 4) {{
                 text = lines.slice(0, 4).join('\\n');
             }}
-            dialogueText.textContent = text;
+            dialogueText.innerHTML = formatText(text);
             
             updateBackground(scene.background_image);
             updateCharacters(scene);
@@ -1089,7 +1567,7 @@ class LuminasScript:
             // クリックで次へ
             textBox.onclick = () => {{
                 if (canClick) {{
-                    loadScene(currentSceneIndex + 1);
+                    loadScene(findNextSceneIndex(currentSceneIndex));
                 }}
             }};
             
@@ -1098,12 +1576,242 @@ class LuminasScript:
                 autoAdvance();
             }}
         }}
+
+        const CHARACTER_BASE_SCALE = 3;
+        const BACKGROUND_BASE_SCALE = 1;
+
+        function normalizeEffectToken(token) {{
+            return token.replace(/[‐‑‒–—−]/g, '-');
+        }}
+
+        function parseImageSpec(spec) {{
+            if (!spec) {{
+                return {{ name: '', effects: null }};
+            }}
+            const trimmed = String(spec).trim();
+            if (!(trimmed.startsWith('<') && trimmed.endsWith('>'))) {{
+                return {{ name: trimmed, effects: null }};
+            }}
+
+            const inner = trimmed.slice(1, -1).trim();
+            const parts = inner.split('|');
+            const name = (parts[0] || '').trim();
+            const effects = {{
+                monochrome: false,
+                scale: 100,
+                offsetX: 0,
+                offsetY: 0,
+                vibration: 0
+            }};
+
+            if (parts[1]) {{
+                const tokens = parts[1].split(',').map(t => normalizeEffectToken(t.trim())).filter(Boolean);
+                tokens.forEach(token => {{
+                    if (token === 'M') {{
+                        effects.monochrome = true;
+                        return;
+                    }}
+                    if (token.startsWith('S')) {{
+                        const value = parseFloat(token.slice(1));
+                        if (!Number.isNaN(value) && value > 0) {{
+                            effects.scale = value;
+                        }}
+                        return;
+                    }}
+                    if (token.startsWith('X')) {{
+                        const value = parseFloat(token.slice(1));
+                        if (!Number.isNaN(value)) {{
+                            effects.offsetX = value;
+                        }}
+                        return;
+                    }}
+                    if (token.startsWith('Y')) {{
+                        const value = parseFloat(token.slice(1));
+                        if (!Number.isNaN(value)) {{
+                            effects.offsetY = value;
+                        }}
+                        return;
+                    }}
+                    if (token.startsWith('V')) {{
+                        const value = parseFloat(token.slice(1));
+                        if (!Number.isNaN(value) && value > 0) {{
+                            effects.vibration = value;
+                        }}
+                    }}
+                }});
+            }}
+
+            return {{ name, effects }};
+        }}
+
+        function clearVibration(element) {{
+            if (element._vibrationAnimation) {{
+                element._vibrationAnimation.cancel();
+                element._vibrationAnimation = null;
+            }}
+        }}
+
+        function applyVibration(element, baseTransform, durationSec) {{
+            clearVibration(element);
+            if (!durationSec || durationSec <= 0) return;
+
+            const jitter = 4;
+            const randomOffset = () => Math.round((Math.random() * 2 - 1) * jitter);
+            const keyframes = [
+                {{ transform: `${{baseTransform}} translate(${{randomOffset()}}px, ${{randomOffset()}}px)` }},
+                {{ transform: `${{baseTransform}} translate(${{randomOffset()}}px, ${{randomOffset()}}px)` }},
+                {{ transform: `${{baseTransform}} translate(${{randomOffset()}}px, ${{randomOffset()}}px)` }},
+                {{ transform: `${{baseTransform}} translate(${{randomOffset()}}px, ${{randomOffset()}}px)` }}
+            ];
+
+            element._vibrationAnimation = element.animate(keyframes, {{
+                duration: durationSec * 1000,
+                iterations: Infinity,
+                direction: 'alternate',
+                easing: 'linear'
+            }});
+        }}
+
+        function applyImageEffects(element, effects, baseScale) {{
+            const scaleFactor = baseScale * (effects.scale / 100);
+            const transform = `translate(${{effects.offsetX}}px, ${{effects.offsetY}}px) scale(${{scaleFactor}})`;
+            element.style.filter = effects.monochrome ? 'grayscale(1)' : '';
+            element.style.transform = transform;
+            applyVibration(element, transform, effects.vibration);
+        }}
+
+        function resetImageEffects(element, baseScale) {{
+            clearVibration(element);
+            element.style.filter = '';
+            element.style.transform = `scale(${{baseScale}})`;
+        }}
+
+        function normalizeVolume(value) {{
+            const volume = Number(value);
+            if (Number.isNaN(volume)) return 0;
+            return Math.min(Math.max(volume, 0), 1);
+        }}
+
+        function clearBgmFade() {{
+            if (bgmFadeInterval) {{
+                clearInterval(bgmFadeInterval);
+                bgmFadeInterval = null;
+            }}
+        }}
+
+        function getBgmTargetVolume() {{
+            return normalizeVolume((gameState.settings.bgmVolume || 0) / 100);
+        }}
+
+        function stopBgmImmediately() {{
+            clearBgmFade();
+            if (bgmAudio) {{
+                bgmAudio.pause();
+                bgmAudio.currentTime = 0;
+                bgmAudio = null;
+            }}
+            currentBgmName = '';
+        }}
+
+        function fadeAudioVolume(audio, fromVolume, toVolume, duration, onComplete) {{
+            clearBgmFade();
+            const start = performance.now();
+            const safeFrom = normalizeVolume(fromVolume);
+            const safeTo = normalizeVolume(toVolume);
+            audio.volume = safeFrom;
+
+            bgmFadeInterval = setInterval(() => {{
+                const elapsed = performance.now() - start;
+                const progress = Math.min(elapsed / duration, 1);
+                audio.volume = safeFrom + (safeTo - safeFrom) * progress;
+
+                if (progress >= 1) {{
+                    clearBgmFade();
+                    audio.volume = safeTo;
+                    if (onComplete) onComplete();
+                }}
+            }}, 50);
+        }}
+
+        function fadeOutCurrentBgm(onComplete) {{
+            if (!bgmAudio) {{
+                currentBgmName = '';
+                if (onComplete) onComplete();
+                return;
+            }}
+
+            const audio = bgmAudio;
+            fadeAudioVolume(audio, audio.volume, 0, BGM_FADE_DURATION, () => {{
+                audio.pause();
+                audio.currentTime = 0;
+                if (bgmAudio === audio) {{
+                    bgmAudio = null;
+                }}
+                currentBgmName = '';
+                if (onComplete) onComplete();
+            }});
+        }}
+
+        function startBgm(name) {{
+            const src = AUDIO_ASSETS[name];
+            if (!src) {{
+                console.warn(`BGM asset not found: ${{name}}`);
+                fadeOutCurrentBgm();
+                return;
+            }}
+
+            const nextAudio = new Audio(src);
+            nextAudio.loop = true;
+            nextAudio.preload = 'auto';
+            nextAudio.volume = 0;
+
+            const playPromise = nextAudio.play();
+            if (playPromise && typeof playPromise.catch === 'function') {{
+                playPromise.catch(err => {{
+                    console.warn('BGM playback was blocked:', err);
+                }});
+            }}
+
+            bgmAudio = nextAudio;
+            currentBgmName = name;
+            fadeAudioVolume(nextAudio, 0, getBgmTargetVolume(), BGM_FADE_DURATION);
+        }}
+
+        function switchToBgm(name) {{
+            if (!name) {{
+                fadeOutCurrentBgm();
+                return;
+            }}
+
+            if (currentBgmName === name && bgmAudio) {{
+                clearBgmFade();
+                bgmAudio.loop = true;
+                bgmAudio.volume = getBgmTargetVolume();
+                return;
+            }}
+
+            fadeOutCurrentBgm(() => startBgm(name));
+        }}
+
+        function updateBgm(rawName) {{
+            const name = extractAssetName(rawName);
+            switchToBgm(name);
+        }}
         
         // 背景を更新
         function updateBackground(bgImage) {{
             const bgLayer = document.getElementById('background-layer');
-            if (bgImage && ASSETS[bgImage]) {{
-                bgLayer.style.backgroundImage = `url(${{ASSETS[bgImage]}})`;
+            const parsed = parseImageSpec(bgImage);
+            if (parsed.name && ASSETS[parsed.name]) {{
+                bgLayer.style.backgroundImage = `url(${{ASSETS[parsed.name]}})`;
+                if (parsed.effects) {{
+                    applyImageEffects(bgLayer, parsed.effects, BACKGROUND_BASE_SCALE);
+                }} else {{
+                    resetImageEffects(bgLayer, BACKGROUND_BASE_SCALE);
+                }}
+            }} else {{
+                bgLayer.style.backgroundImage = '';
+                resetImageEffects(bgLayer, BACKGROUND_BASE_SCALE);
             }}
         }}
         
@@ -1116,12 +1824,19 @@ class LuminasScript:
         
         function updateCharacter(elementId, imageName) {{
             const element = document.getElementById(elementId);
-            if (imageName && ASSETS[imageName]) {{
-                element.style.backgroundImage = `url(${{ASSETS[imageName]}})`;
+            const parsed = parseImageSpec(imageName);
+            if (parsed.name && ASSETS[parsed.name]) {{
+                element.style.backgroundImage = `url(${{ASSETS[parsed.name]}})`;
                 element.classList.add('visible');
+                if (parsed.effects) {{
+                    applyImageEffects(element, parsed.effects, CHARACTER_BASE_SCALE);
+                }} else {{
+                    resetImageEffects(element, CHARACTER_BASE_SCALE);
+                }}
             }} else {{
                 element.style.backgroundImage = '';
                 element.classList.remove('visible');
+                resetImageEffects(element, CHARACTER_BASE_SCALE);
             }}
         }}
         
@@ -1130,6 +1845,7 @@ class LuminasScript:
                 const element = document.getElementById(id);
                 element.style.backgroundImage = '';
                 element.classList.remove('visible');
+                resetImageEffects(element, CHARACTER_BASE_SCALE);
             }});
         }}
         
@@ -1157,6 +1873,10 @@ class LuminasScript:
         }}
         
         function loadGame() {{
+            if (isLicenseRequired() && !licenseAccepted) {{
+                showLicenseModal(true);
+                return;
+            }}
             try {{
                 const saveData = localStorage.getItem('luminas_save');
                 if (saveData) {{
@@ -1175,15 +1895,191 @@ class LuminasScript:
                 alert('ロードに失敗しました: ' + e.message);
             }}
         }}
+
+        function getLicenseText() {{
+            const raw = (CONFIG.License || CONFIG.license || '');
+            if (typeof raw !== 'string') return '';
+            return raw.replace(/\\r\\n/g, '\\n').replace(/\\n/g, '\\n').trim();
+        }}
+
+        function parseBool(value) {{
+            if (typeof value === 'boolean') return value;
+            if (value === null || value === undefined) return false;
+            const text = String(value).trim().toLowerCase();
+            return ['1', 'true', 'yes', 'on'].includes(text);
+        }}
+
+        function isCustomNameEnabled() {{
+            return parseBool(CONFIG.custom_name || CONFIG.customName);
+        }}
+
+        function normalizeCustomName(value) {{
+            return String(value || '').replace(/[^\\p{{L}}\\p{{N}}]+/gu, '');
+        }}
+
+        const FORBIDDEN_WORDS = (Array.isArray(CONFIG.forbidden_word) ? CONFIG.forbidden_word : [])
+            .map(word => normalizeCustomName(word))
+            .filter(word => word);
+
+        function validateCustomName(raw) {{
+            const normalized = normalizeCustomName(raw);
+            if (!normalized) {{
+                return {{ ok: false, message: '有効な文字がありません。' }};
+            }}
+            for (const word of FORBIDDEN_WORDS) {{
+                if (word && normalized.includes(word)) {{
+                    return {{ ok: false, message: '使用できない単語が含まれています。' }};
+                }}
+            }}
+            return {{ ok: true, value: normalized }};
+        }}
+
+        function applyCustomName(text) {{
+            const base = String(text || '');
+            if (!isCustomNameEnabled()) return base;
+            const name = gameState.settings.customName || '';
+            return base.replace(/<\\$custom_name\\$>/g, name);
+        }}
+
+        function hasCustomName() {{
+            return (gameState.settings.customName || '').length > 0;
+        }}
+
+        function syncCustomNameInputs(value) {{
+            const input = document.getElementById('custom-name-input');
+            if (input) input.value = value || '';
+            const modalInput = document.getElementById('custom-name-modal-input');
+            if (modalInput) modalInput.value = value || '';
+        }}
+
+        function showCustomNameError(message) {{
+            const errorEl = document.getElementById('custom-name-error');
+            if (!errorEl) return;
+            if (message) {{
+                errorEl.textContent = message;
+                errorEl.classList.remove('hidden');
+            }} else {{
+                errorEl.textContent = '';
+                errorEl.classList.add('hidden');
+            }}
+        }}
+
+        function isLicenseRequired() {{
+            return getLicenseText().length > 0;
+        }}
+
+        function showLicenseModal(force) {{
+            if (!isLicenseRequired()) return;
+            if (licenseAccepted && !force) return;
+            const modal = document.getElementById('license-modal');
+            const textEl = document.getElementById('license-text');
+            textEl.textContent = getLicenseText();
+            modal.classList.remove('hidden');
+        }}
+
+        function acceptLicense() {{
+            licenseAccepted = true;
+            try {{
+                localStorage.setItem(LICENSE_ACCEPT_KEY, 'true');
+            }} catch (e) {{
+                console.warn('ライセンス同意の保存に失敗しました:', e);
+            }}
+            document.getElementById('license-modal').classList.add('hidden');
+            maybePromptCustomName();
+        }}
+
+        function declineLicense() {{
+            licenseAccepted = false;
+            try {{
+                localStorage.removeItem(LICENSE_ACCEPT_KEY);
+            }} catch (e) {{
+                console.warn('ライセンス同意の削除に失敗しました:', e);
+            }}
+            alert('ライセンスに同意しないとゲームを開始できません。');
+            showLicenseModal(true);
+        }}
+
+        function loadLicenseAcceptance() {{
+            try {{
+                licenseAccepted = localStorage.getItem(LICENSE_ACCEPT_KEY) === 'true';
+            }} catch (e) {{
+                console.warn('ライセンス同意の読み込みに失敗しました:', e);
+                licenseAccepted = false;
+            }}
+        }}
+
+        function maybePromptCustomName() {{
+            if (!isCustomNameEnabled()) return;
+            if (isLicenseRequired() && !licenseAccepted) return;
+            if (hasCustomName()) return;
+            showCustomNameModal(true);
+        }}
+
+        function showCustomNameModal(force) {{
+            if (!isCustomNameEnabled()) return;
+            const modal = document.getElementById('custom-name-modal');
+            if (!modal) return;
+            if (modal.classList.contains('hidden') || force) {{
+                syncCustomNameInputs(gameState.settings.customName);
+                showCustomNameError('');
+                modal.classList.remove('hidden');
+            }}
+        }}
+
+        function hideCustomNameModal() {{
+            const modal = document.getElementById('custom-name-modal');
+            if (modal) modal.classList.add('hidden');
+        }}
+
+        function confirmCustomName() {{
+            const input = document.getElementById('custom-name-modal-input');
+            const raw = input ? input.value : '';
+            const result = validateCustomName(raw);
+            if (!result.ok) {{
+                showCustomNameError(result.message);
+                return;
+            }}
+            gameState.settings.customName = result.value;
+            syncCustomNameInputs(result.value);
+            showCustomNameError('');
+            saveSettings();
+            hideCustomNameModal();
+        }}
+
+        function skipCustomName() {{
+            hideCustomNameModal();
+        }}
         
         // 設定
+        function initCustomNameUI() {{
+            const setting = document.getElementById('custom-name-setting');
+            if (!setting) return;
+            if (isCustomNameEnabled()) {{
+                setting.classList.remove('hidden');
+            }} else {{
+                setting.classList.add('hidden');
+            }}
+        }}
+
         function loadSettings() {{
             const saved = localStorage.getItem('luminas_settings');
             if (saved) {{
-                gameState.settings = JSON.parse(saved);
-                document.getElementById('text-speed').value = gameState.settings.textSpeed;
-                document.getElementById('bgm-volume').value = gameState.settings.bgmVolume;
-                document.getElementById('se-volume').value = gameState.settings.seVolume;
+                try {{
+                    const parsed = JSON.parse(saved);
+                    gameState.settings = {{ ...DEFAULT_SETTINGS, ...parsed }};
+                }} catch (e) {{
+                    console.warn('設定の読み込みに失敗しました:', e);
+                    gameState.settings = {{ ...DEFAULT_SETTINGS }};
+                }}
+            }} else {{
+                gameState.settings = {{ ...DEFAULT_SETTINGS }};
+            }}
+            document.getElementById('text-speed').value = gameState.settings.textSpeed;
+            document.getElementById('bgm-volume').value = gameState.settings.bgmVolume;
+            document.getElementById('se-volume').value = gameState.settings.seVolume;
+            syncCustomNameInputs(gameState.settings.customName);
+            if (bgmAudio) {{
+                bgmAudio.volume = getBgmTargetVolume();
             }}
         }}
         
@@ -1191,7 +2087,27 @@ class LuminasScript:
             gameState.settings.textSpeed = parseInt(document.getElementById('text-speed').value);
             gameState.settings.bgmVolume = parseInt(document.getElementById('bgm-volume').value);
             gameState.settings.seVolume = parseInt(document.getElementById('se-volume').value);
+            if (isCustomNameEnabled()) {{
+                const input = document.getElementById('custom-name-input');
+                const raw = input ? input.value : '';
+                const trimmed = String(raw || '').trim();
+                if (!trimmed) {{
+                    gameState.settings.customName = '';
+                }} else {{
+                    const result = validateCustomName(raw);
+                    if (!result.ok) {{
+                        alert(result.message);
+                        return false;
+                    }}
+                    gameState.settings.customName = result.value;
+                    syncCustomNameInputs(result.value);
+                }}
+            }}
+            if (bgmAudio) {{
+                bgmAudio.volume = getBgmTargetVolume();
+            }}
             localStorage.setItem('luminas_settings', JSON.stringify(gameState.settings));
+            return true;
         }}
         
         // メニュー操作
@@ -1210,7 +2126,7 @@ class LuminasScript:
         }}
         
         function closeSettings() {{
-            saveSettings();
+            if (!saveSettings()) return;
             document.getElementById('settings-screen').classList.add('hidden');
         }}
         
@@ -1227,6 +2143,7 @@ class LuminasScript:
             closeGameMenu();
             isAutoMode = false;
             document.getElementById('auto-button').classList.remove('active');
+            fadeOutCurrentBgm();
         }}
         """
 
@@ -1256,14 +2173,17 @@ def main():
         generator.load_csv(csv_file)
         
         # HTMLを生成
-        generator.generate_html()
+        csv_base_name = Path(csv_file).stem
+        timestamp = datetime.now().strftime("%Y%m%d%H%M")
+        output_filename = f"{csv_base_name}{timestamp}.html"
+        generator.generate_html(output_filename)
         
         print()
         print("=" * 60)
         print("  ✓ 生成完了!")
         print("=" * 60)
         print()
-        print(f"生成されたファイル: {output_dir}/game.html")
+        print(f"生成されたファイル: {output_dir}/{output_filename}")
         print("ブラウザで開いてゲームをお楽しみください!")
         
     except Exception as e:
