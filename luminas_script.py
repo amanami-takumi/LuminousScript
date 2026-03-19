@@ -33,6 +33,7 @@ class LuminasScript:
             'adv_title': 'LuminasScript Game',
             'adv_sub_title': '',
             'title_bg_image': '',
+            'music_def_volume': '70',
             'creator_name': '',
             'License': '',
             'custom_name': '',
@@ -209,6 +210,17 @@ class LuminasScript:
             return False
         text = str(value).strip().lower()
         return text in ("1", "true", "yes", "on")
+
+    def _parse_volume(self, value, default: int = 70) -> int:
+        """音量設定を0〜100の整数に変換"""
+        if value is None:
+            return default
+        try:
+            volume = int(str(value).strip())
+        except (TypeError, ValueError):
+            print(f"⚠ music_def_volumeが不正です: {value}")
+            return default
+        return min(max(volume, 0), 100)
 
     def _parse_optimization_level(self, value) -> Optional[int]:
         """optimization_levelを1〜99の整数に変換"""
@@ -420,6 +432,7 @@ class LuminasScript:
     
     def _generate_html_template(self, scenario_json: str, image_assets_json: str, audio_assets_json: str, config_json: str) -> str:
         """HTMLテンプレートを生成"""
+        default_volume = self._parse_volume(self.config.get('music_def_volume'))
         font_import = ""
         if self.config.get('text_font_importURL'):
             font_import = f'<link href="{self.config["text_font_importURL"]}" rel="stylesheet">'
@@ -526,11 +539,11 @@ class LuminasScript:
                 </div>
                 <div class="setting-item">
                     <label>BGM音量</label>
-                    <input type="range" id="bgm-volume" min="0" max="100" value="70">
+                    <input type="range" id="bgm-volume" min="0" max="100" value="{default_volume}">
                 </div>
                 <div class="setting-item">
                     <label>SE音量</label>
-                    <input type="range" id="se-volume" min="0" max="100" value="70">
+                    <input type="range" id="se-volume" min="0" max="100" value="{default_volume}">
                 </div>
                 <div id="custom-name-setting" class="setting-item hidden">
                     <label>ユーザー名</label>
@@ -1077,6 +1090,7 @@ class LuminasScript:
     
     def _get_javascript(self, scenario_json: str, image_assets_json: str, audio_assets_json: str, config_json: str) -> str:
         """JavaScriptコードを返す"""
+        default_volume = self._parse_volume(self.config.get('music_def_volume'))
         return f"""
         // ゲームデータ
         const SCENARIO_DATA = {scenario_json};
@@ -1085,8 +1099,8 @@ class LuminasScript:
         const CONFIG = {config_json};
         const DEFAULT_SETTINGS = {{
             textSpeed: 5,
-            bgmVolume: 70,
-            seVolume: 70,
+            bgmVolume: {default_volume},
+            seVolume: {default_volume},
             customName: ''
         }};
         const BGM_FADE_DURATION = 1000;
@@ -1111,8 +1125,8 @@ class LuminasScript:
             choices: {{}},
             settings: {{
                 textSpeed: 5,
-                bgmVolume: 70,
-                seVolume: 70,
+                bgmVolume: {default_volume},
+                seVolume: {default_volume},
                 customName: ''
             }}
         }};

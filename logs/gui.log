@@ -1227,3 +1227,1614 @@ Traceback (most recent call last):
     ("%s: %s\r\n" % (keyword, value)).encode('latin-1', 'strict'))
     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^
 UnicodeEncodeError: 'latin-1' codec can't encode characters in position 39-42: ordinal not in range(256)
+2026-03-16 22:18:03,559 [INFO] Build start: test_.csv
+2026-03-16 22:18:11,381 [INFO] Build stdout:
+============================================================
+  LuminasScript - Visual Novel Game Generator
+============================================================
+
+✓ config.ymlを読み込みました
+✓ 20行のシナリオデータを読み込みました (encoding: utf-8)
+✓ 画像7個 / 音声0個のアセットをエンコードしました
+✓ ゲームファイルを生成しました: output/test_202603162218.html
+  ファイルサイズ: 5795.8 KB
+
+============================================================
+  ✓ 生成完了!
+============================================================
+
+生成されたファイル: output/test_202603162218.html
+ブラウザで開いてゲームをお楽しみください!
+2026-03-16 22:47:41,890 [INFO] Build start: common_B.csv
+2026-03-16 22:47:43,055 [INFO] Build stdout:
+============================================================
+  LuminasScript - Visual Novel Game Generator
+============================================================
+
+✓ config.ymlを読み込みました
+✓ 161行のシナリオデータを読み込みました (encoding: shift-jis)
+✓ 画像1個 / 音声0個のアセットをエンコードしました
+✓ ゲームファイルを生成しました: output/common_B202603162247.html
+  ファイルサイズ: 1058.3 KB
+
+============================================================
+  ✓ 生成完了!
+============================================================
+
+生成されたファイル: output/common_B202603162247.html
+ブラウザで開いてゲームをお楽しみください!
+2026-03-16 22:49:54,248 [INFO] Scene ID check start: common_B.csv
+2026-03-16 22:49:54,318 [INFO] Scene ID check stdout:
+ERRORS:
+  line 3: '' - scene_id が空です
+  line 4: '' - scene_id が空です
+  line 5: '' - scene_id が空です
+  line 6: '' - scene_id が空です
+  line 7: '' - scene_id が空です
+  line 8: '' - scene_id が空です
+  line 9: '' - scene_id が空です
+  line 10: '' - scene_id が空です
+  line 11: '' - scene_id が空です
+  line 12: '' - scene_id が空です
+  line 13: '' - scene_id が空です
+  line 14: '' - scene_id が空です
+  line 15: '' - scene_id が空です
+  line 16: '' - scene_id が空です
+  line 17: '' - scene_id が空です
+  line 18: '' - scene_id が空です
+  line 19: '' - scene_id が空です
+  line 20: '' - scene_id が空です
+  line 21: '' - scene_id が空です
+  line 22: '' - scene_id が空です
+  line 23: '' - scene_id が空です
+  line 24: '' - scene_id が空です
+  line 25: '' - scene_id が空です
+  line 26: '' - scene_id が空です
+  line 27: '' - scene_id が空です
+  line 28: '' - scene_id が空です
+  line 29: '' - scene_id が空です
+  line 30: '1-B-T' - 分岐ルートの3番目は数字を想定しています (例: 1-A-1)
+  line 31: '' - scene_id が空です
+  line 32: '' - scene_id が空です
+  line 33: '' - scene_id が空です
+  line 34: '' - scene_id が空です
+  line 35: '' - scene_id が空です
+  line 36: '' - scene_id が空です
+  line 37: '' - scene_id が空です
+  line 38: '' - scene_id が空です
+  line 39: '' - scene_id が空です
+  line 40: '' - scene_id が空です
+  line 41: '' - scene_id が空です
+  line 42: '' - scene_id が空です
+  line 43: '' - scene_id が空です
+  line 44: '' - scene_id が空です
+  line 45: '' - scene_id が空です
+  line 46: '' - scene_id が空です
+  line 47: '' - scene_id が空です
+  line 48: '' - scene_id が空です
+  line 49: '' - scene_id が空です
+  line 50: '' - scene_id が空です
+  line 51: '' - scene_id が空です
+  line 52: '' - scene_id が空です
+  line 53: '' - scene_id が空です
+  line 54: '' - scene_id が空です
+  line 55: '' - scene_id が空です
+  line 56: '' - scene_id が空です
+  line 57: '' - scene_id が空です
+  line 58: '' - scene_id が空です
+  line 59: '' - scene_id が空です
+  line 60: '' - scene_id が空です
+  line 61: '' - scene_id が空です
+  line 62: '' - scene_id が空です
+  line 63: '' - scene_id が空です
+  line 64: '' - scene_id が空です
+  line 65: '' - scene_id が空です
+  line 66: '' - scene_id が空です
+  line 67: '' - scene_id が空です
+  line 68: '' - scene_id が空です
+  line 69: '' - scene_id が空です
+  line 70: '' - scene_id が空です
+  line 71: '' - scene_id が空です
+  line 72: '' - scene_id が空です
+  line 73: '' - scene_id が空です
+  line 74: '' - scene_id が空です
+  line 75: '' - scene_id が空です
+  line 76: '' - scene_id が空です
+  line 77: '' - scene_id が空です
+  line 78: '' - scene_id が空です
+  line 79: '' - scene_id が空です
+  line 80: '' - scene_id が空です
+  line 81: '' - scene_id が空です
+  line 82: '' - scene_id が空です
+  line 83: '' - scene_id が空です
+  line 84: '' - scene_id が空です
+  line 85: '' - scene_id が空です
+  line 86: '' - scene_id が空です
+  line 87: '' - scene_id が空です
+  line 88: '' - scene_id が空です
+  line 89: '' - scene_id が空です
+  line 90: '' - scene_id が空です
+  line 91: '' - scene_id が空です
+  line 92: '' - scene_id が空です
+  line 93: '' - scene_id が空です
+  line 94: '' - scene_id が空です
+  line 95: '' - scene_id が空です
+  line 96: '' - scene_id が空です
+  line 97: '' - scene_id が空です
+  line 98: '' - scene_id が空です
+  line 99: '' - scene_id が空です
+  line 100: '' - scene_id が空です
+  line 101: '' - scene_id が空です
+  line 102: '' - scene_id が空です
+  line 103: '' - scene_id が空です
+  line 104: '' - scene_id が空です
+  line 105: '' - scene_id が空です
+  line 106: '' - scene_id が空です
+  line 107: '' - scene_id が空です
+  line 108: '' - scene_id が空です
+  line 109: '' - scene_id が空です
+  line 110: '' - scene_id が空です
+  line 111: '' - scene_id が空です
+  line 112: '' - scene_id が空です
+  line 113: '' - scene_id が空です
+  line 114: '' - scene_id が空です
+  line 115: '' - scene_id が空です
+  line 116: '' - scene_id が空です
+  line 117: '' - scene_id が空です
+  line 118: '' - scene_id が空です
+  line 119: '' - scene_id が空です
+  line 120: '' - scene_id が空です
+  line 121: '' - scene_id が空です
+  line 122: '' - scene_id が空です
+  line 123: '' - scene_id が空です
+  line 124: '' - scene_id が空です
+  line 125: '' - scene_id が空です
+  line 126: '' - scene_id が空です
+  line 127: '' - scene_id が空です
+  line 128: '' - scene_id が空です
+  line 129: '' - scene_id が空です
+  line 130: '' - scene_id が空です
+  line 131: '' - scene_id が空です
+  line 132: '' - scene_id が空です
+  line 133: '' - scene_id が空です
+  line 134: '' - scene_id が空です
+  line 135: '' - scene_id が空です
+  line 136: '' - scene_id が空です
+  line 137: '' - scene_id が空です
+  line 138: '' - scene_id が空です
+  line 139: '' - scene_id が空です
+  line 140: '' - scene_id が空です
+  line 141: '' - scene_id が空です
+  line 142: '' - scene_id が空です
+  line 143: '' - scene_id が空です
+  line 144: '' - scene_id が空です
+  line 145: '' - scene_id が空です
+  line 146: '' - scene_id が空です
+  line 147: '' - scene_id が空です
+  line 148: '' - scene_id が空です
+  line 149: '' - scene_id が空です
+  line 150: '' - scene_id が空です
+  line 151: '' - scene_id が空です
+  line 152: '' - scene_id が空です
+  line 153: '' - scene_id が空です
+  line 154: '' - scene_id が空です
+  line 155: '' - scene_id が空です
+  line 156: '' - scene_id が空です
+  line 157: '' - scene_id が空です
+  line 158: '' - scene_id が空です
+  line 159: '' - scene_id が空です
+  line 160: '' - scene_id が空です
+  line 161: '' - scene_id が空です
+  line 162: '' - scene_id が空です
+2026-03-16 22:50:28,133 [INFO] Scene ID check start: common_B.csv
+2026-03-16 22:50:28,184 [INFO] Scene ID check stdout:
+ERRORS:
+  line 3: '' - scene_id が空です
+  line 4: '' - scene_id が空です
+  line 5: '' - scene_id が空です
+  line 6: '' - scene_id が空です
+  line 7: '' - scene_id が空です
+  line 8: '' - scene_id が空です
+  line 9: '' - scene_id が空です
+  line 10: '' - scene_id が空です
+  line 11: '' - scene_id が空です
+  line 12: '' - scene_id が空です
+  line 13: '' - scene_id が空です
+  line 14: '' - scene_id が空です
+  line 15: '' - scene_id が空です
+  line 16: '' - scene_id が空です
+  line 17: '' - scene_id が空です
+  line 18: '' - scene_id が空です
+  line 19: '' - scene_id が空です
+  line 20: '' - scene_id が空です
+  line 21: '' - scene_id が空です
+  line 22: '' - scene_id が空です
+  line 23: '' - scene_id が空です
+  line 24: '' - scene_id が空です
+  line 25: '' - scene_id が空です
+  line 26: '' - scene_id が空です
+  line 27: '' - scene_id が空です
+  line 28: '' - scene_id が空です
+  line 29: '' - scene_id が空です
+  line 30: '1-B-T' - 分岐ルートの3番目は数字を想定しています (例: 1-A-1)
+  line 31: '' - scene_id が空です
+  line 32: '' - scene_id が空です
+  line 33: '' - scene_id が空です
+  line 34: '' - scene_id が空です
+  line 35: '' - scene_id が空です
+  line 36: '' - scene_id が空です
+  line 37: '' - scene_id が空です
+  line 38: '' - scene_id が空です
+  line 39: '' - scene_id が空です
+  line 40: '' - scene_id が空です
+  line 41: '' - scene_id が空です
+  line 42: '' - scene_id が空です
+  line 43: '' - scene_id が空です
+  line 44: '' - scene_id が空です
+  line 45: '' - scene_id が空です
+  line 46: '' - scene_id が空です
+  line 47: '' - scene_id が空です
+  line 48: '' - scene_id が空です
+  line 49: '' - scene_id が空です
+  line 50: '' - scene_id が空です
+  line 51: '' - scene_id が空です
+  line 52: '' - scene_id が空です
+  line 53: '' - scene_id が空です
+  line 54: '' - scene_id が空です
+  line 55: '' - scene_id が空です
+  line 56: '' - scene_id が空です
+  line 57: '' - scene_id が空です
+  line 58: '' - scene_id が空です
+  line 59: '' - scene_id が空です
+  line 60: '' - scene_id が空です
+  line 61: '' - scene_id が空です
+  line 62: '' - scene_id が空です
+  line 63: '' - scene_id が空です
+  line 64: '' - scene_id が空です
+  line 65: '' - scene_id が空です
+  line 66: '' - scene_id が空です
+  line 67: '' - scene_id が空です
+  line 68: '' - scene_id が空です
+  line 69: '' - scene_id が空です
+  line 70: '' - scene_id が空です
+  line 71: '' - scene_id が空です
+  line 72: '' - scene_id が空です
+  line 73: '' - scene_id が空です
+  line 74: '' - scene_id が空です
+  line 75: '' - scene_id が空です
+  line 76: '' - scene_id が空です
+  line 77: '' - scene_id が空です
+  line 78: '' - scene_id が空です
+  line 79: '' - scene_id が空です
+  line 80: '' - scene_id が空です
+  line 81: '' - scene_id が空です
+  line 82: '' - scene_id が空です
+  line 83: '' - scene_id が空です
+  line 84: '' - scene_id が空です
+  line 85: '' - scene_id が空です
+  line 86: '' - scene_id が空です
+  line 87: '' - scene_id が空です
+  line 88: '' - scene_id が空です
+  line 89: '' - scene_id が空です
+  line 90: '' - scene_id が空です
+  line 91: '' - scene_id が空です
+  line 92: '' - scene_id が空です
+  line 93: '' - scene_id が空です
+  line 94: '' - scene_id が空です
+  line 95: '' - scene_id が空です
+  line 96: '' - scene_id が空です
+  line 97: '' - scene_id が空です
+  line 98: '' - scene_id が空です
+  line 99: '' - scene_id が空です
+  line 100: '' - scene_id が空です
+  line 101: '' - scene_id が空です
+  line 102: '' - scene_id が空です
+  line 103: '' - scene_id が空です
+  line 104: '' - scene_id が空です
+  line 105: '' - scene_id が空です
+  line 106: '' - scene_id が空です
+  line 107: '' - scene_id が空です
+  line 108: '' - scene_id が空です
+  line 109: '' - scene_id が空です
+  line 110: '' - scene_id が空です
+  line 111: '' - scene_id が空です
+  line 112: '' - scene_id が空です
+  line 113: '' - scene_id が空です
+  line 114: '' - scene_id が空です
+  line 115: '' - scene_id が空です
+  line 116: '' - scene_id が空です
+  line 117: '' - scene_id が空です
+  line 118: '' - scene_id が空です
+  line 119: '' - scene_id が空です
+  line 120: '' - scene_id が空です
+  line 121: '' - scene_id が空です
+  line 122: '' - scene_id が空です
+  line 123: '' - scene_id が空です
+  line 124: '' - scene_id が空です
+  line 125: '' - scene_id が空です
+  line 126: '' - scene_id が空です
+  line 127: '' - scene_id が空です
+  line 128: '' - scene_id が空です
+  line 129: '' - scene_id が空です
+  line 130: '' - scene_id が空です
+  line 131: '' - scene_id が空です
+  line 132: '' - scene_id が空です
+  line 133: '' - scene_id が空です
+  line 134: '' - scene_id が空です
+  line 135: '' - scene_id が空です
+  line 136: '' - scene_id が空です
+  line 137: '' - scene_id が空です
+  line 138: '' - scene_id が空です
+  line 139: '' - scene_id が空です
+  line 140: '' - scene_id が空です
+  line 141: '' - scene_id が空です
+  line 142: '' - scene_id が空です
+  line 143: '' - scene_id が空です
+  line 144: '' - scene_id が空です
+  line 145: '' - scene_id が空です
+  line 146: '' - scene_id が空です
+  line 147: '' - scene_id が空です
+  line 148: '' - scene_id が空です
+  line 149: '' - scene_id が空です
+  line 150: '' - scene_id が空です
+  line 151: '' - scene_id が空です
+  line 152: '' - scene_id が空です
+  line 153: '' - scene_id が空です
+  line 154: '' - scene_id が空です
+  line 155: '' - scene_id が空です
+  line 156: '' - scene_id が空です
+  line 157: '' - scene_id が空です
+  line 158: '' - scene_id が空です
+  line 159: '' - scene_id が空です
+  line 160: '' - scene_id が空です
+  line 161: '' - scene_id が空です
+  line 162: '' - scene_id が空です
+2026-03-16 22:50:32,174 [INFO] Scene ID check start: common_B.csv
+2026-03-16 22:50:32,223 [INFO] Scene ID check stdout:
+ERRORS:
+  line 3: '' - scene_id が空です
+  line 4: '' - scene_id が空です
+  line 5: '' - scene_id が空です
+  line 6: '' - scene_id が空です
+  line 7: '' - scene_id が空です
+  line 8: '' - scene_id が空です
+  line 9: '' - scene_id が空です
+  line 10: '' - scene_id が空です
+  line 11: '' - scene_id が空です
+  line 12: '' - scene_id が空です
+  line 13: '' - scene_id が空です
+  line 14: '' - scene_id が空です
+  line 15: '' - scene_id が空です
+  line 16: '' - scene_id が空です
+  line 17: '' - scene_id が空です
+  line 18: '' - scene_id が空です
+  line 19: '' - scene_id が空です
+  line 20: '' - scene_id が空です
+  line 21: '' - scene_id が空です
+  line 22: '' - scene_id が空です
+  line 23: '' - scene_id が空です
+  line 24: '' - scene_id が空です
+  line 25: '' - scene_id が空です
+  line 26: '' - scene_id が空です
+  line 27: '' - scene_id が空です
+  line 28: '' - scene_id が空です
+  line 29: '' - scene_id が空です
+  line 30: '1-B-T' - 分岐ルートの3番目は数字を想定しています (例: 1-A-1)
+  line 31: '' - scene_id が空です
+  line 32: '' - scene_id が空です
+  line 33: '' - scene_id が空です
+  line 34: '' - scene_id が空です
+  line 35: '' - scene_id が空です
+  line 36: '' - scene_id が空です
+  line 37: '' - scene_id が空です
+  line 38: '' - scene_id が空です
+  line 39: '' - scene_id が空です
+  line 40: '' - scene_id が空です
+  line 41: '' - scene_id が空です
+  line 42: '' - scene_id が空です
+  line 43: '' - scene_id が空です
+  line 44: '' - scene_id が空です
+  line 45: '' - scene_id が空です
+  line 46: '' - scene_id が空です
+  line 47: '' - scene_id が空です
+  line 48: '' - scene_id が空です
+  line 49: '' - scene_id が空です
+  line 50: '' - scene_id が空です
+  line 51: '' - scene_id が空です
+  line 52: '' - scene_id が空です
+  line 53: '' - scene_id が空です
+  line 54: '' - scene_id が空です
+  line 55: '' - scene_id が空です
+  line 56: '' - scene_id が空です
+  line 57: '' - scene_id が空です
+  line 58: '' - scene_id が空です
+  line 59: '' - scene_id が空です
+  line 60: '' - scene_id が空です
+  line 61: '' - scene_id が空です
+  line 62: '' - scene_id が空です
+  line 63: '' - scene_id が空です
+  line 64: '' - scene_id が空です
+  line 65: '' - scene_id が空です
+  line 66: '' - scene_id が空です
+  line 67: '' - scene_id が空です
+  line 68: '' - scene_id が空です
+  line 69: '' - scene_id が空です
+  line 70: '' - scene_id が空です
+  line 71: '' - scene_id が空です
+  line 72: '' - scene_id が空です
+  line 73: '' - scene_id が空です
+  line 74: '' - scene_id が空です
+  line 75: '' - scene_id が空です
+  line 76: '' - scene_id が空です
+  line 77: '' - scene_id が空です
+  line 78: '' - scene_id が空です
+  line 79: '' - scene_id が空です
+  line 80: '' - scene_id が空です
+  line 81: '' - scene_id が空です
+  line 82: '' - scene_id が空です
+  line 83: '' - scene_id が空です
+  line 84: '' - scene_id が空です
+  line 85: '' - scene_id が空です
+  line 86: '' - scene_id が空です
+  line 87: '' - scene_id が空です
+  line 88: '' - scene_id が空です
+  line 89: '' - scene_id が空です
+  line 90: '' - scene_id が空です
+  line 91: '' - scene_id が空です
+  line 92: '' - scene_id が空です
+  line 93: '' - scene_id が空です
+  line 94: '' - scene_id が空です
+  line 95: '' - scene_id が空です
+  line 96: '' - scene_id が空です
+  line 97: '' - scene_id が空です
+  line 98: '' - scene_id が空です
+  line 99: '' - scene_id が空です
+  line 100: '' - scene_id が空です
+  line 101: '' - scene_id が空です
+  line 102: '' - scene_id が空です
+  line 103: '' - scene_id が空です
+  line 104: '' - scene_id が空です
+  line 105: '' - scene_id が空です
+  line 106: '' - scene_id が空です
+  line 107: '' - scene_id が空です
+  line 108: '' - scene_id が空です
+  line 109: '' - scene_id が空です
+  line 110: '' - scene_id が空です
+  line 111: '' - scene_id が空です
+  line 112: '' - scene_id が空です
+  line 113: '' - scene_id が空です
+  line 114: '' - scene_id が空です
+  line 115: '' - scene_id が空です
+  line 116: '' - scene_id が空です
+  line 117: '' - scene_id が空です
+  line 118: '' - scene_id が空です
+  line 119: '' - scene_id が空です
+  line 120: '' - scene_id が空です
+  line 121: '' - scene_id が空です
+  line 122: '' - scene_id が空です
+  line 123: '' - scene_id が空です
+  line 124: '' - scene_id が空です
+  line 125: '' - scene_id が空です
+  line 126: '' - scene_id が空です
+  line 127: '' - scene_id が空です
+  line 128: '' - scene_id が空です
+  line 129: '' - scene_id が空です
+  line 130: '' - scene_id が空です
+  line 131: '' - scene_id が空です
+  line 132: '' - scene_id が空です
+  line 133: '' - scene_id が空です
+  line 134: '' - scene_id が空です
+  line 135: '' - scene_id が空です
+  line 136: '' - scene_id が空です
+  line 137: '' - scene_id が空です
+  line 138: '' - scene_id が空です
+  line 139: '' - scene_id が空です
+  line 140: '' - scene_id が空です
+  line 141: '' - scene_id が空です
+  line 142: '' - scene_id が空です
+  line 143: '' - scene_id が空です
+  line 144: '' - scene_id が空です
+  line 145: '' - scene_id が空です
+  line 146: '' - scene_id が空です
+  line 147: '' - scene_id が空です
+  line 148: '' - scene_id が空です
+  line 149: '' - scene_id が空です
+  line 150: '' - scene_id が空です
+  line 151: '' - scene_id が空です
+  line 152: '' - scene_id が空です
+  line 153: '' - scene_id が空です
+  line 154: '' - scene_id が空です
+  line 155: '' - scene_id が空です
+  line 156: '' - scene_id が空です
+  line 157: '' - scene_id が空です
+  line 158: '' - scene_id が空です
+  line 159: '' - scene_id が空です
+  line 160: '' - scene_id が空です
+  line 161: '' - scene_id が空です
+  line 162: '' - scene_id が空です
+2026-03-16 22:50:34,896 [INFO] Scene ID check start: common_B.csv
+2026-03-16 22:50:34,947 [INFO] Scene ID check stdout:
+ERRORS:
+  line 3: '' - scene_id が空です
+  line 4: '' - scene_id が空です
+  line 5: '' - scene_id が空です
+  line 6: '' - scene_id が空です
+  line 7: '' - scene_id が空です
+  line 8: '' - scene_id が空です
+  line 9: '' - scene_id が空です
+  line 10: '' - scene_id が空です
+  line 11: '' - scene_id が空です
+  line 12: '' - scene_id が空です
+  line 13: '' - scene_id が空です
+  line 14: '' - scene_id が空です
+  line 15: '' - scene_id が空です
+  line 16: '' - scene_id が空です
+  line 17: '' - scene_id が空です
+  line 18: '' - scene_id が空です
+  line 19: '' - scene_id が空です
+  line 20: '' - scene_id が空です
+  line 21: '' - scene_id が空です
+  line 22: '' - scene_id が空です
+  line 23: '' - scene_id が空です
+  line 24: '' - scene_id が空です
+  line 25: '' - scene_id が空です
+  line 26: '' - scene_id が空です
+  line 27: '' - scene_id が空です
+  line 28: '' - scene_id が空です
+  line 29: '' - scene_id が空です
+  line 30: '1-B-T' - 分岐ルートの3番目は数字を想定しています (例: 1-A-1)
+  line 31: '' - scene_id が空です
+  line 32: '' - scene_id が空です
+  line 33: '' - scene_id が空です
+  line 34: '' - scene_id が空です
+  line 35: '' - scene_id が空です
+  line 36: '' - scene_id が空です
+  line 37: '' - scene_id が空です
+  line 38: '' - scene_id が空です
+  line 39: '' - scene_id が空です
+  line 40: '' - scene_id が空です
+  line 41: '' - scene_id が空です
+  line 42: '' - scene_id が空です
+  line 43: '' - scene_id が空です
+  line 44: '' - scene_id が空です
+  line 45: '' - scene_id が空です
+  line 46: '' - scene_id が空です
+  line 47: '' - scene_id が空です
+  line 48: '' - scene_id が空です
+  line 49: '' - scene_id が空です
+  line 50: '' - scene_id が空です
+  line 51: '' - scene_id が空です
+  line 52: '' - scene_id が空です
+  line 53: '' - scene_id が空です
+  line 54: '' - scene_id が空です
+  line 55: '' - scene_id が空です
+  line 56: '' - scene_id が空です
+  line 57: '' - scene_id が空です
+  line 58: '' - scene_id が空です
+  line 59: '' - scene_id が空です
+  line 60: '' - scene_id が空です
+  line 61: '' - scene_id が空です
+  line 62: '' - scene_id が空です
+  line 63: '' - scene_id が空です
+  line 64: '' - scene_id が空です
+  line 65: '' - scene_id が空です
+  line 66: '' - scene_id が空です
+  line 67: '' - scene_id が空です
+  line 68: '' - scene_id が空です
+  line 69: '' - scene_id が空です
+  line 70: '' - scene_id が空です
+  line 71: '' - scene_id が空です
+  line 72: '' - scene_id が空です
+  line 73: '' - scene_id が空です
+  line 74: '' - scene_id が空です
+  line 75: '' - scene_id が空です
+  line 76: '' - scene_id が空です
+  line 77: '' - scene_id が空です
+  line 78: '' - scene_id が空です
+  line 79: '' - scene_id が空です
+  line 80: '' - scene_id が空です
+  line 81: '' - scene_id が空です
+  line 82: '' - scene_id が空です
+  line 83: '' - scene_id が空です
+  line 84: '' - scene_id が空です
+  line 85: '' - scene_id が空です
+  line 86: '' - scene_id が空です
+  line 87: '' - scene_id が空です
+  line 88: '' - scene_id が空です
+  line 89: '' - scene_id が空です
+  line 90: '' - scene_id が空です
+  line 91: '' - scene_id が空です
+  line 92: '' - scene_id が空です
+  line 93: '' - scene_id が空です
+  line 94: '' - scene_id が空です
+  line 95: '' - scene_id が空です
+  line 96: '' - scene_id が空です
+  line 97: '' - scene_id が空です
+  line 98: '' - scene_id が空です
+  line 99: '' - scene_id が空です
+  line 100: '' - scene_id が空です
+  line 101: '' - scene_id が空です
+  line 102: '' - scene_id が空です
+  line 103: '' - scene_id が空です
+  line 104: '' - scene_id が空です
+  line 105: '' - scene_id が空です
+  line 106: '' - scene_id が空です
+  line 107: '' - scene_id が空です
+  line 108: '' - scene_id が空です
+  line 109: '' - scene_id が空です
+  line 110: '' - scene_id が空です
+  line 111: '' - scene_id が空です
+  line 112: '' - scene_id が空です
+  line 113: '' - scene_id が空です
+  line 114: '' - scene_id が空です
+  line 115: '' - scene_id が空です
+  line 116: '' - scene_id が空です
+  line 117: '' - scene_id が空です
+  line 118: '' - scene_id が空です
+  line 119: '' - scene_id が空です
+  line 120: '' - scene_id が空です
+  line 121: '' - scene_id が空です
+  line 122: '' - scene_id が空です
+  line 123: '' - scene_id が空です
+  line 124: '' - scene_id が空です
+  line 125: '' - scene_id が空です
+  line 126: '' - scene_id が空です
+  line 127: '' - scene_id が空です
+  line 128: '' - scene_id が空です
+  line 129: '' - scene_id が空です
+  line 130: '' - scene_id が空です
+  line 131: '' - scene_id が空です
+  line 132: '' - scene_id が空です
+  line 133: '' - scene_id が空です
+  line 134: '' - scene_id が空です
+  line 135: '' - scene_id が空です
+  line 136: '' - scene_id が空です
+  line 137: '' - scene_id が空です
+  line 138: '' - scene_id が空です
+  line 139: '' - scene_id が空です
+  line 140: '' - scene_id が空です
+  line 141: '' - scene_id が空です
+  line 142: '' - scene_id が空です
+  line 143: '' - scene_id が空です
+  line 144: '' - scene_id が空です
+  line 145: '' - scene_id が空です
+  line 146: '' - scene_id が空です
+  line 147: '' - scene_id が空です
+  line 148: '' - scene_id が空です
+  line 149: '' - scene_id が空です
+  line 150: '' - scene_id が空です
+  line 151: '' - scene_id が空です
+  line 152: '' - scene_id が空です
+  line 153: '' - scene_id が空です
+  line 154: '' - scene_id が空です
+  line 155: '' - scene_id が空です
+  line 156: '' - scene_id が空です
+  line 157: '' - scene_id が空です
+  line 158: '' - scene_id が空です
+  line 159: '' - scene_id が空です
+  line 160: '' - scene_id が空です
+  line 161: '' - scene_id が空です
+  line 162: '' - scene_id が空です
+2026-03-16 22:50:37,057 [INFO] Scene ID check start: common_B.csv
+2026-03-16 22:50:37,109 [INFO] Scene ID check stdout:
+ERRORS:
+  line 3: '' - scene_id が空です
+  line 4: '' - scene_id が空です
+  line 5: '' - scene_id が空です
+  line 6: '' - scene_id が空です
+  line 7: '' - scene_id が空です
+  line 8: '' - scene_id が空です
+  line 9: '' - scene_id が空です
+  line 10: '' - scene_id が空です
+  line 11: '' - scene_id が空です
+  line 12: '' - scene_id が空です
+  line 13: '' - scene_id が空です
+  line 14: '' - scene_id が空です
+  line 15: '' - scene_id が空です
+  line 16: '' - scene_id が空です
+  line 17: '' - scene_id が空です
+  line 18: '' - scene_id が空です
+  line 19: '' - scene_id が空です
+  line 20: '' - scene_id が空です
+  line 21: '' - scene_id が空です
+  line 22: '' - scene_id が空です
+  line 23: '' - scene_id が空です
+  line 24: '' - scene_id が空です
+  line 25: '' - scene_id が空です
+  line 26: '' - scene_id が空です
+  line 27: '' - scene_id が空です
+  line 28: '' - scene_id が空です
+  line 29: '' - scene_id が空です
+  line 30: '1-B-T' - 分岐ルートの3番目は数字を想定しています (例: 1-A-1)
+  line 31: '' - scene_id が空です
+  line 32: '' - scene_id が空です
+  line 33: '' - scene_id が空です
+  line 34: '' - scene_id が空です
+  line 35: '' - scene_id が空です
+  line 36: '' - scene_id が空です
+  line 37: '' - scene_id が空です
+  line 38: '' - scene_id が空です
+  line 39: '' - scene_id が空です
+  line 40: '' - scene_id が空です
+  line 41: '' - scene_id が空です
+  line 42: '' - scene_id が空です
+  line 43: '' - scene_id が空です
+  line 44: '' - scene_id が空です
+  line 45: '' - scene_id が空です
+  line 46: '' - scene_id が空です
+  line 47: '' - scene_id が空です
+  line 48: '' - scene_id が空です
+  line 49: '' - scene_id が空です
+  line 50: '' - scene_id が空です
+  line 51: '' - scene_id が空です
+  line 52: '' - scene_id が空です
+  line 53: '' - scene_id が空です
+  line 54: '' - scene_id が空です
+  line 55: '' - scene_id が空です
+  line 56: '' - scene_id が空です
+  line 57: '' - scene_id が空です
+  line 58: '' - scene_id が空です
+  line 59: '' - scene_id が空です
+  line 60: '' - scene_id が空です
+  line 61: '' - scene_id が空です
+  line 62: '' - scene_id が空です
+  line 63: '' - scene_id が空です
+  line 64: '' - scene_id が空です
+  line 65: '' - scene_id が空です
+  line 66: '' - scene_id が空です
+  line 67: '' - scene_id が空です
+  line 68: '' - scene_id が空です
+  line 69: '' - scene_id が空です
+  line 70: '' - scene_id が空です
+  line 71: '' - scene_id が空です
+  line 72: '' - scene_id が空です
+  line 73: '' - scene_id が空です
+  line 74: '' - scene_id が空です
+  line 75: '' - scene_id が空です
+  line 76: '' - scene_id が空です
+  line 77: '' - scene_id が空です
+  line 78: '' - scene_id が空です
+  line 79: '' - scene_id が空です
+  line 80: '' - scene_id が空です
+  line 81: '' - scene_id が空です
+  line 82: '' - scene_id が空です
+  line 83: '' - scene_id が空です
+  line 84: '' - scene_id が空です
+  line 85: '' - scene_id が空です
+  line 86: '' - scene_id が空です
+  line 87: '' - scene_id が空です
+  line 88: '' - scene_id が空です
+  line 89: '' - scene_id が空です
+  line 90: '' - scene_id が空です
+  line 91: '' - scene_id が空です
+  line 92: '' - scene_id が空です
+  line 93: '' - scene_id が空です
+  line 94: '' - scene_id が空です
+  line 95: '' - scene_id が空です
+  line 96: '' - scene_id が空です
+  line 97: '' - scene_id が空です
+  line 98: '' - scene_id が空です
+  line 99: '' - scene_id が空です
+  line 100: '' - scene_id が空です
+  line 101: '' - scene_id が空です
+  line 102: '' - scene_id が空です
+  line 103: '' - scene_id が空です
+  line 104: '' - scene_id が空です
+  line 105: '' - scene_id が空です
+  line 106: '' - scene_id が空です
+  line 107: '' - scene_id が空です
+  line 108: '' - scene_id が空です
+  line 109: '' - scene_id が空です
+  line 110: '' - scene_id が空です
+  line 111: '' - scene_id が空です
+  line 112: '' - scene_id が空です
+  line 113: '' - scene_id が空です
+  line 114: '' - scene_id が空です
+  line 115: '' - scene_id が空です
+  line 116: '' - scene_id が空です
+  line 117: '' - scene_id が空です
+  line 118: '' - scene_id が空です
+  line 119: '' - scene_id が空です
+  line 120: '' - scene_id が空です
+  line 121: '' - scene_id が空です
+  line 122: '' - scene_id が空です
+  line 123: '' - scene_id が空です
+  line 124: '' - scene_id が空です
+  line 125: '' - scene_id が空です
+  line 126: '' - scene_id が空です
+  line 127: '' - scene_id が空です
+  line 128: '' - scene_id が空です
+  line 129: '' - scene_id が空です
+  line 130: '' - scene_id が空です
+  line 131: '' - scene_id が空です
+  line 132: '' - scene_id が空です
+  line 133: '' - scene_id が空です
+  line 134: '' - scene_id が空です
+  line 135: '' - scene_id が空です
+  line 136: '' - scene_id が空です
+  line 137: '' - scene_id が空です
+  line 138: '' - scene_id が空です
+  line 139: '' - scene_id が空です
+  line 140: '' - scene_id が空です
+  line 141: '' - scene_id が空です
+  line 142: '' - scene_id が空です
+  line 143: '' - scene_id が空です
+  line 144: '' - scene_id が空です
+  line 145: '' - scene_id が空です
+  line 146: '' - scene_id が空です
+  line 147: '' - scene_id が空です
+  line 148: '' - scene_id が空です
+  line 149: '' - scene_id が空です
+  line 150: '' - scene_id が空です
+  line 151: '' - scene_id が空です
+  line 152: '' - scene_id が空です
+  line 153: '' - scene_id が空です
+  line 154: '' - scene_id が空です
+  line 155: '' - scene_id が空です
+  line 156: '' - scene_id が空です
+  line 157: '' - scene_id が空です
+  line 158: '' - scene_id が空です
+  line 159: '' - scene_id が空です
+  line 160: '' - scene_id が空です
+  line 161: '' - scene_id が空です
+  line 162: '' - scene_id が空です
+2026-03-16 22:50:38,019 [INFO] Scene ID check start: common_B.csv
+2026-03-16 22:50:38,067 [INFO] Scene ID check stdout:
+ERRORS:
+  line 3: '' - scene_id が空です
+  line 4: '' - scene_id が空です
+  line 5: '' - scene_id が空です
+  line 6: '' - scene_id が空です
+  line 7: '' - scene_id が空です
+  line 8: '' - scene_id が空です
+  line 9: '' - scene_id が空です
+  line 10: '' - scene_id が空です
+  line 11: '' - scene_id が空です
+  line 12: '' - scene_id が空です
+  line 13: '' - scene_id が空です
+  line 14: '' - scene_id が空です
+  line 15: '' - scene_id が空です
+  line 16: '' - scene_id が空です
+  line 17: '' - scene_id が空です
+  line 18: '' - scene_id が空です
+  line 19: '' - scene_id が空です
+  line 20: '' - scene_id が空です
+  line 21: '' - scene_id が空です
+  line 22: '' - scene_id が空です
+  line 23: '' - scene_id が空です
+  line 24: '' - scene_id が空です
+  line 25: '' - scene_id が空です
+  line 26: '' - scene_id が空です
+  line 27: '' - scene_id が空です
+  line 28: '' - scene_id が空です
+  line 29: '' - scene_id が空です
+  line 30: '1-B-T' - 分岐ルートの3番目は数字を想定しています (例: 1-A-1)
+  line 31: '' - scene_id が空です
+  line 32: '' - scene_id が空です
+  line 33: '' - scene_id が空です
+  line 34: '' - scene_id が空です
+  line 35: '' - scene_id が空です
+  line 36: '' - scene_id が空です
+  line 37: '' - scene_id が空です
+  line 38: '' - scene_id が空です
+  line 39: '' - scene_id が空です
+  line 40: '' - scene_id が空です
+  line 41: '' - scene_id が空です
+  line 42: '' - scene_id が空です
+  line 43: '' - scene_id が空です
+  line 44: '' - scene_id が空です
+  line 45: '' - scene_id が空です
+  line 46: '' - scene_id が空です
+  line 47: '' - scene_id が空です
+  line 48: '' - scene_id が空です
+  line 49: '' - scene_id が空です
+  line 50: '' - scene_id が空です
+  line 51: '' - scene_id が空です
+  line 52: '' - scene_id が空です
+  line 53: '' - scene_id が空です
+  line 54: '' - scene_id が空です
+  line 55: '' - scene_id が空です
+  line 56: '' - scene_id が空です
+  line 57: '' - scene_id が空です
+  line 58: '' - scene_id が空です
+  line 59: '' - scene_id が空です
+  line 60: '' - scene_id が空です
+  line 61: '' - scene_id が空です
+  line 62: '' - scene_id が空です
+  line 63: '' - scene_id が空です
+  line 64: '' - scene_id が空です
+  line 65: '' - scene_id が空です
+  line 66: '' - scene_id が空です
+  line 67: '' - scene_id が空です
+  line 68: '' - scene_id が空です
+  line 69: '' - scene_id が空です
+  line 70: '' - scene_id が空です
+  line 71: '' - scene_id が空です
+  line 72: '' - scene_id が空です
+  line 73: '' - scene_id が空です
+  line 74: '' - scene_id が空です
+  line 75: '' - scene_id が空です
+  line 76: '' - scene_id が空です
+  line 77: '' - scene_id が空です
+  line 78: '' - scene_id が空です
+  line 79: '' - scene_id が空です
+  line 80: '' - scene_id が空です
+  line 81: '' - scene_id が空です
+  line 82: '' - scene_id が空です
+  line 83: '' - scene_id が空です
+  line 84: '' - scene_id が空です
+  line 85: '' - scene_id が空です
+  line 86: '' - scene_id が空です
+  line 87: '' - scene_id が空です
+  line 88: '' - scene_id が空です
+  line 89: '' - scene_id が空です
+  line 90: '' - scene_id が空です
+  line 91: '' - scene_id が空です
+  line 92: '' - scene_id が空です
+  line 93: '' - scene_id が空です
+  line 94: '' - scene_id が空です
+  line 95: '' - scene_id が空です
+  line 96: '' - scene_id が空です
+  line 97: '' - scene_id が空です
+  line 98: '' - scene_id が空です
+  line 99: '' - scene_id が空です
+  line 100: '' - scene_id が空です
+  line 101: '' - scene_id が空です
+  line 102: '' - scene_id が空です
+  line 103: '' - scene_id が空です
+  line 104: '' - scene_id が空です
+  line 105: '' - scene_id が空です
+  line 106: '' - scene_id が空です
+  line 107: '' - scene_id が空です
+  line 108: '' - scene_id が空です
+  line 109: '' - scene_id が空です
+  line 110: '' - scene_id が空です
+  line 111: '' - scene_id が空です
+  line 112: '' - scene_id が空です
+  line 113: '' - scene_id が空です
+  line 114: '' - scene_id が空です
+  line 115: '' - scene_id が空です
+  line 116: '' - scene_id が空です
+  line 117: '' - scene_id が空です
+  line 118: '' - scene_id が空です
+  line 119: '' - scene_id が空です
+  line 120: '' - scene_id が空です
+  line 121: '' - scene_id が空です
+  line 122: '' - scene_id が空です
+  line 123: '' - scene_id が空です
+  line 124: '' - scene_id が空です
+  line 125: '' - scene_id が空です
+  line 126: '' - scene_id が空です
+  line 127: '' - scene_id が空です
+  line 128: '' - scene_id が空です
+  line 129: '' - scene_id が空です
+  line 130: '' - scene_id が空です
+  line 131: '' - scene_id が空です
+  line 132: '' - scene_id が空です
+  line 133: '' - scene_id が空です
+  line 134: '' - scene_id が空です
+  line 135: '' - scene_id が空です
+  line 136: '' - scene_id が空です
+  line 137: '' - scene_id が空です
+  line 138: '' - scene_id が空です
+  line 139: '' - scene_id が空です
+  line 140: '' - scene_id が空です
+  line 141: '' - scene_id が空です
+  line 142: '' - scene_id が空です
+  line 143: '' - scene_id が空です
+  line 144: '' - scene_id が空です
+  line 145: '' - scene_id が空です
+  line 146: '' - scene_id が空です
+  line 147: '' - scene_id が空です
+  line 148: '' - scene_id が空です
+  line 149: '' - scene_id が空です
+  line 150: '' - scene_id が空です
+  line 151: '' - scene_id が空です
+  line 152: '' - scene_id が空です
+  line 153: '' - scene_id が空です
+  line 154: '' - scene_id が空です
+  line 155: '' - scene_id が空です
+  line 156: '' - scene_id が空です
+  line 157: '' - scene_id が空です
+  line 158: '' - scene_id が空です
+  line 159: '' - scene_id が空です
+  line 160: '' - scene_id が空です
+  line 161: '' - scene_id が空です
+  line 162: '' - scene_id が空です
+2026-03-16 22:50:38,495 [INFO] Scene ID check start: common_B.csv
+2026-03-16 22:50:38,547 [INFO] Scene ID check stdout:
+ERRORS:
+  line 3: '' - scene_id が空です
+  line 4: '' - scene_id が空です
+  line 5: '' - scene_id が空です
+  line 6: '' - scene_id が空です
+  line 7: '' - scene_id が空です
+  line 8: '' - scene_id が空です
+  line 9: '' - scene_id が空です
+  line 10: '' - scene_id が空です
+  line 11: '' - scene_id が空です
+  line 12: '' - scene_id が空です
+  line 13: '' - scene_id が空です
+  line 14: '' - scene_id が空です
+  line 15: '' - scene_id が空です
+  line 16: '' - scene_id が空です
+  line 17: '' - scene_id が空です
+  line 18: '' - scene_id が空です
+  line 19: '' - scene_id が空です
+  line 20: '' - scene_id が空です
+  line 21: '' - scene_id が空です
+  line 22: '' - scene_id が空です
+  line 23: '' - scene_id が空です
+  line 24: '' - scene_id が空です
+  line 25: '' - scene_id が空です
+  line 26: '' - scene_id が空です
+  line 27: '' - scene_id が空です
+  line 28: '' - scene_id が空です
+  line 29: '' - scene_id が空です
+  line 30: '1-B-T' - 分岐ルートの3番目は数字を想定しています (例: 1-A-1)
+  line 31: '' - scene_id が空です
+  line 32: '' - scene_id が空です
+  line 33: '' - scene_id が空です
+  line 34: '' - scene_id が空です
+  line 35: '' - scene_id が空です
+  line 36: '' - scene_id が空です
+  line 37: '' - scene_id が空です
+  line 38: '' - scene_id が空です
+  line 39: '' - scene_id が空です
+  line 40: '' - scene_id が空です
+  line 41: '' - scene_id が空です
+  line 42: '' - scene_id が空です
+  line 43: '' - scene_id が空です
+  line 44: '' - scene_id が空です
+  line 45: '' - scene_id が空です
+  line 46: '' - scene_id が空です
+  line 47: '' - scene_id が空です
+  line 48: '' - scene_id が空です
+  line 49: '' - scene_id が空です
+  line 50: '' - scene_id が空です
+  line 51: '' - scene_id が空です
+  line 52: '' - scene_id が空です
+  line 53: '' - scene_id が空です
+  line 54: '' - scene_id が空です
+  line 55: '' - scene_id が空です
+  line 56: '' - scene_id が空です
+  line 57: '' - scene_id が空です
+  line 58: '' - scene_id が空です
+  line 59: '' - scene_id が空です
+  line 60: '' - scene_id が空です
+  line 61: '' - scene_id が空です
+  line 62: '' - scene_id が空です
+  line 63: '' - scene_id が空です
+  line 64: '' - scene_id が空です
+  line 65: '' - scene_id が空です
+  line 66: '' - scene_id が空です
+  line 67: '' - scene_id が空です
+  line 68: '' - scene_id が空です
+  line 69: '' - scene_id が空です
+  line 70: '' - scene_id が空です
+  line 71: '' - scene_id が空です
+  line 72: '' - scene_id が空です
+  line 73: '' - scene_id が空です
+  line 74: '' - scene_id が空です
+  line 75: '' - scene_id が空です
+  line 76: '' - scene_id が空です
+  line 77: '' - scene_id が空です
+  line 78: '' - scene_id が空です
+  line 79: '' - scene_id が空です
+  line 80: '' - scene_id が空です
+  line 81: '' - scene_id が空です
+  line 82: '' - scene_id が空です
+  line 83: '' - scene_id が空です
+  line 84: '' - scene_id が空です
+  line 85: '' - scene_id が空です
+  line 86: '' - scene_id が空です
+  line 87: '' - scene_id が空です
+  line 88: '' - scene_id が空です
+  line 89: '' - scene_id が空です
+  line 90: '' - scene_id が空です
+  line 91: '' - scene_id が空です
+  line 92: '' - scene_id が空です
+  line 93: '' - scene_id が空です
+  line 94: '' - scene_id が空です
+  line 95: '' - scene_id が空です
+  line 96: '' - scene_id が空です
+  line 97: '' - scene_id が空です
+  line 98: '' - scene_id が空です
+  line 99: '' - scene_id が空です
+  line 100: '' - scene_id が空です
+  line 101: '' - scene_id が空です
+  line 102: '' - scene_id が空です
+  line 103: '' - scene_id が空です
+  line 104: '' - scene_id が空です
+  line 105: '' - scene_id が空です
+  line 106: '' - scene_id が空です
+  line 107: '' - scene_id が空です
+  line 108: '' - scene_id が空です
+  line 109: '' - scene_id が空です
+  line 110: '' - scene_id が空です
+  line 111: '' - scene_id が空です
+  line 112: '' - scene_id が空です
+  line 113: '' - scene_id が空です
+  line 114: '' - scene_id が空です
+  line 115: '' - scene_id が空です
+  line 116: '' - scene_id が空です
+  line 117: '' - scene_id が空です
+  line 118: '' - scene_id が空です
+  line 119: '' - scene_id が空です
+  line 120: '' - scene_id が空です
+  line 121: '' - scene_id が空です
+  line 122: '' - scene_id が空です
+  line 123: '' - scene_id が空です
+  line 124: '' - scene_id が空です
+  line 125: '' - scene_id が空です
+  line 126: '' - scene_id が空です
+  line 127: '' - scene_id が空です
+  line 128: '' - scene_id が空です
+  line 129: '' - scene_id が空です
+  line 130: '' - scene_id が空です
+  line 131: '' - scene_id が空です
+  line 132: '' - scene_id が空です
+  line 133: '' - scene_id が空です
+  line 134: '' - scene_id が空です
+  line 135: '' - scene_id が空です
+  line 136: '' - scene_id が空です
+  line 137: '' - scene_id が空です
+  line 138: '' - scene_id が空です
+  line 139: '' - scene_id が空です
+  line 140: '' - scene_id が空です
+  line 141: '' - scene_id が空です
+  line 142: '' - scene_id が空です
+  line 143: '' - scene_id が空です
+  line 144: '' - scene_id が空です
+  line 145: '' - scene_id が空です
+  line 146: '' - scene_id が空です
+  line 147: '' - scene_id が空です
+  line 148: '' - scene_id が空です
+  line 149: '' - scene_id が空です
+  line 150: '' - scene_id が空です
+  line 151: '' - scene_id が空です
+  line 152: '' - scene_id が空です
+  line 153: '' - scene_id が空です
+  line 154: '' - scene_id が空です
+  line 155: '' - scene_id が空です
+  line 156: '' - scene_id が空です
+  line 157: '' - scene_id が空です
+  line 158: '' - scene_id が空です
+  line 159: '' - scene_id が空です
+  line 160: '' - scene_id が空です
+  line 161: '' - scene_id が空です
+  line 162: '' - scene_id が空です
+2026-03-16 22:51:12,806 [INFO] Scene ID check start: common_B.csv
+2026-03-16 22:51:12,853 [INFO] Scene ID check stdout:
+ERRORS:
+  line 3: '' - scene_id が空です
+  line 4: '' - scene_id が空です
+  line 5: '' - scene_id が空です
+  line 6: '' - scene_id が空です
+  line 7: '' - scene_id が空です
+  line 8: '' - scene_id が空です
+  line 9: '' - scene_id が空です
+  line 10: '' - scene_id が空です
+  line 11: '' - scene_id が空です
+  line 12: '' - scene_id が空です
+  line 13: '' - scene_id が空です
+  line 14: '' - scene_id が空です
+  line 15: '' - scene_id が空です
+  line 16: '' - scene_id が空です
+  line 17: '' - scene_id が空です
+  line 18: '' - scene_id が空です
+  line 19: '' - scene_id が空です
+  line 20: '' - scene_id が空です
+  line 21: '' - scene_id が空です
+  line 22: '' - scene_id が空です
+  line 23: '' - scene_id が空です
+  line 24: '' - scene_id が空です
+  line 25: '' - scene_id が空です
+  line 26: '' - scene_id が空です
+  line 27: '' - scene_id が空です
+  line 28: '' - scene_id が空です
+  line 29: '' - scene_id が空です
+  line 30: '1-B-T' - 分岐ルートの3番目は数字を想定しています (例: 1-A-1)
+  line 31: '' - scene_id が空です
+  line 32: '' - scene_id が空です
+  line 33: '' - scene_id が空です
+  line 34: '' - scene_id が空です
+  line 35: '' - scene_id が空です
+  line 36: '' - scene_id が空です
+  line 37: '' - scene_id が空です
+  line 38: '' - scene_id が空です
+  line 39: '' - scene_id が空です
+  line 40: '' - scene_id が空です
+  line 41: '' - scene_id が空です
+  line 42: '' - scene_id が空です
+  line 43: '' - scene_id が空です
+  line 44: '' - scene_id が空です
+  line 45: '' - scene_id が空です
+  line 46: '' - scene_id が空です
+  line 47: '' - scene_id が空です
+  line 48: '' - scene_id が空です
+  line 49: '' - scene_id が空です
+  line 50: '' - scene_id が空です
+  line 51: '' - scene_id が空です
+  line 52: '' - scene_id が空です
+  line 53: '' - scene_id が空です
+  line 54: '' - scene_id が空です
+  line 55: '' - scene_id が空です
+  line 56: '' - scene_id が空です
+  line 57: '' - scene_id が空です
+  line 58: '' - scene_id が空です
+  line 59: '' - scene_id が空です
+  line 60: '' - scene_id が空です
+  line 61: '' - scene_id が空です
+  line 62: '' - scene_id が空です
+  line 63: '' - scene_id が空です
+  line 64: '' - scene_id が空です
+  line 65: '' - scene_id が空です
+  line 66: '' - scene_id が空です
+  line 67: '' - scene_id が空です
+  line 68: '' - scene_id が空です
+  line 69: '' - scene_id が空です
+  line 70: '' - scene_id が空です
+  line 71: '' - scene_id が空です
+  line 72: '' - scene_id が空です
+  line 73: '' - scene_id が空です
+  line 74: '' - scene_id が空です
+  line 75: '' - scene_id が空です
+  line 76: '' - scene_id が空です
+  line 77: '' - scene_id が空です
+  line 78: '' - scene_id が空です
+  line 79: '' - scene_id が空です
+  line 80: '' - scene_id が空です
+  line 81: '' - scene_id が空です
+  line 82: '' - scene_id が空です
+  line 83: '' - scene_id が空です
+  line 84: '' - scene_id が空です
+  line 85: '' - scene_id が空です
+  line 86: '' - scene_id が空です
+  line 87: '' - scene_id が空です
+  line 88: '' - scene_id が空です
+  line 89: '' - scene_id が空です
+  line 90: '' - scene_id が空です
+  line 91: '' - scene_id が空です
+  line 92: '' - scene_id が空です
+  line 93: '' - scene_id が空です
+  line 94: '' - scene_id が空です
+  line 95: '' - scene_id が空です
+  line 96: '' - scene_id が空です
+  line 97: '' - scene_id が空です
+  line 98: '' - scene_id が空です
+  line 99: '' - scene_id が空です
+  line 100: '' - scene_id が空です
+  line 101: '' - scene_id が空です
+  line 102: '' - scene_id が空です
+  line 103: '' - scene_id が空です
+  line 104: '' - scene_id が空です
+  line 105: '' - scene_id が空です
+  line 106: '' - scene_id が空です
+  line 107: '' - scene_id が空です
+  line 108: '' - scene_id が空です
+  line 109: '' - scene_id が空です
+  line 110: '' - scene_id が空です
+  line 111: '' - scene_id が空です
+  line 112: '' - scene_id が空です
+  line 113: '' - scene_id が空です
+  line 114: '' - scene_id が空です
+  line 115: '' - scene_id が空です
+  line 116: '' - scene_id が空です
+  line 117: '' - scene_id が空です
+  line 118: '' - scene_id が空です
+  line 119: '' - scene_id が空です
+  line 120: '' - scene_id が空です
+  line 121: '' - scene_id が空です
+  line 122: '' - scene_id が空です
+  line 123: '' - scene_id が空です
+  line 124: '' - scene_id が空です
+  line 125: '' - scene_id が空です
+  line 126: '' - scene_id が空です
+  line 127: '' - scene_id が空です
+  line 128: '' - scene_id が空です
+  line 129: '' - scene_id が空です
+  line 130: '' - scene_id が空です
+  line 131: '' - scene_id が空です
+  line 132: '' - scene_id が空です
+  line 133: '' - scene_id が空です
+  line 134: '' - scene_id が空です
+  line 135: '' - scene_id が空です
+  line 136: '' - scene_id が空です
+  line 137: '' - scene_id が空です
+  line 138: '' - scene_id が空です
+  line 139: '' - scene_id が空です
+  line 140: '' - scene_id が空です
+  line 141: '' - scene_id が空です
+  line 142: '' - scene_id が空です
+  line 143: '' - scene_id が空です
+  line 144: '' - scene_id が空です
+  line 145: '' - scene_id が空です
+  line 146: '' - scene_id が空です
+  line 147: '' - scene_id が空です
+  line 148: '' - scene_id が空です
+  line 149: '' - scene_id が空です
+  line 150: '' - scene_id が空です
+  line 151: '' - scene_id が空です
+  line 152: '' - scene_id が空です
+  line 153: '' - scene_id が空です
+  line 154: '' - scene_id が空です
+  line 155: '' - scene_id が空です
+  line 156: '' - scene_id が空です
+  line 157: '' - scene_id が空です
+  line 158: '' - scene_id が空です
+  line 159: '' - scene_id が空です
+  line 160: '' - scene_id が空です
+  line 161: '' - scene_id が空です
+  line 162: '' - scene_id が空です
+2026-03-16 22:51:16,893 [INFO] Scene ID check start: common_B.csv
+2026-03-16 22:51:16,939 [INFO] Scene ID check stdout:
+ERRORS:
+  line 3: '' - scene_id が空です
+  line 4: '' - scene_id が空です
+  line 5: '' - scene_id が空です
+  line 6: '' - scene_id が空です
+  line 7: '' - scene_id が空です
+  line 8: '' - scene_id が空です
+  line 9: '' - scene_id が空です
+  line 10: '' - scene_id が空です
+  line 11: '' - scene_id が空です
+  line 12: '' - scene_id が空です
+  line 13: '' - scene_id が空です
+  line 14: '' - scene_id が空です
+  line 15: '' - scene_id が空です
+  line 16: '' - scene_id が空です
+  line 17: '' - scene_id が空です
+  line 18: '' - scene_id が空です
+  line 19: '' - scene_id が空です
+  line 20: '' - scene_id が空です
+  line 21: '' - scene_id が空です
+  line 22: '' - scene_id が空です
+  line 23: '' - scene_id が空です
+  line 24: '' - scene_id が空です
+  line 25: '' - scene_id が空です
+  line 26: '' - scene_id が空です
+  line 27: '' - scene_id が空です
+  line 28: '' - scene_id が空です
+  line 29: '' - scene_id が空です
+  line 30: '1-B-T' - 分岐ルートの3番目は数字を想定しています (例: 1-A-1)
+  line 31: '' - scene_id が空です
+  line 32: '' - scene_id が空です
+  line 33: '' - scene_id が空です
+  line 34: '' - scene_id が空です
+  line 35: '' - scene_id が空です
+  line 36: '' - scene_id が空です
+  line 37: '' - scene_id が空です
+  line 38: '' - scene_id が空です
+  line 39: '' - scene_id が空です
+  line 40: '' - scene_id が空です
+  line 41: '' - scene_id が空です
+  line 42: '' - scene_id が空です
+  line 43: '' - scene_id が空です
+  line 44: '' - scene_id が空です
+  line 45: '' - scene_id が空です
+  line 46: '' - scene_id が空です
+  line 47: '' - scene_id が空です
+  line 48: '' - scene_id が空です
+  line 49: '' - scene_id が空です
+  line 50: '' - scene_id が空です
+  line 51: '' - scene_id が空です
+  line 52: '' - scene_id が空です
+  line 53: '' - scene_id が空です
+  line 54: '' - scene_id が空です
+  line 55: '' - scene_id が空です
+  line 56: '' - scene_id が空です
+  line 57: '' - scene_id が空です
+  line 58: '' - scene_id が空です
+  line 59: '' - scene_id が空です
+  line 60: '' - scene_id が空です
+  line 61: '' - scene_id が空です
+  line 62: '' - scene_id が空です
+  line 63: '' - scene_id が空です
+  line 64: '' - scene_id が空です
+  line 65: '' - scene_id が空です
+  line 66: '' - scene_id が空です
+  line 67: '' - scene_id が空です
+  line 68: '' - scene_id が空です
+  line 69: '' - scene_id が空です
+  line 70: '' - scene_id が空です
+  line 71: '' - scene_id が空です
+  line 72: '' - scene_id が空です
+  line 73: '' - scene_id が空です
+  line 74: '' - scene_id が空です
+  line 75: '' - scene_id が空です
+  line 76: '' - scene_id が空です
+  line 77: '' - scene_id が空です
+  line 78: '' - scene_id が空です
+  line 79: '' - scene_id が空です
+  line 80: '' - scene_id が空です
+  line 81: '' - scene_id が空です
+  line 82: '' - scene_id が空です
+  line 83: '' - scene_id が空です
+  line 84: '' - scene_id が空です
+  line 85: '' - scene_id が空です
+  line 86: '' - scene_id が空です
+  line 87: '' - scene_id が空です
+  line 88: '' - scene_id が空です
+  line 89: '' - scene_id が空です
+  line 90: '' - scene_id が空です
+  line 91: '' - scene_id が空です
+  line 92: '' - scene_id が空です
+  line 93: '' - scene_id が空です
+  line 94: '' - scene_id が空です
+  line 95: '' - scene_id が空です
+  line 96: '' - scene_id が空です
+  line 97: '' - scene_id が空です
+  line 98: '' - scene_id が空です
+  line 99: '' - scene_id が空です
+  line 100: '' - scene_id が空です
+  line 101: '' - scene_id が空です
+  line 102: '' - scene_id が空です
+  line 103: '' - scene_id が空です
+  line 104: '' - scene_id が空です
+  line 105: '' - scene_id が空です
+  line 106: '' - scene_id が空です
+  line 107: '' - scene_id が空です
+  line 108: '' - scene_id が空です
+  line 109: '' - scene_id が空です
+  line 110: '' - scene_id が空です
+  line 111: '' - scene_id が空です
+  line 112: '' - scene_id が空です
+  line 113: '' - scene_id が空です
+  line 114: '' - scene_id が空です
+  line 115: '' - scene_id が空です
+  line 116: '' - scene_id が空です
+  line 117: '' - scene_id が空です
+  line 118: '' - scene_id が空です
+  line 119: '' - scene_id が空です
+  line 120: '' - scene_id が空です
+  line 121: '' - scene_id が空です
+  line 122: '' - scene_id が空です
+  line 123: '' - scene_id が空です
+  line 124: '' - scene_id が空です
+  line 125: '' - scene_id が空です
+  line 126: '' - scene_id が空です
+  line 127: '' - scene_id が空です
+  line 128: '' - scene_id が空です
+  line 129: '' - scene_id が空です
+  line 130: '' - scene_id が空です
+  line 131: '' - scene_id が空です
+  line 132: '' - scene_id が空です
+  line 133: '' - scene_id が空です
+  line 134: '' - scene_id が空です
+  line 135: '' - scene_id が空です
+  line 136: '' - scene_id が空です
+  line 137: '' - scene_id が空です
+  line 138: '' - scene_id が空です
+  line 139: '' - scene_id が空です
+  line 140: '' - scene_id が空です
+  line 141: '' - scene_id が空です
+  line 142: '' - scene_id が空です
+  line 143: '' - scene_id が空です
+  line 144: '' - scene_id が空です
+  line 145: '' - scene_id が空です
+  line 146: '' - scene_id が空です
+  line 147: '' - scene_id が空です
+  line 148: '' - scene_id が空です
+  line 149: '' - scene_id が空です
+  line 150: '' - scene_id が空です
+  line 151: '' - scene_id が空です
+  line 152: '' - scene_id が空です
+  line 153: '' - scene_id が空です
+  line 154: '' - scene_id が空です
+  line 155: '' - scene_id が空です
+  line 156: '' - scene_id が空です
+  line 157: '' - scene_id が空です
+  line 158: '' - scene_id が空です
+  line 159: '' - scene_id が空です
+  line 160: '' - scene_id が空です
+  line 161: '' - scene_id が空です
+  line 162: '' - scene_id が空です
+2026-03-16 22:55:24,487 [INFO] Build start: common_B.csv
+2026-03-16 22:55:25,640 [INFO] Build stdout:
+============================================================
+  LuminasScript - Visual Novel Game Generator
+============================================================
+
+✓ config.ymlを読み込みました
+✓ 161行のシナリオデータを読み込みました (encoding: shift-jis)
+✓ 画像1個 / 音声0個のアセットをエンコードしました
+✓ ゲームファイルを生成しました: output/common_B202603162255.html
+  ファイルサイズ: 1058.3 KB
+
+============================================================
+  ✓ 生成完了!
+============================================================
+
+生成されたファイル: output/common_B202603162255.html
+ブラウザで開いてゲームをお楽しみください!
+2026-03-19 18:31:47,530 [INFO] Build start: test_.csv
+2026-03-19 18:31:54,934 [INFO] Build stdout:
+============================================================
+  LuminasScript - Visual Novel Game Generator
+============================================================
+
+✓ config.ymlを読み込みました
+✓ 20行のシナリオデータを読み込みました (encoding: utf-8)
+✓ 画像6個 / 音声0個のアセットをエンコードしました
+✓ ゲームファイルを生成しました: output/test_202603191831.html
+  ファイルサイズ: 5679.1 KB
+
+============================================================
+  ✓ 生成完了!
+============================================================
+
+生成されたファイル: output/test_202603191831.html
+ブラウザで開いてゲームをお楽しみください!
+2026-03-19 18:35:51,381 [INFO] Build start: test_.csv
+2026-03-19 18:35:58,506 [INFO] Build stdout:
+============================================================
+  LuminasScript - Visual Novel Game Generator
+============================================================
+
+✓ config.ymlを読み込みました
+✓ 20行のシナリオデータを読み込みました (encoding: utf-8)
+✓ 画像6個 / 音声0個のアセットをエンコードしました
+✓ ゲームファイルを生成しました: output/test_202603191835.html
+  ファイルサイズ: 5909.4 KB
+
+============================================================
+  ✓ 生成完了!
+============================================================
+
+生成されたファイル: output/test_202603191835.html
+ブラウザで開いてゲームをお楽しみください!
+2026-03-19 18:39:04,119 [INFO] Build start: test_.csv
+2026-03-19 18:39:11,223 [INFO] Build stdout:
+============================================================
+  LuminasScript - Visual Novel Game Generator
+============================================================
+
+✓ config.ymlを読み込みました
+✓ 20行のシナリオデータを読み込みました (encoding: utf-8)
+✓ 画像6個 / 音声0個のアセットをエンコードしました
+✓ ゲームファイルを生成しました: output/test_202603191839.html
+  ファイルサイズ: 5911.9 KB
+
+============================================================
+  ✓ 生成完了!
+============================================================
+
+生成されたファイル: output/test_202603191839.html
+ブラウザで開いてゲームをお楽しみください!
+2026-03-20 00:21:31,759 [INFO] Build start: test_.csv
+2026-03-20 00:21:38,853 [INFO] Build stdout:
+============================================================
+  LuminasScript - Visual Novel Game Generator
+============================================================
+
+✓ config.ymlを読み込みました
+✓ 20行のシナリオデータを読み込みました (encoding: utf-8)
+✓ 画像6個 / 音声0個のアセットをエンコードしました
+✓ ゲームファイルを生成しました: output/test_202603200021.html
+  ファイルサイズ: 5908.9 KB
+
+============================================================
+  ✓ 生成完了!
+============================================================
+
+生成されたファイル: output/test_202603200021.html
+ブラウザで開いてゲームをお楽しみください!
+2026-03-20 01:35:50,163 [INFO] Build start: test_.csv
+2026-03-20 01:35:57,451 [INFO] Build stdout:
+============================================================
+  LuminasScript - Visual Novel Game Generator
+============================================================
+
+✓ config.ymlを読み込みました
+✓ 20行のシナリオデータを読み込みました (encoding: utf-8)
+✓ 画像6個 / 音声1個のアセットをエンコードしました
+✓ ゲームファイルを生成しました: output/test_202603200135.html
+  ファイルサイズ: 17524.1 KB
+
+============================================================
+  ✓ 生成完了!
+============================================================
+
+生成されたファイル: output/test_202603200135.html
+ブラウザで開いてゲームをお楽しみください!

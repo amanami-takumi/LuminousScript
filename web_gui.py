@@ -10,6 +10,7 @@ import os
 import shutil
 import subprocess
 import sys
+import zipfile
 from http.server import BaseHTTPRequestHandler, HTTPServer
 from pathlib import Path
 from urllib.parse import parse_qs, urlparse
@@ -192,6 +193,7 @@ INDEX_HTML = r"""<!DOCTYPE html>
       border-radius: 8px;
       padding: 6px;
       background: #0e1421;
+      transition: background-color 0.14s ease, border-color 0.14s ease, box-shadow 0.14s ease, transform 0.14s ease, filter 0.14s ease;
       display: flex;
       align-items: center;
       justify-content: center;
@@ -203,7 +205,19 @@ INDEX_HTML = r"""<!DOCTYPE html>
     }
 
     .preview-tile:hover { background: #141c2a; }
-    .preview-tile.active { outline: 2px solid var(--accent); }
+    .preview-tile.active {
+      background: #1b2638;
+      border-color: #5d7298;
+      outline: 2px solid #7f93bb;
+      box-shadow: 0 0 0 1px rgba(127, 147, 187, 0.35), 0 10px 24px rgba(8, 12, 20, 0.35);
+      transform: translateY(-1px);
+    }
+    .preview-tile.active img,
+    .preview-tile.active audio,
+    .preview-tile.active .preview-icon,
+    .preview-tile.active .preview-name {
+      filter: brightness(1.12);
+    }
     .preview-tile.drop-target {
       outline: 2px dashed #5d7298;
       background: #182235;
@@ -486,11 +500,12 @@ INDEX_HTML = r"""<!DOCTYPE html>
     <section class="card assets-card">
       <h2>Assets 管理</h2>
       <div class="path" id="assetsPath"></div>
-      <div class="muted">単クリックで選択、ダブルクリックでフォルダを開くかファイルをプレビューします。</div>
+      <div class="muted">単クリックで選択、Shift+クリックで範囲選択、Ctrl+クリックで複数選択、ダブルクリックでフォルダを開くかファイルをプレビューします。</div>
       <div class="row">
         <span class="badge">アイコンサイズ</span>
         <input type="range" id="assetsIconSize" min="60" max="320" step="4" />
         <span class="range-value" id="assetsIconSizeValue">96px</span>
+        <span class="badge" id="assetsSelectionInfo">未選択</span>
       </div>
       <div class="preview" id="assetsList"></div>
       <div class="row">
@@ -560,8 +575,11 @@ INDEX_HTML = r"""<!DOCTYPE html>
       assetsDir: "",
       outputDir: "",
       assetsSelected: null,
+      assetsSelectedKeys: [],
+      assetsEntries: [],
+      assetsSelectionAnchor: null,
       assetsPreview: null,
-      assetsDragging: null,
+      assetsDragging: [],
       inputSelected: null,
       assetsCopyEnabled: false,
       assetsIconSize: 96,
@@ -664,6 +682,120 @@ INDEX_HTML = r"""<!DOCTYPE html>
       button.textContent = state.assetsCopyEnabled ? "コピー: ON" : "コピー: OFF";
     }
 
+    function assetEntryKey(entry) {
+      if (!entry) return "";
+      return `${entry.type}:${entry.rel_path}`;
+    }
+
+    function isAssetEntrySelected(entry) {
+      const key = assetEntryKey(entry);
+      return Boolean(key) && state.assetsSelectedKeys.includes(key);
+    }
+
+    function getAssetSelectedEntries() {
+      const selected = state.assetsEntries.filter((entry) => isAssetEntrySelected(entry));
+      if (state.assetsSelected && !selected.some((entry) => assetEntryKey(entry) === assetEntryKey(state.assetsSelected))) {
+        state.assetsSelected = selected[0] || null;
+      }
+      return selected;
+    }
+
+    function syncAssetRenameFields() {
+      const renameFrom = document.getElementById("renameFrom");
+      const renameTo = document.getElementById("renameTo");
+      const selectedEntries = getAssetSelectedEntries();
+      if (selectedEntries.length === 1) {
+        renameFrom.value = selectedEntries[0].rel_path;
+        renameTo.value = selectedEntries[0].rel_path;
+      } else {
+        renameFrom.value = "";
+        renameTo.value = "";
+      }
+    }
+
+    function updateAssetsSelectionInfo() {
+      const info = document.getElementById("assetsSelectionInfo");
+      if (!info) return;
+      const selectedEntries = getAssetSelectedEntries();
+      if (!selectedEntries.length) {
+        info.textContent = "未選択";
+        return;
+      }
+      const fileCount = selectedEntries.filter((entry) => entry.type === "file").length;
+      const dirCount = selectedEntries.filter((entry) => entry.type === "dir").length;
+      info.textContent = `${selectedEntries.length}件選択 (${fileCount} file / ${dirCount} dir)`;
+    }
+
+    function syncAssetSelectionUI() {
+      const tiles = document.querySelectorAll(".preview-tile");
+      tiles.forEach((tile) => {
+        const key = `${tile.dataset.type}:${tile.dataset.path}`;
+        tile.classList.toggle("active", state.assetsSelectedKeys.includes(key));
+      });
+      syncAssetRenameFields();
+      updateAssetsSelectionInfo();
+    }
+
+    function setAssetSelection(entries, anchorEntry = null) {
+      const normalized = [];
+      const seen = new Set();
+      entries.forEach((entry) => {
+        if (!entry || entry.name === "..") return;
+        const key = assetEntryKey(entry);
+        if (!key || seen.has(key)) return;
+        seen.add(key);
+        normalized.push(entry);
+      });
+      state.assetsSelectedKeys = normalized.map((entry) => assetEntryKey(entry));
+      state.assetsSelected = normalized.length === 1 ? normalized[0] : (anchorEntry || normalized[normalized.length - 1] || null);
+      state.assetsSelectionAnchor = anchorEntry || state.assetsSelected || null;
+      syncAssetSelectionUI();
+      if (state.assetsCopyEnabled && normalized.length === 1 && normalized[0]?.type === "file") {
+        copyAssetBasename(normalized[0]);
+      }
+    }
+
+    function clearAssetSelection() {
+      state.assetsSelectedKeys = [];
+      state.assetsSelected = null;
+      state.assetsSelectionAnchor = null;
+      syncAssetSelectionUI();
+    }
+
+    function getAssetEntryRange(fromEntry, toEntry) {
+      const fromIndex = state.assetsEntries.findIndex((entry) => assetEntryKey(entry) === assetEntryKey(fromEntry));
+      const toIndex = state.assetsEntries.findIndex((entry) => assetEntryKey(entry) === assetEntryKey(toEntry));
+      if (fromIndex < 0 || toIndex < 0) return [toEntry];
+      const start = Math.min(fromIndex, toIndex);
+      const end = Math.max(fromIndex, toIndex);
+      return state.assetsEntries.slice(start, end + 1);
+    }
+
+    function handleAssetTileClick(entry, event) {
+      if (!entry || entry.name === "..") return;
+      const toggleSelection = event.ctrlKey || event.metaKey;
+      if (event.shiftKey && state.assetsSelectionAnchor) {
+        const rangeEntries = getAssetEntryRange(state.assetsSelectionAnchor, entry);
+        if (toggleSelection) {
+          const merged = [...getAssetSelectedEntries(), ...rangeEntries];
+          setAssetSelection(merged, entry);
+        } else {
+          setAssetSelection(rangeEntries, state.assetsSelectionAnchor);
+        }
+        return;
+      }
+      if (toggleSelection) {
+        if (isAssetEntrySelected(entry)) {
+          const remaining = getAssetSelectedEntries().filter((item) => assetEntryKey(item) !== assetEntryKey(entry));
+          setAssetSelection(remaining, remaining[remaining.length - 1] || null);
+        } else {
+          setAssetSelection([...getAssetSelectedEntries(), entry], entry);
+        }
+        return;
+      }
+      setAssetSelection([entry], entry);
+    }
+
     function applyAssetsIconSize(value) {
       const size = Math.max(60, Math.min(320, Number(value) || 96));
       state.assetsIconSize = size;
@@ -711,6 +843,16 @@ INDEX_HTML = r"""<!DOCTYPE html>
       if (data.dir !== undefined) {
         state.assetsDir = data.dir || "";
       }
+      state.assetsEntries = data.entries || [];
+      state.assetsSelectedKeys = state.assetsSelectedKeys.filter((key) => (
+        state.assetsEntries.some((entry) => assetEntryKey(entry) === key)
+      ));
+      state.assetsSelected = state.assetsEntries.find((entry) => isAssetEntrySelected(entry)) || null;
+      if (state.assetsSelectionAnchor && !state.assetsEntries.some((entry) => (
+        assetEntryKey(entry) === assetEntryKey(state.assetsSelectionAnchor)
+      ))) {
+        state.assetsSelectionAnchor = state.assetsSelected || null;
+      }
       document.getElementById("assetsPath").textContent = `input/assets/${data.dir || ""}`;
       renderAssetsExplorer(document.getElementById("assetsList"), data.entries, {
         includeParent: true,
@@ -725,16 +867,19 @@ INDEX_HTML = r"""<!DOCTYPE html>
       grid.className = "preview-grid";
 
       if (includeParent && currentDir) {
+        const parentEntry = { type: "dir", rel_path: parentPath(currentDir), name: ".." };
         const parent = document.createElement("div");
         parent.className = "preview-tile";
-        parent.dataset.type = "dir";
-        parent.dataset.dropDir = parentPath(currentDir);
+        parent.dataset.type = parentEntry.type;
+        parent.dataset.path = parentEntry.rel_path;
+        parent.dataset.dropDir = parentEntry.rel_path;
         parent.innerHTML = `<div class="preview-icon">📁</div><div class="preview-name">..</div>`;
-        parent.onclick = () => {
-          state.assetsDir = parentPath(currentDir);
+        parent.onclick = () => clearAssetSelection();
+        parent.ondblclick = () => {
+          state.assetsDir = parentEntry.rel_path;
           refreshAssets();
         };
-        attachAssetDropTarget(parent, parentPath(currentDir));
+        attachAssetDropTarget(parent, parentEntry.rel_path);
         grid.appendChild(parent);
       }
 
@@ -754,11 +899,15 @@ INDEX_HTML = r"""<!DOCTYPE html>
         if (entry.type === "dir") {
           tile.dataset.dropDir = entry.rel_path;
           tile.innerHTML = `<div class="preview-icon">📁</div><div class="preview-name">${entry.name}</div>`;
-          tile.onclick = () => selectAssetEntry(entry);
+          tile.draggable = true;
+          tile.onclick = (event) => handleAssetTileClick(entry, event);
           tile.ondblclick = () => {
+            setAssetSelection([entry], entry);
             state.assetsDir = entry.rel_path;
             refreshAssets();
           };
+          tile.ondragstart = (event) => handleAssetDragStart(event, entry);
+          tile.ondragend = () => handleAssetDragEnd();
           attachAssetDropTarget(tile, entry.rel_path);
         } else {
           const url = `/api/download?base=assets&path=${encodeURIComponent(entry.rel_path)}&inline=1`;
@@ -771,50 +920,49 @@ INDEX_HTML = r"""<!DOCTYPE html>
             tile.innerHTML = `<div class="preview-icon">📄</div><div class="preview-name">${entry.name}</div>`;
           }
           tile.draggable = true;
-          tile.onclick = () => selectAssetEntry(entry);
-          tile.ondblclick = () => openAssetPreview(entry);
+          tile.onclick = (event) => handleAssetTileClick(entry, event);
+          tile.ondblclick = () => {
+            setAssetSelection([entry], entry);
+            openAssetPreview(entry);
+          };
           tile.ondragstart = (event) => handleAssetDragStart(event, entry);
-          tile.ondragend = () => handleAssetDragEnd(tile);
+          tile.ondragend = () => handleAssetDragEnd();
         }
         grid.appendChild(tile);
       });
 
       container.appendChild(grid);
-    }
-
-    function selectAssetEntry(entry) {
-      state.assetsSelected = entry;
-      const renameFrom = document.getElementById("renameFrom");
-      const selectedPath = entry?.rel_path;
-      renameFrom.value = selectedPath || "";
-      document.getElementById("renameTo").value = selectedPath || "";
-      const tiles = document.querySelectorAll(".preview-tile");
-      tiles.forEach((tile) => tile.classList.remove("active"));
-      const matching = Array.from(tiles).find((tile) => tile.dataset.path === entry.rel_path);
-      if (matching) matching.classList.add("active");
-      if (state.assetsCopyEnabled && entry?.type === "file") copyAssetBasename(entry);
+      syncAssetSelectionUI();
     }
 
     function handleAssetDragStart(event, entry) {
-      state.assetsDragging = entry;
+      let dragEntries = getAssetSelectedEntries();
+      if (!isAssetEntrySelected(entry)) {
+        setAssetSelection([entry], entry);
+        dragEntries = [entry];
+      }
+      state.assetsDragging = dragEntries.filter((item) => item.name !== "..");
       if (event.dataTransfer) {
         event.dataTransfer.effectAllowed = "move";
-        event.dataTransfer.setData("text/plain", entry.rel_path);
+        event.dataTransfer.setData("text/plain", JSON.stringify(state.assetsDragging.map((item) => item.rel_path)));
       }
-      event.currentTarget.classList.add("dragging");
+      document.querySelectorAll(".preview-tile").forEach((tile) => {
+        const key = `${tile.dataset.type}:${tile.dataset.path}`;
+        tile.classList.toggle("dragging", state.assetsDragging.some((item) => assetEntryKey(item) === key));
+      });
     }
 
-    function handleAssetDragEnd(tile) {
-      state.assetsDragging = null;
-      tile.classList.remove("dragging");
-      document.querySelectorAll(".preview-tile.drop-target").forEach((node) => {
+    function handleAssetDragEnd() {
+      state.assetsDragging = [];
+      document.querySelectorAll(".preview-tile").forEach((node) => {
+        node.classList.remove("dragging");
         node.classList.remove("drop-target");
       });
     }
 
     function attachAssetDropTarget(tile, targetDir) {
       tile.ondragover = (event) => {
-        if (!state.assetsDragging || state.assetsDragging.type !== "file") return;
+        if (!state.assetsDragging.length) return;
         event.preventDefault();
         if (event.dataTransfer) event.dataTransfer.dropEffect = "move";
         tile.classList.add("drop-target");
@@ -823,32 +971,30 @@ INDEX_HTML = r"""<!DOCTYPE html>
         tile.classList.remove("drop-target");
       };
       tile.ondrop = async (event) => {
-        if (!state.assetsDragging || state.assetsDragging.type !== "file") return;
+        if (!state.assetsDragging.length) return;
         event.preventDefault();
         tile.classList.remove("drop-target");
-        const source = state.assetsDragging;
-        state.assetsDragging = null;
-        await moveAssetToDirectory(source, targetDir);
+        const sourceEntries = [...state.assetsDragging];
+        state.assetsDragging = [];
+        await moveAssetsToDirectory(sourceEntries, targetDir);
+        handleAssetDragEnd();
       };
     }
 
-    async function moveAssetToDirectory(entry, targetDir) {
-      if (!entry || entry.type !== "file") return;
-      const sourceDir = parentPath(entry.rel_path);
+    async function moveAssetsToDirectory(entries, targetDir) {
+      const selectedEntries = (entries || []).filter(Boolean);
+      if (!selectedEntries.length) return;
       const normalizedTarget = normalizeRelPath(targetDir);
-      if (sourceDir === normalizedTarget) return;
-      const destination = joinAssetPath(normalizedTarget, entry.name);
-      await apiPost("/api/rename/assets", { old: entry.rel_path, new: destination });
-      state.assetsSelected = {
-        ...entry,
-        rel_path: destination,
-      };
+      const movablePaths = selectedEntries.map((entry) => entry.rel_path);
+      if (!movablePaths.length) return;
+      await apiPost("/api/move/assets", { paths: movablePaths, target_dir: normalizedTarget });
+      clearAssetSelection();
       await refreshAssets();
     }
 
     function openAssetPreview(entry) {
       if (!entry || entry.type !== "file") return;
-      selectAssetEntry(entry);
+      setAssetSelection([entry], entry);
       state.assetsPreview = entry;
       const overlay = document.getElementById("assetPreviewOverlay");
       const title = document.getElementById("assetPreviewTitle");
@@ -1041,18 +1187,38 @@ INDEX_HTML = r"""<!DOCTYPE html>
     }
 
     async function downloadSelectedAsset() {
-      if (!state.assetsSelected || state.assetsSelected.type !== "file") return alert("ファイルを選択してください");
-      window.open(`/api/download?base=assets&path=${encodeURIComponent(state.assetsSelected.rel_path)}`, "_blank");
+      const selectedEntries = getAssetSelectedEntries();
+      if (!selectedEntries.length) return alert("ファイルを選択してください");
+      if (selectedEntries.length === 1 && selectedEntries[0].type === "file") {
+        window.open(`/api/download?base=assets&path=${encodeURIComponent(selectedEntries[0].rel_path)}`, "_blank");
+        return;
+      }
+      const url = new URL("/api/download/assets-batch", window.location.origin);
+      selectedEntries.forEach((entry) => url.searchParams.append("path", entry.rel_path));
+      const res = await fetch(url);
+      if (!res.ok) throw new Error(await res.text());
+      const blob = await res.blob();
+      const header = res.headers.get("Content-Disposition") || "";
+      const match = header.match(/filename="?([^"]+)"?/);
+      const filename = match?.[1] || "assets_bundle.zip";
+      const objectUrl = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = objectUrl;
+      link.download = filename;
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      URL.revokeObjectURL(objectUrl);
     }
 
     async function deleteSelectedAsset() {
-      if (!state.assetsSelected) return alert("対象を選択してください");
-      if (!confirm(`削除しますか？\\n${state.assetsSelected.rel_path}`)) return;
-      await apiPost("/api/delete/assets", { path: state.assetsSelected.rel_path });
-      state.assetsSelected = null;
-      document.getElementById("renameFrom").value = "";
-      document.getElementById("renameTo").value = "";
-      refreshAssets();
+      const selectedEntries = getAssetSelectedEntries();
+      if (!selectedEntries.length) return alert("対象を選択してください");
+      const targetList = selectedEntries.map((entry) => entry.rel_path).join("\\n");
+      if (!confirm(`削除しますか？\\n${targetList}`)) return;
+      await apiPost("/api/delete/assets-batch", { paths: selectedEntries.map((entry) => entry.rel_path) });
+      clearAssetSelection();
+      await refreshAssets();
     }
 
     async function createAssetDirectory() {
@@ -1100,7 +1266,7 @@ INDEX_HTML = r"""<!DOCTYPE html>
       await apiPost("/api/rename/assets", { old: oldPath, new: newPath });
       document.getElementById("renameFrom").value = "";
       document.getElementById("renameTo").value = "";
-      state.assetsSelected = null;
+      clearAssetSelection();
       await refreshAssets();
     }
 
@@ -1125,9 +1291,7 @@ INDEX_HTML = r"""<!DOCTYPE html>
         rel_path: newPath,
       };
       state.assetsPreview = updatedEntry;
-      state.assetsSelected = updatedEntry;
-      document.getElementById("renameFrom").value = newPath;
-      document.getElementById("renameTo").value = newPath;
+      setAssetSelection([updatedEntry], updatedEntry);
       await refreshAssets();
       openAssetPreview(updatedEntry);
     }
@@ -1353,6 +1517,96 @@ def list_dir(base: Path, rel: str) -> dict:
     return {"dir": rel, "entries": entries}
 
 
+def prune_nested_rel_paths(paths) -> list[str]:
+    normalized = []
+    seen = set()
+    for rel in paths or []:
+        cleaned = normalize_rel_path(rel)
+        if not cleaned or cleaned in seen:
+            continue
+        seen.add(cleaned)
+        normalized.append(cleaned)
+    normalized.sort(key=lambda rel: (len(Path(rel).parts), rel))
+    pruned = []
+    for rel in normalized:
+        if any(rel == existing or rel.startswith(f"{existing}/") for existing in pruned):
+            continue
+        pruned.append(rel)
+    return pruned
+
+
+def build_assets_archive(paths) -> tuple[bytes, str]:
+    rel_paths = prune_nested_rel_paths(paths)
+    if not rel_paths:
+        raise ValueError("No paths")
+
+    archive_name = "assets_bundle.zip" if len(rel_paths) > 1 else f"{Path(rel_paths[0]).name}.zip"
+    buffer = io.BytesIO()
+    with zipfile.ZipFile(buffer, "w", compression=zipfile.ZIP_DEFLATED) as archive:
+        for rel in rel_paths:
+            source = safe_path(ASSETS_DIR, rel)
+            if not source.exists():
+                raise FileNotFoundError(rel)
+            if source.is_dir():
+                children = sorted(source.rglob("*"))
+                if not children:
+                    archive.writestr(f"{rel}/", b"")
+                    continue
+                for child in children:
+                    arcname = child.relative_to(ASSETS_DIR).as_posix()
+                    if child.is_dir():
+                        if not any(child.iterdir()):
+                            archive.writestr(f"{arcname}/", b"")
+                        continue
+                    archive.write(child, arcname=arcname)
+            else:
+                archive.write(source, arcname=rel)
+    return buffer.getvalue(), archive_name
+
+
+def move_assets(paths, target_dir: str) -> int:
+    rel_paths = prune_nested_rel_paths(paths)
+    if not rel_paths:
+        return 0
+
+    target_rel = normalize_rel_path(target_dir)
+    target = safe_path(ASSETS_DIR, target_rel)
+    ensure_dir(target)
+    if not target.is_dir():
+        raise ValueError("Target must be directory")
+
+    moves = []
+    destinations = set()
+    for rel in rel_paths:
+        source = safe_path(ASSETS_DIR, rel)
+        if not source.exists():
+            raise FileNotFoundError(rel)
+        destination = safe_path(ASSETS_DIR, str((Path(target_rel) / source.name).as_posix()) if target_rel else source.name)
+        if source == destination:
+            continue
+        if source.parent == destination.parent:
+            continue
+        if source.is_dir():
+            try:
+                destination.relative_to(source)
+            except ValueError:
+                pass
+            else:
+                raise ValueError(f"Cannot move directory into itself: {rel}")
+        if destination.exists():
+            raise FileExistsError(destination.name)
+        destination_rel = destination.relative_to(ASSETS_DIR).as_posix()
+        if destination_rel in destinations:
+            raise FileExistsError(destination.name)
+        destinations.add(destination_rel)
+        moves.append((source, destination))
+
+    for source, destination in moves:
+        ensure_dir(destination.parent)
+        source.rename(destination)
+    return len(moves)
+
+
 def tail_lines(path: Path, lines: int = 200) -> str:
     if not path.exists():
         return ""
@@ -1458,6 +1712,15 @@ class GUIHandler(BaseHTTPRequestHandler):
         self.end_headers()
         self.wfile.write(data)
 
+    def _send_bytes(self, data: bytes, filename: str, content_type: str = "application/octet-stream", inline: bool = False):
+        self.send_response(200)
+        self.send_header("Content-Type", content_type)
+        disposition = "inline" if inline else "attachment"
+        self.send_header("Content-Disposition", f"{disposition}; filename=\"{filename}\"")
+        self.send_header("Content-Length", str(len(data)))
+        self.end_headers()
+        self.wfile.write(data)
+
     def _parse_json(self):
         length = int(self.headers.get("Content-Length", "0"))
         raw = self.rfile.read(length) if length else b"{}"
@@ -1523,6 +1786,13 @@ class GUIHandler(BaseHTTPRequestHandler):
                     return
                 path = safe_path(base_dir, rel)
                 self._send_file(path, inline=inline)
+                return
+
+            if parsed.path == "/api/download/assets-batch":
+                params = parse_qs(parsed.query)
+                paths = params.get("path", [])
+                archive, filename = build_assets_archive(paths)
+                self._send_bytes(archive, filename, content_type="application/zip")
                 return
 
             self._send_text("Not Found", status=404)
@@ -1614,6 +1884,31 @@ class GUIHandler(BaseHTTPRequestHandler):
                     else:
                         target.unlink()
                 self._send_json({"ok": True})
+                return
+
+            if parsed.path == "/api/delete/assets-batch":
+                data = self._parse_json()
+                paths = prune_nested_rel_paths(data.get("paths", []))
+                if not paths:
+                    self._send_text("Missing fields", status=400)
+                    return
+                for rel in reversed(paths):
+                    target = safe_path(ASSETS_DIR, rel)
+                    if not target.exists():
+                        continue
+                    if target.is_dir():
+                        shutil.rmtree(target)
+                    else:
+                        target.unlink()
+                self._send_json({"ok": True, "count": len(paths)})
+                return
+
+            if parsed.path == "/api/move/assets":
+                data = self._parse_json()
+                paths = data.get("paths", [])
+                target_dir = data.get("target_dir", "")
+                moved = move_assets(paths, target_dir)
+                self._send_json({"ok": True, "count": moved})
                 return
 
             if parsed.path == "/api/text":
