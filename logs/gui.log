@@ -2838,3 +2838,243 @@ ERRORS:
 
 生成されたファイル: output/test_202603200135.html
 ブラウザで開いてゲームをお楽しみください!
+2026-03-20 01:44:26,134 [INFO] Build start: test_.csv
+2026-03-20 01:44:33,312 [INFO] Build stdout:
+============================================================
+  LuminasScript - Visual Novel Game Generator
+============================================================
+
+✓ config.ymlを読み込みました
+✓ 20行のシナリオデータを読み込みました (encoding: utf-8)
+✓ 画像6個 / 音声1個のアセットをエンコードしました
+✓ ゲームファイルを生成しました: output/test_202603200144.html
+  ファイルサイズ: 17524.5 KB
+
+============================================================
+  ✓ 生成完了!
+============================================================
+
+生成されたファイル: output/test_202603200144.html
+ブラウザで開いてゲームをお楽しみください!
+2026-03-20 02:02:40,974 [INFO] Build start: test_.csv
+2026-03-20 02:02:48,256 [INFO] Build stdout:
+============================================================
+  LuminasScript - Visual Novel Game Generator
+============================================================
+
+✓ config.ymlを読み込みました
+✓ 20行のシナリオデータを読み込みました (encoding: utf-8)
+✓ 画像6個 / 音声1個のアセットをエンコードしました
+✓ ゲームファイルを生成しました: output/test_202603200202.html
+  ファイルサイズ: 17524.8 KB
+
+============================================================
+  ✓ 生成完了!
+============================================================
+
+生成されたファイル: output/test_202603200202.html
+ブラウザで開いてゲームをお楽しみください!
+2026-03-20 07:40:04,463 [INFO] Build start: test_.csv
+2026-03-20 07:40:11,946 [INFO] Build stdout:
+============================================================
+  LuminasScript - Visual Novel Game Generator
+============================================================
+
+✓ config.ymlを読み込みました
+✓ 20行のシナリオデータを読み込みました (encoding: utf-8)
+✓ 画像6個 / 音声1個のアセットをエンコードしました
+✓ ゲームファイルを生成しました: output/test_202603200740.html
+✓ 最新版を更新しました: output/game.html
+  ファイルサイズ: 17525.0 KB
+
+============================================================
+  ✓ 生成完了!
+============================================================
+
+生成されたファイル: output/test_202603200740.html
+最新版: output/game.html
+ブラウザで開いてゲームをお楽しみください!
+2026-03-20 07:44:42,811 [INFO] Build start: test2.csv
+2026-03-20 07:44:49,991 [INFO] Build stdout:
+============================================================
+  LuminasScript - Visual Novel Game Generator
+============================================================
+
+✓ config.ymlを読み込みました
+✓ 19行のシナリオデータを読み込みました (encoding: utf-8)
+✓ 画像6個 / 音声1個のアセットをエンコードしました
+✓ ゲームファイルを生成しました: output/test2202603200744.html
+✓ 最新版を更新しました: output/game.html
+  ファイルサイズ: 17524.8 KB
+
+============================================================
+  ✓ 生成完了!
+============================================================
+
+生成されたファイル: output/test2202603200744.html
+最新版: output/game.html
+ブラウザで開いてゲームをお楽しみください!
+2026-03-20 07:49:03,013 [ERROR] GET error
+Traceback (most recent call last):
+  File "/usr/src/LuminousScript/web_gui.py", line 1788, in do_GET
+    self._send_file(path, inline=inline)
+    ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/src/LuminousScript/web_gui.py", line 1713, in _send_file
+    self.wfile.write(data)
+    ~~~~~~~~~~~~~~~~^^^^^^
+  File "/usr/local/lib/python3.14/socketserver.py", line 845, in write
+    self._sock.sendall(b)
+    ~~~~~~~~~~~~~~~~~~^^^
+BrokenPipeError: [Errno 32] Broken pipe
+2026-03-20 07:49:03,075 [ERROR] GET error
+Traceback (most recent call last):
+  File "/usr/src/LuminousScript/web_gui.py", line 1788, in do_GET
+    self._send_file(path, inline=inline)
+    ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/src/LuminousScript/web_gui.py", line 1713, in _send_file
+    self.wfile.write(data)
+    ~~~~~~~~~~~~~~~~^^^^^^
+  File "/usr/local/lib/python3.14/socketserver.py", line 845, in write
+    self._sock.sendall(b)
+    ~~~~~~~~~~~~~~~~~~^^^
+BrokenPipeError: [Errno 32] Broken pipe
+2026-03-20 07:49:03,114 [ERROR] GET error
+Traceback (most recent call last):
+  File "/usr/src/LuminousScript/web_gui.py", line 1788, in do_GET
+    self._send_file(path, inline=inline)
+    ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/src/LuminousScript/web_gui.py", line 1713, in _send_file
+    self.wfile.write(data)
+    ~~~~~~~~~~~~~~~~^^^^^^
+  File "/usr/local/lib/python3.14/socketserver.py", line 845, in write
+    self._sock.sendall(b)
+    ~~~~~~~~~~~~~~~~~~^^^
+BrokenPipeError: [Errno 32] Broken pipe
+2026-03-20 07:49:03,187 [ERROR] GET error
+Traceback (most recent call last):
+  File "/usr/src/LuminousScript/web_gui.py", line 1788, in do_GET
+    self._send_file(path, inline=inline)
+    ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/src/LuminousScript/web_gui.py", line 1713, in _send_file
+    self.wfile.write(data)
+    ~~~~~~~~~~~~~~~~^^^^^^
+  File "/usr/local/lib/python3.14/socketserver.py", line 845, in write
+    self._sock.sendall(b)
+    ~~~~~~~~~~~~~~~~~~^^^
+BrokenPipeError: [Errno 32] Broken pipe
+2026-03-20 07:49:03,224 [ERROR] GET error
+Traceback (most recent call last):
+  File "/usr/src/LuminousScript/web_gui.py", line 1788, in do_GET
+    self._send_file(path, inline=inline)
+    ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/src/LuminousScript/web_gui.py", line 1713, in _send_file
+    self.wfile.write(data)
+    ~~~~~~~~~~~~~~~~^^^^^^
+  File "/usr/local/lib/python3.14/socketserver.py", line 845, in write
+    self._sock.sendall(b)
+    ~~~~~~~~~~~~~~~~~~^^^
+BrokenPipeError: [Errno 32] Broken pipe
+2026-03-20 07:49:03,307 [ERROR] GET error
+Traceback (most recent call last):
+  File "/usr/src/LuminousScript/web_gui.py", line 1788, in do_GET
+    self._send_file(path, inline=inline)
+    ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/src/LuminousScript/web_gui.py", line 1713, in _send_file
+    self.wfile.write(data)
+    ~~~~~~~~~~~~~~~~^^^^^^
+  File "/usr/local/lib/python3.14/socketserver.py", line 845, in write
+    self._sock.sendall(b)
+    ~~~~~~~~~~~~~~~~~~^^^
+BrokenPipeError: [Errno 32] Broken pipe
+2026-03-20 07:49:19,646 [ERROR] GET error
+Traceback (most recent call last):
+  File "/usr/src/LuminousScript/web_gui.py", line 1788, in do_GET
+    self._send_file(path, inline=inline)
+    ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/src/LuminousScript/web_gui.py", line 1713, in _send_file
+    self.wfile.write(data)
+    ~~~~~~~~~~~~~~~~^^^^^^
+  File "/usr/local/lib/python3.14/socketserver.py", line 845, in write
+    self._sock.sendall(b)
+    ~~~~~~~~~~~~~~~~~~^^^
+BrokenPipeError: [Errno 32] Broken pipe
+2026-03-20 07:53:12,906 [INFO] Build start: test2_.csv
+2026-03-20 07:53:15,250 [INFO] Build stdout:
+============================================================
+  LuminasScript - Visual Novel Game Generator
+============================================================
+
+✓ config.ymlを読み込みました
+✓ 1行のシナリオデータを読み込みました (encoding: utf-8)
+✓ 画像3個 / 音声1個のアセットをエンコードしました
+✓ ゲームファイルを生成しました: output/test2_202603200753.html
+✓ 最新版を更新しました: output/game.html
+  ファイルサイズ: 14025.0 KB
+
+============================================================
+  ✓ 生成完了!
+============================================================
+
+生成されたファイル: output/test2_202603200753.html
+最新版: output/game.html
+ブラウザで開いてゲームをお楽しみください!
+2026-03-20 08:03:58,577 [INFO] Build start: test2_.csv
+2026-03-20 08:04:00,937 [INFO] Build stdout:
+============================================================
+  LuminasScript - Visual Novel Game Generator
+============================================================
+
+✓ config.ymlを読み込みました
+✓ 1行のシナリオデータを読み込みました (encoding: utf-8)
+✓ 画像3個 / 音声1個のアセットをエンコードしました
+✓ ゲームファイルを生成しました: output/test2_202603200803.html
+✓ 最新版を更新しました: output/game.html
+  ファイルサイズ: 14036.9 KB
+
+============================================================
+  ✓ 生成完了!
+============================================================
+
+生成されたファイル: output/test2_202603200803.html
+最新版: output/game.html
+ブラウザで開いてゲームをお楽しみください!
+2026-03-20 08:40:23,831 [INFO] Build start: test2_.csv
+2026-03-20 08:40:26,170 [INFO] Build stdout:
+============================================================
+  LuminasScript - Visual Novel Game Generator
+============================================================
+
+✓ config.ymlを読み込みました
+✓ 1行のシナリオデータを読み込みました (encoding: utf-8)
+✓ 画像3個 / 音声1個のアセットをエンコードしました
+✓ ゲームファイルを生成しました: output/test2_202603200840.html
+✓ 最新版を更新しました: output/game.html
+  ファイルサイズ: 14037.1 KB
+
+============================================================
+  ✓ 生成完了!
+============================================================
+
+生成されたファイル: output/test2_202603200840.html
+最新版: output/game.html
+ブラウザで開いてゲームをお楽しみください!
+2026-03-20 08:44:12,781 [INFO] Build start: test_.csv
+2026-03-20 08:44:20,038 [INFO] Build stdout:
+============================================================
+  LuminasScript - Visual Novel Game Generator
+============================================================
+
+✓ config.ymlを読み込みました
+✓ 20行のシナリオデータを読み込みました (encoding: utf-8)
+✓ 画像6個 / 音声1個のアセットをエンコードしました
+✓ ゲームファイルを生成しました: output/test_202603200844.html
+✓ 最新版を更新しました: output/game.html
+  ファイルサイズ: 17537.1 KB
+
+============================================================
+  ✓ 生成完了!
+============================================================
+
+生成されたファイル: output/test_202603200844.html
+最新版: output/game.html
+ブラウザで開いてゲームをお楽しみください!

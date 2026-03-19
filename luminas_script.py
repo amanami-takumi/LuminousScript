@@ -186,6 +186,21 @@ class LuminasScript:
             print(f"⚠ 音声のエンコードに失敗: {audio_path} - {e}")
             return None
 
+    def encode_file_to_data_url(self, file_path: Path, mime_type: str) -> Optional[str]:
+        """任意ファイルをData URLへ変換する"""
+        if not file_path.exists():
+            print(f"⚠ ファイルが見つかりません: {file_path}")
+            return None
+
+        try:
+            with open(file_path, 'rb') as f:
+                payload = f.read()
+            encoded = base64.b64encode(payload).decode('utf-8')
+            return f"data:{mime_type};base64,{encoded}"
+        except Exception as e:
+            print(f"⚠ ファイルのエンコードに失敗: {file_path} - {e}")
+            return None
+
     def _parse_target_size(self, value) -> Optional[int]:
         """target_sizeを整数に変換"""
         if value is None:
@@ -291,17 +306,44 @@ class LuminasScript:
 
         for candidate in candidate_names:
             path = directory / candidate
-            if path.exists():
+            if path.is_file():
                 return path
 
         path_without_ext = normalized_path.with_suffix("")
         fallback_path = directory / path_without_ext
-        if fallback_path.exists():
+        if fallback_path.is_file():
             return fallback_path
 
         legacy_path = directory / normalized_path.stem
-        if legacy_path.exists():
+        if legacy_path.is_file():
             return legacy_path
+
+        # サブディレクトリ指定がない場合は配下を再帰探索する
+        if len(normalized_path.parts) == 1:
+            recursive_matches: List[Path] = []
+            seen_paths = set()
+
+            search_names = candidate_names + [path_without_ext.name, legacy_path.name]
+            for search_name in search_names:
+                for path in sorted(directory.rglob(search_name)):
+                    if not path.is_file():
+                        continue
+                    resolved = path.resolve()
+                    if resolved in seen_paths:
+                        continue
+                    seen_paths.add(resolved)
+                    recursive_matches.append(path)
+
+            if recursive_matches:
+                if len(recursive_matches) > 1:
+                    match_list = ", ".join(str(path.relative_to(directory)) for path in recursive_matches[:3])
+                    if len(recursive_matches) > 3:
+                        match_list += ", ..."
+                    print(
+                        f"⚠ アセット '{filename}' に複数候補が見つかりました。"
+                        f"先頭を使用します: {match_list}"
+                    )
+                return recursive_matches[0]
 
         return None
 
@@ -401,8 +443,49 @@ class LuminasScript:
                 return inner.split('|', 1)[0].strip()
             return inner
         return text
+
+    def _resolve_favicon_href(self) -> str:
+        """favicon_urlを単一HTMLで使えるhrefへ解決"""
+        raw = str(self.config.get('favicon_url') or '').strip()
+        if not raw:
+            return ''
+
+        lowered = raw.lower()
+        if lowered.startswith(('data:', 'http://', 'https://')):
+            return raw
+
+        branding_dir = self.assets_dir / "branding"
+        favicon_path = None
+        if branding_dir.exists():
+            favicon_path = self._find_asset_path(
+                branding_dir,
+                raw,
+                ['.ico', '.png', '.jpg', '.jpeg', '.webp', '.gif', '.svg']
+            )
+
+        if not favicon_path:
+            input_candidate = self.input_dir / raw
+            if input_candidate.is_file():
+                favicon_path = input_candidate
+
+        if not favicon_path:
+            print(f"⚠ favicon が見つかりません: {raw}")
+            return ''
+
+        mime_type = {
+            '.ico': 'image/x-icon',
+            '.png': 'image/png',
+            '.jpg': 'image/jpeg',
+            '.jpeg': 'image/jpeg',
+            '.webp': 'image/webp',
+            '.gif': 'image/gif',
+            '.svg': 'image/svg+xml'
+        }.get(favicon_path.suffix.lower(), 'application/octet-stream')
+
+        encoded = self.encode_file_to_data_url(favicon_path, mime_type)
+        return encoded or ''
     
-    def generate_html(self, output_filename: str = "game.html") -> None:
+    def generate_html(self, output_filename: str = "game.html", latest_filename: Optional[str] = None) -> None:
         """HTMLファイルを生成"""
         if not self.scenario_data:
             raise ValueError("シナリオデータが読み込まれていません")
@@ -428,6 +511,13 @@ class LuminasScript:
             f.write(html_content)
         
         print(f"✓ ゲームファイルを生成しました: {output_path}")
+
+        if latest_filename and latest_filename != output_filename:
+            latest_path = self.output_dir / latest_filename
+            with open(latest_path, 'w', encoding='utf-8') as f:
+                f.write(html_content)
+            print(f"✓ 最新版を更新しました: {latest_path}")
+
         print(f"  ファイルサイズ: {output_path.stat().st_size / 1024:.1f} KB")
     
     def _generate_html_template(self, scenario_json: str, image_assets_json: str, audio_assets_json: str, config_json: str) -> str:
@@ -438,8 +528,9 @@ class LuminasScript:
             font_import = f'<link href="{self.config["text_font_importURL"]}" rel="stylesheet">'
         
         favicon_link = ""
-        if self.config.get('favicon_url'):
-            favicon_link = f'<link rel="icon" href="{self.config["favicon_url"]}">'
+        favicon_href = self._resolve_favicon_href()
+        if favicon_href:
+            favicon_link = f'<link rel="icon" href="{favicon_href}">'
         
         return f"""<!DOCTYPE html>
 <html lang="ja">
@@ -475,6 +566,7 @@ class LuminasScript:
                     <button class="menu-btn" onclick="showCredits()">クレジット</button>
                 </div>
             </div>
+            {f'<div class="title-version">{self.config.get("version")}</div>' if self.config.get('version') else ''}
         </div>
         
         <!-- ゲーム画面 -->
@@ -628,6 +720,10 @@ class LuminasScript:
             padding: 0;
             box-sizing: border-box;
         }}
+
+        .hidden {{
+            display: none !important;
+        }}
         
         body {{
             font-family: 'Kosugi Maru', 'Hiragino Kaku Gothic Pro', 'Meiryo', sans-serif;
@@ -695,22 +791,30 @@ class LuminasScript:
             position: absolute;
             width: 100%;
             height: 100%;
+            display: none;
             opacity: 0;
+            visibility: hidden;
             pointer-events: none;
             transition: opacity 0.5s ease;
         }}
         
         .screen.active {{
+            display: block;
             opacity: 1;
+            visibility: visible;
             pointer-events: auto;
         }}
         
         /* タイトル画面 */
         #title-screen {{
             background: linear-gradient(135deg, {theme_color} 0%, {sub_color} 100%);
-            display: flex;
             align-items: center;
             justify-content: center;
+            position: relative;
+        }}
+
+        #title-screen.active {{
+            display: flex;
         }}
         
         .title-content {{
@@ -742,6 +846,17 @@ class LuminasScript:
             gap: 1rem;
             align-items: center;
         }}
+
+        .title-version {{
+            position: absolute;
+            right: 1.5rem;
+            bottom: 1rem;
+            color: rgba(255, 255, 255, 0.45);
+            font-size: 0.9rem;
+            letter-spacing: 0.08em;
+            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.35);
+            pointer-events: none;
+        }}
         
         /* ゲーム画面 */
         #game-screen {{
@@ -758,6 +873,7 @@ class LuminasScript:
             background-size: cover;
             background-position: center;
             transition: background-image 0.5s ease;
+            z-index: 0;
         }}
         
         #character-layer {{
@@ -766,6 +882,7 @@ class LuminasScript:
             justify-content: space-between;
             padding: 0 5%;
             pointer-events: none;
+            z-index: 1;
         }}
         
         .character-sprite {{
@@ -789,6 +906,7 @@ class LuminasScript:
             flex-direction: column;
             justify-content: flex-end;
             pointer-events: none;
+            z-index: 2;
         }}
         
         #text-box {{
@@ -1104,6 +1222,9 @@ class LuminasScript:
             customName: ''
         }};
         const BGM_FADE_DURATION = 1000;
+        const STORAGE_PREFIX = String(CONFIG.localstorage_prefix || '').trim();
+        const SAVE_DATA_KEY = getStorageKey('luminas_save');
+        const SETTINGS_KEY = getStorageKey('luminas_settings');
         
         // ゲーム状態
         let currentSceneIndex = 0;
@@ -1114,7 +1235,7 @@ class LuminasScript:
         let canClick = false;
         const CLICK_DELAY = 500; // クリック可能になるまでの時間（ミリ秒）
         let licenseAccepted = false;
-        const LICENSE_ACCEPT_KEY = 'luminas_license_accepted';
+        const LICENSE_ACCEPT_KEY = getStorageKey('luminas_license_accepted');
         let bgmAudio = null;
         let bgmFadeInterval = null;
         let currentBgmName = '';
@@ -1227,6 +1348,39 @@ class LuminasScript:
                 return (separatorIndex >= 0 ? inner.slice(0, separatorIndex) : inner).trim();
             }}
             return text;
+        }}
+
+        function getStorageKey(name) {{
+            return STORAGE_PREFIX ? `${{STORAGE_PREFIX}}_${{name}}` : name;
+        }}
+
+        function safeStorageGet(key) {{
+            try {{
+                return localStorage.getItem(key);
+            }} catch (e) {{
+                console.warn(`localStorage read failed for ${{key}}:`, e);
+                return null;
+            }}
+        }}
+
+        function safeStorageSet(key, value) {{
+            try {{
+                localStorage.setItem(key, value);
+                return true;
+            }} catch (e) {{
+                console.warn(`localStorage write failed for ${{key}}:`, e);
+                return false;
+            }}
+        }}
+
+        function safeStorageRemove(key) {{
+            try {{
+                localStorage.removeItem(key);
+                return true;
+            }} catch (e) {{
+                console.warn(`localStorage remove failed for ${{key}}:`, e);
+                return false;
+            }}
         }}
 
         function escapeHtml(text) {{
@@ -1343,6 +1497,18 @@ class LuminasScript:
             showScreen('game-screen');
             loadScene(0);
         }}
+
+        function resetSceneUI() {{
+            const textBox = document.getElementById('text-box');
+            const choiceBox = document.getElementById('choice-box');
+            const dialogueText = document.getElementById('dialogue-text');
+
+            textBox.style.display = 'block';
+            choiceBox.classList.add('hidden');
+            dialogueText.style.fontSize = '1.1rem';
+            dialogueText.style.textAlign = 'left';
+            dialogueText.style.fontWeight = 'normal';
+        }}
         
         // シーンを読み込み
         function loadScene(index) {{
@@ -1363,6 +1529,7 @@ class LuminasScript:
             const sceneId = normalizeSceneId(scene.scene_id);
             gameState.currentSceneId = sceneId;
             gameState.visitedScenes.push(sceneId);
+            resetSceneUI();
             updateBgm(scene.bgm);
             
             console.log(`Loading scene: ${{sceneId}}`);
@@ -1866,19 +2033,23 @@ class LuminasScript:
         // 画面切り替え
         function showScreen(screenId) {{
             document.querySelectorAll('.screen').forEach(screen => {{
-                screen.classList.remove('active');
+                const isTarget = screen.id === screenId;
+                screen.classList.toggle('active', isTarget);
+                screen.hidden = !isTarget;
             }});
-            document.getElementById(screenId).classList.add('active');
         }}
         
         // セーブ/ロード
         function saveGame() {{
             try {{
-                localStorage.setItem('luminas_save', JSON.stringify({{
+                const saved = safeStorageSet(SAVE_DATA_KEY, JSON.stringify({{
                     sceneIndex: currentSceneIndex,
                     state: gameState,
                     history: conversationHistory
                 }}));
+                if (!saved) {{
+                    throw new Error('localStorage に保存できませんでした');
+                }}
                 alert('セーブしました!');
                 closeGameMenu();
             }} catch (e) {{
@@ -1892,7 +2063,7 @@ class LuminasScript:
                 return;
             }}
             try {{
-                const saveData = localStorage.getItem('luminas_save');
+                const saveData = safeStorageGet(SAVE_DATA_KEY);
                 if (saveData) {{
                     const data = JSON.parse(saveData);
                     currentSceneIndex = data.sceneIndex;
@@ -1993,33 +2164,20 @@ class LuminasScript:
 
         function acceptLicense() {{
             licenseAccepted = true;
-            try {{
-                localStorage.setItem(LICENSE_ACCEPT_KEY, 'true');
-            }} catch (e) {{
-                console.warn('ライセンス同意の保存に失敗しました:', e);
-            }}
+            safeStorageSet(LICENSE_ACCEPT_KEY, 'true');
             document.getElementById('license-modal').classList.add('hidden');
             maybePromptCustomName();
         }}
 
         function declineLicense() {{
             licenseAccepted = false;
-            try {{
-                localStorage.removeItem(LICENSE_ACCEPT_KEY);
-            }} catch (e) {{
-                console.warn('ライセンス同意の削除に失敗しました:', e);
-            }}
+            safeStorageRemove(LICENSE_ACCEPT_KEY);
             alert('ライセンスに同意しないとゲームを開始できません。');
             showLicenseModal(true);
         }}
 
         function loadLicenseAcceptance() {{
-            try {{
-                licenseAccepted = localStorage.getItem(LICENSE_ACCEPT_KEY) === 'true';
-            }} catch (e) {{
-                console.warn('ライセンス同意の読み込みに失敗しました:', e);
-                licenseAccepted = false;
-            }}
+            licenseAccepted = safeStorageGet(LICENSE_ACCEPT_KEY) === 'true';
         }}
 
         function maybePromptCustomName() {{
@@ -2076,7 +2234,7 @@ class LuminasScript:
         }}
 
         function loadSettings() {{
-            const saved = localStorage.getItem('luminas_settings');
+            const saved = safeStorageGet(SETTINGS_KEY);
             if (saved) {{
                 try {{
                     const parsed = JSON.parse(saved);
@@ -2120,7 +2278,7 @@ class LuminasScript:
             if (bgmAudio) {{
                 bgmAudio.volume = getBgmTargetVolume();
             }}
-            localStorage.setItem('luminas_settings', JSON.stringify(gameState.settings));
+            safeStorageSet(SETTINGS_KEY, JSON.stringify(gameState.settings));
             return true;
         }}
         
@@ -2190,7 +2348,7 @@ def main():
         csv_base_name = Path(csv_file).stem
         timestamp = datetime.now().strftime("%Y%m%d%H%M")
         output_filename = f"{csv_base_name}{timestamp}.html"
-        generator.generate_html(output_filename)
+        generator.generate_html(output_filename, latest_filename="game.html")
         
         print()
         print("=" * 60)
@@ -2198,6 +2356,7 @@ def main():
         print("=" * 60)
         print()
         print(f"生成されたファイル: {output_dir}/{output_filename}")
+        print(f"最新版: {output_dir}/game.html")
         print("ブラウザで開いてゲームをお楽しみください!")
         
     except Exception as e:
