@@ -34,6 +34,7 @@ class LuminasScript:
             'adv_sub_title': '',
             'adv_text_title_off': '',
             'title_bg_image': '',
+            'localstorage_prefix': '',
             'music_def_volume': '70',
             'creator_name': '',
             'License': '',
@@ -1228,7 +1229,9 @@ class LuminasScript:
             customName: ''
         }};
         const BGM_FADE_DURATION = 1000;
-        const STORAGE_PREFIX = String(CONFIG.localstorage_prefix || '').trim();
+        const STORAGE_PREFIX = normalizeStoragePrefix(
+            CONFIG.localstorage_prefix ?? CONFIG.localStoragePrefix
+        );
         const SAVE_DATA_KEY = getStorageKey('luminas_save');
         const SETTINGS_KEY = getStorageKey('luminas_settings');
         
@@ -1354,6 +1357,10 @@ class LuminasScript:
                 return (separatorIndex >= 0 ? inner.slice(0, separatorIndex) : inner).trim();
             }}
             return text;
+        }}
+
+        function normalizeStoragePrefix(value) {{
+            return String(value || '').trim().replace(/^_+|_+$/g, '');
         }}
 
         function getStorageKey(name) {{
