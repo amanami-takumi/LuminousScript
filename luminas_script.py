@@ -32,6 +32,7 @@ class LuminasScript:
         default_config = {
             'adv_title': 'LuminasScript Game',
             'adv_sub_title': '',
+            'adv_text_title_off': '',
             'title_bg_image': '',
             'music_def_volume': '70',
             'creator_name': '',
@@ -523,6 +524,7 @@ class LuminasScript:
     def _generate_html_template(self, scenario_json: str, image_assets_json: str, audio_assets_json: str, config_json: str) -> str:
         """HTMLテンプレートを生成"""
         default_volume = self._parse_volume(self.config.get('music_def_volume'))
+        show_title_text = not self._parse_bool(self.config.get('adv_text_title_off'))
         font_import = ""
         if self.config.get('text_font_importURL'):
             font_import = f'<link href="{self.config["text_font_importURL"]}" rel="stylesheet">'
@@ -553,12 +555,12 @@ class LuminasScript:
         </div>
     </div>
 
-    <div id="game-container" class="hidden">
+        <div id="game-container" class="hidden">
         <!-- タイトル画面 -->
         <div id="title-screen" class="screen active">
             <div class="title-content">
-                <h1 class="game-title">{self.config.get('adv_title', 'LuminasScript')}</h1>
-                {f'<p class="game-subtitle">{self.config.get("adv_sub_title")}</p>' if self.config.get('adv_sub_title') else ''}
+                {f'<h1 class="game-title">{self.config.get("adv_title", "LuminasScript")}</h1>' if show_title_text else ''}
+                {f'<p class="game-subtitle">{self.config.get("adv_sub_title")}</p>' if show_title_text and self.config.get('adv_sub_title') else ''}
                 <div class="title-menu">
                     <button class="menu-btn" onclick="startNewGame()">ニューゲーム</button>
                     <button class="menu-btn" onclick="loadGame()">ロード</button>
@@ -808,6 +810,9 @@ class LuminasScript:
         /* タイトル画面 */
         #title-screen {{
             background: linear-gradient(135deg, {theme_color} 0%, {sub_color} 100%);
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
             align-items: center;
             justify-content: center;
             position: relative;
@@ -845,6 +850,7 @@ class LuminasScript:
             flex-direction: column;
             gap: 1rem;
             align-items: center;
+            margin-top: 20rem;
         }}
 
         .title-version {{
@@ -1185,7 +1191,7 @@ class LuminasScript:
             background: rgba(255, 255, 255, 0.2);
             color: white;
             border: 2px solid white;
-            padding: 1rem 2rem;
+            padding: 1rem 8rem;
             font-size: 1.1rem;
             border-radius: 8px;
             cursor: pointer;
