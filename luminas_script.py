@@ -1189,7 +1189,7 @@ class LuminasScript:
         
         /* ボタン */
         .menu-btn {{
-            background: rgba(255, 255, 255, 0.2);
+            background: linear-gradient(135deg, {theme_color} 0%, {sub_color} 100%);
             color: white;
             border: 2px solid white;
             padding: 1rem 8rem;
