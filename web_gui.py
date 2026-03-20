@@ -170,6 +170,34 @@ INDEX_HTML = r"""<!DOCTYPE html>
     .list-item:hover { background: #141c2a; }
     .list-item.active { background: #1e2637; }
 
+    .list-item-main {
+      min-width: 0;
+      flex: 1;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .list-item-side {
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      gap: 8px;
+      flex-shrink: 0;
+    }
+
+    .list-item-size {
+      min-width: 72px;
+      text-align: right;
+      color: var(--muted);
+      font-variant-numeric: tabular-nums;
+    }
+
+    .list-action-btn {
+      padding: 4px 8px;
+      font-size: 11px;
+    }
+
     .muted { color: var(--muted); font-size: 11px; }
 
     .preview {
@@ -618,7 +646,7 @@ INDEX_HTML = r"""<!DOCTYPE html>
       if (includeParent && currentDir) {
         const parent = document.createElement("div");
         parent.className = "list-item";
-        parent.innerHTML = `<span>📁 ..</span><span class="badge">dir</span>`;
+        parent.innerHTML = `<span class="list-item-main">📁 ..</span><span class="list-item-side"><span class="badge">dir</span></span>`;
         parent.onclick = () => onClick({ type: "dir", rel_path: parentPath(currentDir), name: ".." });
         if (onDoubleClick) parent.ondblclick = () => onDoubleClick({ type: "dir", rel_path: parentPath(currentDir), name: ".." });
         el.appendChild(parent);
@@ -633,9 +661,78 @@ INDEX_HTML = r"""<!DOCTYPE html>
       entries.forEach((entry) => {
         const row = document.createElement("div");
         row.className = "list-item";
-        row.innerHTML = `<span>${entry.type === "dir" ? "📁" : "📄"} ${entry.name}</span><span class="badge">${entry.type}</span>`;
+        row.innerHTML = `<span class="list-item-main">${entry.type === "dir" ? "📁" : "📄"} ${entry.name}</span><span class="list-item-side"><span class="badge">${entry.type}</span></span>`;
         row.onclick = () => onClick(entry);
         if (onDoubleClick) row.ondblclick = () => onDoubleClick(entry);
+        el.appendChild(row);
+      });
+    }
+
+    function renderOutputList(el, entries, currentDir = "") {
+      el.innerHTML = "";
+      if (currentDir) {
+        const parent = document.createElement("div");
+        parent.className = "list-item";
+        parent.innerHTML = `
+          <span class="list-item-main">📁 ..</span>
+          <span class="list-item-side">
+            <span class="list-item-size">-</span>
+            <span class="badge">dir</span>
+          </span>
+        `;
+        parent.onclick = () => {
+          state.outputDir = parentPath(currentDir);
+          refreshOutput();
+        };
+        el.appendChild(parent);
+      }
+      if (!entries.length) {
+        const empty = document.createElement("div");
+        empty.className = "muted";
+        empty.textContent = "空";
+        el.appendChild(empty);
+        return;
+      }
+      entries.forEach((entry) => {
+        const row = document.createElement("div");
+        row.className = "list-item";
+
+        const name = document.createElement("span");
+        name.className = "list-item-main";
+        name.textContent = `${entry.type === "dir" ? "📁" : "📄"} ${entry.name}`;
+        row.appendChild(name);
+
+        const side = document.createElement("span");
+        side.className = "list-item-side";
+
+        const size = document.createElement("span");
+        size.className = "list-item-size";
+        size.textContent = entry.type === "file" ? formatBytes(entry.size) : "-";
+        side.appendChild(size);
+
+        const badge = document.createElement("span");
+        badge.className = "badge";
+        badge.textContent = entry.type;
+        side.appendChild(badge);
+
+        const deleteButton = document.createElement("button");
+        deleteButton.className = "danger list-action-btn";
+        deleteButton.textContent = "削除";
+        deleteButton.onclick = async (event) => {
+          event.stopPropagation();
+          await deleteOutputEntry(entry);
+        };
+        side.appendChild(deleteButton);
+
+        row.appendChild(side);
+        row.onclick = () => {
+          if (entry.type === "dir") {
+            state.outputDir = entry.rel_path;
+            refreshOutput();
+          } else {
+            window.open(`/api/download?base=output&path=${encodeURIComponent(entry.rel_path)}`, "_blank");
+          }
+        };
         el.appendChild(row);
       });
     }
@@ -1373,15 +1470,17 @@ INDEX_HTML = r"""<!DOCTYPE html>
 
     async function refreshOutput() {
       const data = await apiGet("/api/output/list", { dir: state.outputDir });
+      state.outputDir = data.dir || "";
       document.getElementById("outputPath").textContent = `output/${data.dir || ""}`;
-      renderList(document.getElementById("outputList"), data.entries, (entry) => {
-        if (entry.type === "dir") {
-          state.outputDir = entry.rel_path;
-          refreshOutput();
-        } else {
-          window.open(`/api/download?base=output&path=${encodeURIComponent(entry.rel_path)}`, "_blank");
-        }
-      });
+      renderOutputList(document.getElementById("outputList"), data.entries, data.dir || "");
+    }
+
+    async function deleteOutputEntry(entry) {
+      if (!entry) return;
+      const targetLabel = entry.type === "dir" ? `フォルダ「${entry.name}」` : `ファイル「${entry.name}」`;
+      if (!window.confirm(`${targetLabel}を削除します。よろしいですか？`)) return;
+      await apiPost("/api/delete/output", { path: entry.rel_path });
+      await refreshOutput();
     }
 
     async function buildGame() {
@@ -1901,6 +2000,21 @@ class GUIHandler(BaseHTTPRequestHandler):
                     else:
                         target.unlink()
                 self._send_json({"ok": True, "count": len(paths)})
+                return
+
+            if parsed.path == "/api/delete/output":
+                data = self._parse_json()
+                rel = data.get("path", "")
+                if not rel:
+                    self._send_text("Missing fields", status=400)
+                    return
+                target = safe_path(OUTPUT_DIR, rel)
+                if target.exists():
+                    if target.is_dir():
+                        shutil.rmtree(target)
+                    else:
+                        target.unlink()
+                self._send_json({"ok": True})
                 return
 
             if parsed.path == "/api/move/assets":

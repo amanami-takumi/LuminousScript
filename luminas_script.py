@@ -639,6 +639,11 @@ class LuminasScript:
             <div class="modal-content save-load-content">
                 <h2 id="save-load-title">ロード</h2>
                 <p id="save-load-summary" class="save-load-summary"></p>
+                <div id="save-load-tools" class="save-load-tools hidden">
+                    <button class="slot-action-btn" onclick="exportSaveBackup()">バックアップ出力</button>
+                    <button class="slot-action-btn" onclick="promptImportSaveBackup()">インポート</button>
+                    <input type="file" id="save-backup-input" accept=".json,application/json" class="hidden" onchange="importSaveBackupFromFile(event)">
+                </div>
                 <div id="save-slot-list" class="save-slot-list"></div>
                 <button class="menu-btn" onclick="closeSaveLoadModal()">閉じる</button>
             </div>
@@ -1121,6 +1126,13 @@ class LuminasScript:
             opacity: 0.85;
         }}
 
+        .save-load-tools {{
+            display: flex;
+            gap: 0.8rem;
+            justify-content: center;
+            margin-bottom: 1rem;
+        }}
+
         .save-slot-list {{
             display: flex;
             flex-direction: column;
@@ -1341,6 +1353,10 @@ class LuminasScript:
         }}
 
         @media (max-width: 720px) {{
+            .save-load-tools {{
+                flex-direction: column;
+            }}
+
             .save-slot-item {{
                 flex-direction: column;
                 align-items: stretch;
@@ -2338,7 +2354,11 @@ class LuminasScript:
         function renderSaveSlots() {{
             const slotList = document.getElementById('save-slot-list');
             const summary = document.getElementById('save-load-summary');
+            const tools = document.getElementById('save-load-tools');
             if (!slotList || !summary) return;
+            if (tools) {{
+                tools.classList.toggle('hidden', saveLoadMode !== 'load');
+            }}
 
             let usedCount = 0;
             const rows = [];
@@ -2378,6 +2398,97 @@ class LuminasScript:
 
             summary.textContent = `使用中 ${{usedCount}} / ${{SAVE_SLOT_COUNT}}`;
             slotList.innerHTML = rows.join('');
+        }}
+
+        function collectSaveBackupSlots() {{
+            const slots = [];
+            for (let slotIndex = 1; slotIndex <= SAVE_SLOT_COUNT; slotIndex += 1) {{
+                const data = readSaveSlot(slotIndex);
+                if (data) {{
+                    slots.push({{ slot: slotIndex, data }});
+                }}
+            }}
+            return slots;
+        }}
+
+        function exportSaveBackup() {{
+            const slots = collectSaveBackupSlots();
+            const backup = {{
+                format: 'LuminasScriptSaveBackup',
+                version: 1,
+                exportedAt: new Date().toISOString(),
+                saveSlotCount: SAVE_SLOT_COUNT,
+                slots
+            }};
+
+            const json = JSON.stringify(backup, null, 2);
+            const blob = new Blob([json], {{ type: 'application/json' }});
+            const url = URL.createObjectURL(blob);
+            const anchor = document.createElement('a');
+            const stamp = new Date().toISOString().replace(/[-:]/g, '').replace(/\\..+/, '').replace('T', '_');
+            anchor.href = url;
+            anchor.download = `luminas_save_backup_${{stamp}}.json`;
+            document.body.appendChild(anchor);
+            anchor.click();
+            anchor.remove();
+            URL.revokeObjectURL(url);
+        }}
+
+        function promptImportSaveBackup() {{
+            const input = document.getElementById('save-backup-input');
+            if (!input) return;
+            input.value = '';
+            input.click();
+        }}
+
+        function normalizeImportedBackup(payload) {{
+            if (payload && payload.format === 'LuminasScriptSaveBackup' && Array.isArray(payload.slots)) {{
+                return payload.slots;
+            }}
+            if (Array.isArray(payload)) {{
+                return payload;
+            }}
+            throw new Error('バックアップ形式が不正です');
+        }}
+
+        async function importSaveBackupFromFile(event) {{
+            const input = event?.target;
+            const file = input?.files?.[0];
+            if (!file) return;
+
+            try {{
+                const text = await file.text();
+                const payload = JSON.parse(text);
+                const importedSlots = normalizeImportedBackup(payload);
+                const validSlots = importedSlots.filter(entry => {{
+                    const slot = Number.parseInt(entry?.slot, 10);
+                    return Number.isInteger(slot) && slot >= 1 && slot <= SAVE_SLOT_COUNT && entry?.data && typeof entry.data === 'object';
+                }});
+
+                if (!validSlots.length) {{
+                    throw new Error('有効なセーブデータが含まれていません');
+                }}
+
+                if (!confirm(`${{validSlots.length}} 件のセーブデータをインポートします。該当スロットは上書きされます。よろしいですか？`)) {{
+                    return;
+                }}
+
+                let importedCount = 0;
+                validSlots.forEach(entry => {{
+                    const slot = Number.parseInt(entry.slot, 10);
+                    const saved = safeStorageSet(getSaveSlotKey(slot), JSON.stringify(entry.data));
+                    if (saved) {{
+                        importedCount += 1;
+                    }}
+                }});
+
+                renderSaveSlots();
+                alert(`${{importedCount}} 件のセーブデータをインポートしました。`);
+            }} catch (e) {{
+                alert('インポートに失敗しました: ' + e.message);
+            }} finally {{
+                if (input) input.value = '';
+            }}
         }}
 
         function buildSaveData() {{
