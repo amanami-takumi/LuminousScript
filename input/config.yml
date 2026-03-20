@@ -6,6 +6,7 @@ adv_sub_title: "あなたとわたしの物語"
 title_bg_image: "start_1.png"
 ### タイトルを画像に変更したい場合は下をコメントアウトしてファイル名を入力する。両方コメントアウトした場合はテキストが優先される。
 adv_title_image: "start_1"
+adv_title_music: "test_01"
 adv_text_title_off: "true"
 
 # システム設定

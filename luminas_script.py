@@ -34,6 +34,7 @@ class LuminasScript:
             'adv_sub_title': '',
             'adv_text_title_off': '',
             'title_bg_image': '',
+            'adv_title_music': '',
             'localstorage_prefix': '',
             'music_def_volume': '70',
             'creator_name': '',
@@ -427,6 +428,15 @@ class LuminasScript:
                         encoded = self.encode_audio_to_base64(bgm_path)
                         if encoded:
                             audio_assets[bgm_name] = encoded
+
+            title_bgm_raw = self.config.get('adv_title_music', '').strip()
+            title_bgm = self._extract_asset_name(title_bgm_raw)
+            if title_bgm and title_bgm not in audio_assets:
+                bgm_path = self._find_asset_path(bgm_dir, title_bgm, ['.mp3', '.wav', '.ogg', '.m4a'])
+                if bgm_path:
+                    encoded = self.encode_audio_to_base64(bgm_path)
+                    if encoded:
+                        audio_assets[title_bgm] = encoded
 
         print(f"✓ 画像{len(image_assets)}個 / 音声{len(audio_assets)}個のアセットをエンコードしました")
         return {
@@ -1285,6 +1295,7 @@ class LuminasScript:
                 setTimeout(() => {{
                     document.getElementById('loading-screen').style.display = 'none';
                     document.getElementById('game-container').classList.remove('hidden');
+                    activateTitleScreen();
                     if (isLicenseRequired() && !licenseAccepted) {{
                         showLicenseModal(true);
                     }} else {{
@@ -1946,6 +1957,24 @@ class LuminasScript:
             }});
         }}
 
+        function retryBgmOnNextInteraction(audio, name) {{
+            const retry = () => {{
+                if (bgmAudio !== audio || currentBgmName !== name) {{
+                    return;
+                }}
+                const playPromise = audio.play();
+                if (playPromise && typeof playPromise.catch === 'function') {{
+                    playPromise.catch(err => {{
+                        console.warn('BGM playback retry was blocked:', err);
+                    }});
+                }}
+            }};
+
+            ['pointerdown', 'keydown', 'touchstart'].forEach(eventName => {{
+                document.addEventListener(eventName, retry, {{ once: true }});
+            }});
+        }}
+
         function startBgm(name) {{
             const src = AUDIO_ASSETS[name];
             if (!src) {{
@@ -1963,12 +1992,22 @@ class LuminasScript:
             if (playPromise && typeof playPromise.catch === 'function') {{
                 playPromise.catch(err => {{
                     console.warn('BGM playback was blocked:', err);
+                    retryBgmOnNextInteraction(nextAudio, name);
                 }});
             }}
 
             bgmAudio = nextAudio;
             currentBgmName = name;
             fadeAudioVolume(nextAudio, 0, getBgmTargetVolume(), BGM_FADE_DURATION);
+        }}
+
+        function getTitleBgmName() {{
+            return extractAssetName(CONFIG.adv_title_music);
+        }}
+
+        function activateTitleScreen() {{
+            showScreen('title-screen');
+            updateBgm(getTitleBgmName());
         }}
 
         function switchToBgm(name) {{
@@ -2324,11 +2363,10 @@ class LuminasScript:
         }}
         
         function returnToTitle() {{
-            showScreen('title-screen');
+            activateTitleScreen();
             closeGameMenu();
             isAutoMode = false;
             document.getElementById('auto-button').classList.remove('active');
-            fadeOutCurrentBgm();
         }}
         """
 
