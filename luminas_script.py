@@ -1433,10 +1433,19 @@ class LuminasScript:
                 let color = null;
                 let underline = false;
                 let ruby = null;
+                let fontSize = null;
+                let centered = false;
 
                 parts.forEach(p => {{
                     if (/^#([0-9a-fA-F]{{3}}|[0-9a-fA-F]{{6}})$/.test(p)) {{
                         if (!color) color = p;
+                    }} else if (/^S\\d+(\\.\\d+)?$/i.test(p)) {{
+                        const sizeValue = Number.parseFloat(p.slice(1));
+                        if (!Number.isNaN(sizeValue) && sizeValue > 0) {{
+                            fontSize = sizeValue;
+                        }}
+                    }} else if (p.toUpperCase() === 'C') {{
+                        centered = true;
                     }} else if (p.toUpperCase() === 'U') {{
                         underline = true;
                     }} else if (!ruby) {{
@@ -1451,6 +1460,12 @@ class LuminasScript:
                 }}
                 if (underline) {{
                     formatted = `<span style="text-decoration: underline;">${{formatted}}</span>`;
+                }}
+                if (fontSize !== null) {{
+                    formatted = `<span style="font-size:${{fontSize}}%;">${{formatted}}</span>`;
+                }}
+                if (centered) {{
+                    formatted = `<span style="display:flex;align-items:center;justify-content:center;width:100%;text-align:center;">${{formatted}}</span>`;
                 }}
                 if (color) {{
                     formatted = `<span style="color:${{color}}">${{formatted}}</span>`;
