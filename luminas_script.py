@@ -633,6 +633,16 @@ class LuminasScript:
                 <button class="menu-btn" onclick="closeGameMenu()">閉じる</button>
             </div>
         </div>
+
+        <!-- セーブ/ロード画面 -->
+        <div id="save-load-screen" class="modal hidden">
+            <div class="modal-content save-load-content">
+                <h2 id="save-load-title">ロード</h2>
+                <p id="save-load-summary" class="save-load-summary"></p>
+                <div id="save-slot-list" class="save-slot-list"></div>
+                <button class="menu-btn" onclick="closeSaveLoadModal()">閉じる</button>
+            </div>
+        </div>
         
         <!-- 設定画面 -->
         <div id="settings-screen" class="modal hidden">
@@ -1099,6 +1109,114 @@ class LuminasScript:
         .history-content {{
             max-width: 800px;
         }}
+
+        .save-load-content {{
+            max-width: 920px;
+            width: min(92vw, 920px);
+        }}
+
+        .save-load-summary {{
+            margin-bottom: 1rem;
+            text-align: center;
+            opacity: 0.85;
+        }}
+
+        .save-slot-list {{
+            display: flex;
+            flex-direction: column;
+            gap: 0.8rem;
+            max-height: 40vh;
+            overflow-y: auto;
+            margin-bottom: 1.5rem;
+        }}
+
+        .save-slot-item {{
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 1rem;
+            padding: 1rem 1.2rem;
+            border-radius: 10px;
+            background: rgba(0, 0, 0, 0.28);
+            border: 1px solid rgba(255, 255, 255, 0.18);
+        }}
+
+        .save-slot-item.empty {{
+            opacity: 0.9;
+        }}
+
+        .save-slot-meta {{
+            flex: 1;
+            min-width: 0;
+        }}
+
+        .save-slot-header {{
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.6rem;
+            align-items: baseline;
+            margin-bottom: 0.3rem;
+        }}
+
+        .save-slot-number {{
+            font-size: 1.1rem;
+            font-weight: bold;
+        }}
+
+        .save-slot-time {{
+            font-size: 0.9rem;
+            opacity: 0.8;
+        }}
+
+        .save-slot-scene,
+        .save-slot-preview {{
+            overflow-wrap: anywhere;
+            line-height: 1.5;
+        }}
+
+        .save-slot-preview {{
+            font-size: 0.95rem;
+            opacity: 0.95;
+        }}
+
+        .save-slot-empty {{
+            opacity: 0.75;
+        }}
+
+        .save-slot-actions {{
+            display: flex;
+            gap: 0.6rem;
+            flex-shrink: 0;
+        }}
+
+        .slot-action-btn {{
+            border: 1px solid rgba(255, 255, 255, 0.45);
+            background: rgba(255, 255, 255, 0.14);
+            color: white;
+            padding: 0.75rem 1rem;
+            border-radius: 8px;
+            cursor: pointer;
+            min-width: 6.5rem;
+            transition: background 0.2s, transform 0.2s;
+        }}
+
+        .slot-action-btn:hover:not(:disabled) {{
+            background: rgba(255, 255, 255, 0.22);
+            transform: translateY(-1px);
+        }}
+
+        .slot-action-btn:disabled {{
+            opacity: 0.45;
+            cursor: not-allowed;
+        }}
+
+        .slot-action-btn.danger {{
+            background: rgba(160, 32, 32, 0.35);
+        }}
+
+        .slot-action-btn.danger:hover:not(:disabled) {{
+            background: rgba(180, 32, 32, 0.48);
+        }}
         
         #history-list {{
             background: rgba(0, 0, 0, 0.3);
@@ -1221,6 +1339,21 @@ class LuminasScript:
         .menu-btn:active {{
             transform: translateY(0);
         }}
+
+        @media (max-width: 720px) {{
+            .save-slot-item {{
+                flex-direction: column;
+                align-items: stretch;
+            }}
+
+            .save-slot-actions {{
+                width: 100%;
+            }}
+
+            .slot-action-btn {{
+                flex: 1;
+            }}
+        }}
         """
     
     def _get_javascript(self, scenario_json: str, image_assets_json: str, audio_assets_json: str, config_json: str) -> str:
@@ -1242,7 +1375,9 @@ class LuminasScript:
         const STORAGE_PREFIX = normalizeStoragePrefix(
             CONFIG.localstorage_prefix ?? CONFIG.localStoragePrefix
         );
-        const SAVE_DATA_KEY = getStorageKey('luminas_save');
+        const LEGACY_SAVE_DATA_KEY = getStorageKey('luminas_save');
+        const SAVE_SLOT_KEY_PREFIX = getStorageKey('luminas_save_');
+        const SAVE_SLOT_COUNT = 99;
         const SETTINGS_KEY = getStorageKey('luminas_settings');
         
         // ゲーム状態
@@ -1258,18 +1393,9 @@ class LuminasScript:
         let bgmAudio = null;
         let bgmFadeInterval = null;
         let currentBgmName = '';
+        let saveLoadMode = 'load';
         
-        let gameState = {{
-            currentSceneId: null,
-            visitedScenes: [],
-            choices: {{}},
-            settings: {{
-                textSpeed: 5,
-                bgmVolume: {default_volume},
-                seVolume: {default_volume},
-                customName: ''
-            }}
-        }};
+        let gameState = createInitialGameState();
         
         // 初期化
         document.addEventListener('DOMContentLoaded', () => {{
@@ -1282,6 +1408,7 @@ class LuminasScript:
             loadSettings();
             loadLicenseAcceptance();
             initCustomNameUI();
+            migrateLegacySaveData();
             
             // タイトル背景を設定
             const titleBg = extractAssetName(CONFIG.title_bg_image);
@@ -1374,8 +1501,25 @@ class LuminasScript:
             return String(value || '').trim().replace(/^_+|_+$/g, '');
         }}
 
+        function createInitialGameState() {{
+            return {{
+                currentSceneId: null,
+                visitedScenes: [],
+                choices: {{}},
+                settings: {{ ...DEFAULT_SETTINGS }}
+            }};
+        }}
+
         function getStorageKey(name) {{
             return STORAGE_PREFIX ? `${{STORAGE_PREFIX}}_${{name}}` : name;
+        }}
+
+        function getSaveSlotKey(slotIndex) {{
+            return `${{SAVE_SLOT_KEY_PREFIX}}${{String(slotIndex).padStart(2, '0')}}`;
+        }}
+
+        function getSaveSlotLabel(slotIndex) {{
+            return `Slot ${{String(slotIndex).padStart(2, '0')}}`;
         }}
 
         function safeStorageGet(key) {{
@@ -1414,6 +1558,59 @@ class LuminasScript:
                 .replace(/>/g, '&gt;')
                 .replace(/"/g, '&quot;')
                 .replace(/'/g, '&#39;');
+        }}
+
+        function formatSaveTimestamp(value) {{
+            if (!value) return '';
+            const date = new Date(value);
+            if (Number.isNaN(date.getTime())) return '';
+            return date.toLocaleString('ja-JP', {{
+                year: 'numeric',
+                month: '2-digit',
+                day: '2-digit',
+                hour: '2-digit',
+                minute: '2-digit',
+                second: '2-digit'
+            }});
+        }}
+
+        function summarizeSceneText(raw) {{
+            const normalized = applyCustomName(raw || '').replace(/\\s+/g, ' ').trim();
+            if (!normalized) return '';
+            return normalized.length > 60 ? `${{normalized.slice(0, 60)}}...` : normalized;
+        }}
+
+        function getSavePreviewMeta(data) {{
+            const sceneIndex = Number.parseInt(data?.sceneIndex, 10);
+            const scene = Number.isInteger(sceneIndex) ? SCENARIO_DATA[sceneIndex] : null;
+            const meta = data?.meta && typeof data.meta === 'object' ? data.meta : {{}};
+            return {{
+                sceneId: meta.sceneId || normalizeSceneId(scene?.scene_id),
+                speaker: meta.speaker || scene?.person_name || '',
+                preview: meta.preview || summarizeSceneText(scene?.text || '')
+            }};
+        }}
+
+        function readSaveSlot(slotIndex) {{
+            const raw = safeStorageGet(getSaveSlotKey(slotIndex));
+            if (!raw) return null;
+            try {{
+                return JSON.parse(raw);
+            }} catch (e) {{
+                console.warn(`セーブスロット ${{slotIndex}} の読み込みに失敗しました:`, e);
+                return null;
+            }}
+        }}
+
+        function migrateLegacySaveData() {{
+            const legacyData = safeStorageGet(LEGACY_SAVE_DATA_KEY);
+            if (!legacyData) return;
+
+            const firstSlotKey = getSaveSlotKey(1);
+            if (!safeStorageGet(firstSlotKey)) {{
+                safeStorageSet(firstSlotKey, legacyData);
+            }}
+            safeStorageRemove(LEGACY_SAVE_DATA_KEY);
         }}
 
         function formatText(raw) {{
@@ -1515,9 +1712,16 @@ class LuminasScript:
             // 最新の履歴までスクロール
             historyList.scrollTop = historyList.scrollHeight;
         }}
+
+        function closeModalById(id) {{
+            const element = document.getElementById(id);
+            if (element) {{
+                element.classList.add('hidden');
+            }}
+        }}
         
         function closeHistory() {{
-            document.getElementById('history-screen').classList.add('hidden');
+            closeModalById('history-screen');
         }}
         
         // ゲーム開始
@@ -2108,20 +2312,11 @@ class LuminasScript:
         
         // セーブ/ロード
         function saveGame() {{
-            try {{
-                const saved = safeStorageSet(SAVE_DATA_KEY, JSON.stringify({{
-                    sceneIndex: currentSceneIndex,
-                    state: gameState,
-                    history: conversationHistory
-                }}));
-                if (!saved) {{
-                    throw new Error('localStorage に保存できませんでした');
-                }}
-                alert('セーブしました!');
-                closeGameMenu();
-            }} catch (e) {{
-                alert('セーブに失敗しました: ' + e.message);
-            }}
+            saveLoadMode = 'save';
+            renderSaveSlots();
+            document.getElementById('save-load-title').textContent = 'セーブ';
+            document.getElementById('save-load-screen').classList.remove('hidden');
+            closeGameMenu();
         }}
         
         function loadGame() {{
@@ -2129,23 +2324,146 @@ class LuminasScript:
                 showLicenseModal(true);
                 return;
             }}
-            try {{
-                const saveData = safeStorageGet(SAVE_DATA_KEY);
-                if (saveData) {{
-                    const data = JSON.parse(saveData);
-                    currentSceneIndex = data.sceneIndex;
-                    gameState = data.state;
-                    conversationHistory = data.history || [];
-                    
-                    showScreen('game-screen');
-                    loadScene(currentSceneIndex);
-                    closeGameMenu();
-                }} else {{
-                    alert('セーブデータがありません');
+            saveLoadMode = 'load';
+            renderSaveSlots();
+            document.getElementById('save-load-title').textContent = 'ロード';
+            document.getElementById('save-load-screen').classList.remove('hidden');
+            closeGameMenu();
+        }}
+
+        function closeSaveLoadModal() {{
+            document.getElementById('save-load-screen').classList.add('hidden');
+        }}
+
+        function renderSaveSlots() {{
+            const slotList = document.getElementById('save-slot-list');
+            const summary = document.getElementById('save-load-summary');
+            if (!slotList || !summary) return;
+
+            let usedCount = 0;
+            const rows = [];
+            for (let slotIndex = 1; slotIndex <= SAVE_SLOT_COUNT; slotIndex += 1) {{
+                const data = readSaveSlot(slotIndex);
+                const hasData = !!data;
+                if (hasData) usedCount += 1;
+
+                const meta = hasData ? getSavePreviewMeta(data) : null;
+                const timestamp = hasData ? formatSaveTimestamp(data.savedAt) : '';
+                const primaryLabel = saveLoadMode === 'save'
+                    ? (hasData ? '上書き保存' : 'ここに保存')
+                    : 'ロード';
+                const previewHtml = hasData
+                    ? `
+                        <div class="save-slot-scene">${{escapeHtml(meta.sceneId || 'scene unknown')}}</div>
+                        <div class="save-slot-preview">${{escapeHtml(meta.speaker ? `${{meta.speaker}}: ${{meta.preview}}` : meta.preview || 'プレビューなし')}}</div>
+                    `
+                    : '<div class="save-slot-empty">未使用スロット</div>';
+
+                rows.push(`
+                    <div class="save-slot-item ${{hasData ? 'filled' : 'empty'}}">
+                        <div class="save-slot-meta">
+                            <div class="save-slot-header">
+                                <span class="save-slot-number">${{getSaveSlotLabel(slotIndex)}}</span>
+                                <span class="save-slot-time">${{escapeHtml(timestamp || '未保存')}}</span>
+                            </div>
+                            ${{previewHtml}}
+                        </div>
+                        <div class="save-slot-actions">
+                            <button class="slot-action-btn" onclick="handleSaveLoadPrimaryAction(${{slotIndex}})" ${{saveLoadMode === 'load' && !hasData ? 'disabled' : ''}}>${{primaryLabel}}</button>
+                            <button class="slot-action-btn danger" onclick="deleteSaveSlot(${{slotIndex}})" ${{hasData ? '' : 'disabled'}}>破棄</button>
+                        </div>
+                    </div>
+                `);
+            }}
+
+            summary.textContent = `使用中 ${{usedCount}} / ${{SAVE_SLOT_COUNT}}`;
+            slotList.innerHTML = rows.join('');
+        }}
+
+        function buildSaveData() {{
+            const scene = SCENARIO_DATA[currentSceneIndex] || null;
+            return {{
+                version: 2,
+                savedAt: new Date().toISOString(),
+                sceneIndex: currentSceneIndex,
+                state: gameState,
+                history: conversationHistory,
+                meta: {{
+                    sceneId: gameState.currentSceneId || normalizeSceneId(scene?.scene_id),
+                    speaker: scene?.person_name || '',
+                    preview: summarizeSceneText(scene?.text || '')
                 }}
+            }};
+        }}
+
+        function handleSaveLoadPrimaryAction(slotIndex) {{
+            if (saveLoadMode === 'save') {{
+                saveToSlot(slotIndex);
+                return;
+            }}
+            loadFromSlot(slotIndex);
+        }}
+
+        function saveToSlot(slotIndex) {{
+            const existing = readSaveSlot(slotIndex);
+            if (existing && !confirm(`${{getSaveSlotLabel(slotIndex)}} に上書き保存しますか？`)) {{
+                return;
+            }}
+
+            try {{
+                const saved = safeStorageSet(getSaveSlotKey(slotIndex), JSON.stringify(buildSaveData()));
+                if (!saved) {{
+                    throw new Error('localStorage に保存できませんでした');
+                }}
+                renderSaveSlots();
+                closeSaveLoadModal();
+                alert(`${{getSaveSlotLabel(slotIndex)}} にセーブしました!`);
+            }} catch (e) {{
+                alert('セーブに失敗しました: ' + e.message);
+            }}
+        }}
+
+        function loadFromSlot(slotIndex) {{
+            try {{
+                const data = readSaveSlot(slotIndex);
+                if (!data) {{
+                    alert('セーブデータがありません');
+                    return;
+                }}
+
+                const nextSceneIndex = Number.parseInt(data.sceneIndex, 10);
+                currentSceneIndex = Number.isInteger(nextSceneIndex) && nextSceneIndex >= 0 && nextSceneIndex < SCENARIO_DATA.length
+                    ? nextSceneIndex
+                    : 0;
+
+                const loadedState = data.state && typeof data.state === 'object' ? data.state : {{}};
+                gameState = {{
+                    ...createInitialGameState(),
+                    ...loadedState,
+                    visitedScenes: Array.isArray(loadedState.visitedScenes) ? loadedState.visitedScenes : [],
+                    choices: loadedState.choices && typeof loadedState.choices === 'object' ? loadedState.choices : {{}},
+                    settings: {{ ...DEFAULT_SETTINGS, ...(loadedState.settings || {{}}) }}
+                }};
+                conversationHistory = Array.isArray(data.history) ? data.history : [];
+
+                closeSaveLoadModal();
+                showScreen('game-screen');
+                loadScene(currentSceneIndex);
             }} catch (e) {{
                 alert('ロードに失敗しました: ' + e.message);
             }}
+        }}
+
+        function deleteSaveSlot(slotIndex) {{
+            if (!readSaveSlot(slotIndex)) {{
+                return;
+            }}
+            if (!confirm(`${{getSaveSlotLabel(slotIndex)}} のセーブデータを破棄しますか？`)) {{
+                return;
+            }}
+            safeStorageRemove(getSaveSlotKey(slotIndex));
+            renderSaveSlots();
+            alert(`${{getSaveSlotLabel(slotIndex)}} のセーブデータを破棄しました。`);
         }}
 
         function getLicenseText() {{
@@ -2356,7 +2674,7 @@ class LuminasScript:
         }}
         
         function closeGameMenu() {{
-            document.getElementById('game-menu').classList.add('hidden');
+            closeModalById('game-menu');
         }}
         
         function showSettings() {{
@@ -2366,7 +2684,7 @@ class LuminasScript:
         
         function closeSettings() {{
             if (!saveSettings()) return;
-            document.getElementById('settings-screen').classList.add('hidden');
+            closeModalById('settings-screen');
         }}
         
         function showCredits() {{
@@ -2374,7 +2692,7 @@ class LuminasScript:
         }}
         
         function closeCredits() {{
-            document.getElementById('credits-screen').classList.add('hidden');
+            closeModalById('credits-screen');
         }}
         
         function returnToTitle() {{
