@@ -538,7 +538,9 @@ INDEX_HTML = r"""<!DOCTYPE html>
       <div class="preview" id="assetsList"></div>
       <div class="row">
         <input type="file" id="assetsUpload" multiple style="display:none" />
+        <input type="file" id="assetsReplaceUpload" style="display:none" />
         <button onclick="openAssetsPicker()">アップロード</button>
+        <button class="secondary" onclick="openAssetReplacePicker()">差替アップロード</button>
         <button class="secondary" onclick="createAssetDirectory()">フォルダ作成</button>
         <button class="secondary" onclick="downloadSelectedAsset()">ダウンロード</button>
         <button class="danger" onclick="deleteSelectedAsset()">削除</button>
@@ -1338,6 +1340,17 @@ INDEX_HTML = r"""<!DOCTYPE html>
       input.click();
     }
 
+    function openAssetReplacePicker() {
+      const selectedEntries = getAssetSelectedEntries();
+      if (selectedEntries.length !== 1 || selectedEntries[0].type !== "file") {
+        alert("差し替えるファイルを1件選択してください");
+        return;
+      }
+      const input = document.getElementById("assetsReplaceUpload");
+      input.value = "";
+      input.click();
+    }
+
     async function uploadAssets() {
       const input = document.getElementById("assetsUpload");
       if (!input.files.length) return;
@@ -1347,6 +1360,32 @@ INDEX_HTML = r"""<!DOCTYPE html>
       await apiPost("/api/upload/assets", form, false);
       input.value = "";
       refreshAssets();
+    }
+
+    async function replaceAssetUpload() {
+      const input = document.getElementById("assetsReplaceUpload");
+      if (!input.files.length) return;
+      const selectedEntries = getAssetSelectedEntries();
+      const target = selectedEntries.length === 1 ? selectedEntries[0] : null;
+      if (!target || target.type !== "file") {
+        input.value = "";
+        alert("差し替えるファイルを1件選択してください");
+        return;
+      }
+
+      const form = new FormData();
+      form.append("file", input.files[0]);
+      form.append("path", target.rel_path);
+      await apiPost("/api/upload/assets-replace", form, false);
+      input.value = "";
+      await refreshAssets();
+
+      if (state.assetsPreview && state.assetsPreview.rel_path === target.rel_path) {
+        const updatedEntry = state.assetsEntries.find((entry) => entry.rel_path === target.rel_path && entry.type === "file");
+        if (updatedEntry) {
+          openAssetPreview(updatedEntry);
+        }
+      }
     }
 
     async function renameAsset() {
@@ -1553,6 +1592,7 @@ INDEX_HTML = r"""<!DOCTYPE html>
 
     async function init() {
       document.getElementById("assetsUpload").addEventListener("change", uploadAssets);
+      document.getElementById("assetsReplaceUpload").addEventListener("change", replaceAssetUpload);
       document.getElementById("inputUpload").addEventListener("change", uploadInput);
       document.getElementById("assetPreviewOverlay").addEventListener("click", closeAssetPreview);
       document.getElementById("inputEditorOverlay").addEventListener("click", closeInputEditorModal);
@@ -1918,6 +1958,23 @@ class GUIHandler(BaseHTTPRequestHandler):
                     with dest.open("wb") as f:
                         f.write(item.get("data", b""))
                 self._send_json({"ok": True})
+                return
+
+            if parsed.path == "/api/upload/assets-replace":
+                fields, files = self._parse_multipart()
+                rel = fields.get("path", [""])[0]
+                items = files.get("file", [])
+                item = items[0] if items else None
+                if not rel or not item:
+                    self._send_text("Missing fields", status=400)
+                    return
+                target = safe_path(ASSETS_DIR, rel)
+                if not target.exists() or not target.is_file():
+                    self._send_text("Target file not found", status=404)
+                    return
+                with target.open("wb") as f:
+                    f.write(item.get("data", b""))
+                self._send_json({"ok": True, "path": rel})
                 return
 
             if parsed.path == "/api/mkdir/assets":
