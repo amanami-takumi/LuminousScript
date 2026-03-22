@@ -20,7 +20,8 @@ project/
 │   ├── scenario.csv     # シナリオCSVファイル
 │   └── assets/          # 画像・音声ファイル
 │       ├── backgrounds/ # 背景画像
-│       └── characters/  # キャラクター立ち絵
+│       ├── characters/  # キャラクター立ち絵
+│       └── effect/      # 画面最前面のエフェクト画像
 └── output/              # 生成されたHTMLの出力先
 ```
 
@@ -36,7 +37,7 @@ project/
 - `center_standing_portrait_image` - 中央の立ち絵
 - `left_standing_portrait_image` - 左の立ち絵
 - `right_standing_portrait_image` - 右の立ち絵
-- `effect` - エフェクト（将来実装）
+- `effect` - 最前面に重ねるエフェクト画像。`<file|M,S120,X10,Y-20,V2>` 記法対応
 - `sounds` - 効果音（将来実装）
 - `bgm` - BGM（将来実装）
 
@@ -53,6 +54,7 @@ project/
 画像ファイルを以下のディレクトリに配置:
 - 背景: `input/assets/backgrounds/`
 - キャラクター: `input/assets/characters/`
+- エフェクト: `input/assets/effect/`
 
 対応形式: PNG, JPG, JPEG, GIF, WebP
 

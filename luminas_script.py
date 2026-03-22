@@ -416,6 +416,19 @@ class LuminasScript:
                             if encoded:
                                 image_assets[char_name] = encoded
 
+        # エフェクト画像
+        effect_dir = self.assets_dir / "effect"
+        if effect_dir.exists():
+            for row in self.scenario_data:
+                effect_name_raw = row.get('effect', '').strip()
+                effect_name = self._extract_asset_name(effect_name_raw)
+                if effect_name and effect_name not in image_assets:
+                    effect_path = self._find_asset_path(effect_dir, effect_name, ['.png', '.jpg', '.jpeg', '.webp', '.gif'])
+                    if effect_path:
+                        encoded = self.encode_image_to_base64(effect_path)
+                        if encoded:
+                            image_assets[effect_name] = encoded
+
         # BGM
         bgm_dir = self.assets_dir / "bgms"
         if bgm_dir.exists():
@@ -591,6 +604,8 @@ class LuminasScript:
                 <div id="char-center" class="character-sprite"></div>
                 <div id="char-right" class="character-sprite"></div>
             </div>
+
+            <div id="effect-layer" class="layer effect-overlay"></div>
             
             <div id="ui-layer" class="layer">
                 <div id="text-box">
@@ -916,6 +931,14 @@ class LuminasScript:
             pointer-events: none;
             z-index: 1;
         }}
+
+        #effect-layer {{
+            background-size: contain;
+            background-position: center;
+            background-repeat: no-repeat;
+            pointer-events: none;
+            z-index: 2;
+        }}
         
         .character-sprite {{
             width: 50%;
@@ -938,7 +961,7 @@ class LuminasScript:
             flex-direction: column;
             justify-content: flex-end;
             pointer-events: none;
-            z-index: 2;
+            z-index: 3;
         }}
         
         #text-box {{
@@ -1596,13 +1619,17 @@ class LuminasScript:
             return normalized.length > 60 ? `${{normalized.slice(0, 60)}}...` : normalized;
         }}
 
+        function getSceneSpeakerName(scene) {{
+            return applyCustomName(scene?.person_name || '');
+        }}
+
         function getSavePreviewMeta(data) {{
             const sceneIndex = Number.parseInt(data?.sceneIndex, 10);
             const scene = Number.isInteger(sceneIndex) ? SCENARIO_DATA[sceneIndex] : null;
             const meta = data?.meta && typeof data.meta === 'object' ? data.meta : {{}};
             return {{
                 sceneId: meta.sceneId || normalizeSceneId(scene?.scene_id),
-                speaker: meta.speaker || scene?.person_name || '',
+                speaker: applyCustomName(meta.speaker || getSceneSpeakerName(scene)),
                 preview: meta.preview || summarizeSceneText(scene?.text || '')
             }};
         }}
@@ -1695,7 +1722,7 @@ class LuminasScript:
         // 会話履歴の追加
         function addToHistory(speaker, text) {{
             if (text && text.trim()) {{
-                conversationHistory.push({{ speaker, text }});
+                conversationHistory.push({{ speaker: applyCustomName(speaker), text }});
             }}
         }}
         
@@ -1712,7 +1739,7 @@ class LuminasScript:
                 if (item.speaker) {{
                     const speaker = document.createElement('div');
                     speaker.className = 'history-speaker';
-                    speaker.textContent = item.speaker;
+                    speaker.textContent = applyCustomName(item.speaker);
                     div.appendChild(speaker);
                 }}
                 
@@ -1871,6 +1898,7 @@ class LuminasScript:
             
             updateBackground(scene.background_image);
             clearCharacters();
+            updateEffectOverlay(scene.effect);
             
             addToHistory('', chapterText);
             
@@ -1909,6 +1937,7 @@ class LuminasScript:
             }});
             
             updateBackground(scene.background_image);
+            updateEffectOverlay(scene.effect);
         }}
         
         // 選択肢を選ぶ
@@ -1947,7 +1976,8 @@ class LuminasScript:
             textBox.style.display = 'block';
             document.getElementById('choice-box').classList.add('hidden');
 
-            speakerName.textContent = scene.person_name || '';
+            const speaker = getSceneSpeakerName(scene);
+            speakerName.textContent = speaker;
 
             let text = applyCustomName(scene.text || '');
             const lines = text.split('\\n');
@@ -1958,8 +1988,9 @@ class LuminasScript:
 
             updateBackground(scene.background_image);
             updateCharacters(scene);
+            updateEffectOverlay(scene.effect);
 
-            addToHistory(scene.person_name, text);
+            addToHistory(speaker, text);
 
             startClickDelay();
             textBox.onclick = () => {{
@@ -1986,7 +2017,8 @@ class LuminasScript:
             textBox.style.display = 'block';
             document.getElementById('choice-box').classList.add('hidden');
             
-            speakerName.textContent = scene.person_name || '';
+            const speaker = getSceneSpeakerName(scene);
+            speakerName.textContent = speaker;
             
             // テキストを4行に制限
             let text = applyCustomName(scene.text || '');
@@ -1998,8 +2030,9 @@ class LuminasScript:
             
             updateBackground(scene.background_image);
             updateCharacters(scene);
+            updateEffectOverlay(scene.effect);
             
-            addToHistory(scene.person_name, text);
+            addToHistory(speaker, text);
             
             // クリック遅延を開始
             startClickDelay();
@@ -2019,6 +2052,7 @@ class LuminasScript:
 
         const CHARACTER_BASE_SCALE = 3;
         const BACKGROUND_BASE_SCALE = 1;
+        const EFFECT_BASE_SCALE = 1;
 
         function normalizeEffectToken(token) {{
             return token.replace(/[‐‑‒–—−]/g, '-');
@@ -2289,6 +2323,22 @@ class LuminasScript:
             updateCharacter('char-center', scene.center_standing_portrait_image);
             updateCharacter('char-right', scene.right_standing_portrait_image);
         }}
+
+        function updateEffectOverlay(effectImage) {{
+            const effectLayer = document.getElementById('effect-layer');
+            const parsed = parseImageSpec(effectImage);
+            if (parsed.name && ASSETS[parsed.name]) {{
+                effectLayer.style.backgroundImage = `url(${{ASSETS[parsed.name]}})`;
+                if (parsed.effects) {{
+                    applyImageEffects(effectLayer, parsed.effects, EFFECT_BASE_SCALE);
+                }} else {{
+                    resetImageEffects(effectLayer, EFFECT_BASE_SCALE);
+                }}
+            }} else {{
+                effectLayer.style.backgroundImage = '';
+                resetImageEffects(effectLayer, EFFECT_BASE_SCALE);
+            }}
+        }}
         
         function updateCharacter(elementId, imageName) {{
             const element = document.getElementById(elementId);
@@ -2501,7 +2551,7 @@ class LuminasScript:
                 history: conversationHistory,
                 meta: {{
                     sceneId: gameState.currentSceneId || normalizeSceneId(scene?.scene_id),
-                    speaker: scene?.person_name || '',
+                    speaker: getSceneSpeakerName(scene),
                     preview: summarizeSceneText(scene?.text || '')
                 }}
             }};

@@ -15,8 +15,9 @@ version: "2026.03.18"
 music_def_volume: "10"
 
 ##  最適化設定
-target_size: "1080"
-optimization_level: "95"
+target_size: "2160"
+optimization: true
+optimization_level: "99"
 
 
 
