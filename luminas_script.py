@@ -976,6 +976,11 @@ class LuminasScript:
             box-shadow: 0 4px 20px rgba(0,0,0,0.5);
             position: relative;
         }}
+
+        #text-box.text-back-off {{
+            background: transparent;
+            box-shadow: none;
+        }}
         
         #speaker-name {{
             font-size: 1.3rem;
@@ -999,6 +1004,11 @@ class LuminasScript:
             background: rgba(255, 255, 255, 0.2);
             border-radius: 2px;
             overflow: hidden;
+        }}
+
+        #click-gauge-container.text-back-off,
+        #click-gauge.text-back-off {{
+            display: none;
         }}
         
         #click-gauge {{
@@ -1526,6 +1536,31 @@ class LuminasScript:
             return (sceneId || '').trim();
         }}
 
+        function parseSceneScriptTokens(scene) {{
+            const raw = String(scene?.script || '');
+            if (!raw.trim()) return [];
+            return raw
+                .split(/[\\s,;|]+/u)
+                .map(token => token.trim())
+                .filter(token => token);
+        }}
+
+        function sceneHasDirective(scene, directive) {{
+            if (!directive) return false;
+            return parseSceneScriptTokens(scene).includes(directive);
+        }}
+
+        function updateTextBoxAppearance(scene) {{
+            const textBox = document.getElementById('text-box');
+            const gaugeContainer = document.getElementById('click-gauge-container');
+            const gauge = document.getElementById('click-gauge');
+            const isTextBackOff = sceneHasDirective(scene, 'text_back_off');
+
+            textBox.classList.toggle('text-back-off', isTextBackOff);
+            gaugeContainer.classList.toggle('text-back-off', isTextBackOff);
+            gauge.classList.toggle('text-back-off', isTextBackOff);
+        }}
+
         function extractAssetName(spec) {{
             const text = String(spec || '').trim();
             if (text.startsWith('<') && text.endsWith('>')) {{
@@ -1794,6 +1829,7 @@ class LuminasScript:
             dialogueText.style.fontSize = '1.1rem';
             dialogueText.style.textAlign = 'left';
             dialogueText.style.fontWeight = 'normal';
+            updateTextBoxAppearance(null);
         }}
         
         // シーンを読み込み
@@ -1816,6 +1852,7 @@ class LuminasScript:
             gameState.currentSceneId = sceneId;
             gameState.visitedScenes.push(sceneId);
             resetSceneUI();
+            updateTextBoxAppearance(scene);
             updateBgm(scene.bgm);
             
             console.log(`Loading scene: ${{sceneId}}`);
