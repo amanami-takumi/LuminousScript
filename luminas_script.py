@@ -18,6 +18,17 @@ from typing import List, Dict, Optional
 
 class LuminasScript:
     """CSVからビジュアルノベルゲームを生成するメインクラス"""
+
+    STANDING_PORTRAIT_FIELDS = (
+        'center_standing_portrait_image',
+        'left_standing_portrait_image',
+        'right_standing_portrait_image'
+    )
+    GLOBAL_STANDING_PORTRAIT_CONFIG_MAP = {
+        'center_standing_portrait_image': 'custom_all_center_standing_portrait_image',
+        'left_standing_portrait_image': 'custom_all_left_standing_portrait_image',
+        'right_standing_portrait_image': 'custom_all_right_standing_portrait_image'
+    }
     
     def __init__(self, input_dir: str = "input", output_dir: str = "output"):
         self.input_dir = Path(input_dir)
@@ -40,6 +51,9 @@ class LuminasScript:
             'creator_name': '',
             'License': '',
             'custom_name': '',
+            'custom_all_center_standing_portrait_image': '',
+            'custom_all_left_standing_portrait_image': '',
+            'custom_all_right_standing_portrait_image': '',
             'forbidden_word': [],
             'target_size': '',
             'optimization': '',
@@ -101,6 +115,7 @@ class LuminasScript:
                     
                     # データが正しく読み込まれたか確認
                     if self.scenario_data and 'scene_id' in self.scenario_data[0]:
+                        self._apply_global_standing_portrait_customizations()
                         print(f"✓ {len(self.scenario_data)}行のシナリオデータを読み込みました (encoding: {encoding})")
                         return
                     
@@ -373,6 +388,183 @@ class LuminasScript:
 
         return "/".join(parts)
 
+    def _normalize_effect_token(self, token: str) -> str:
+        """全角ハイフン類を半角ハイフンへ正規化"""
+        return str(token).replace('‐', '-').replace('‑', '-').replace('‒', '-').replace('–', '-').replace('—', '-').replace('−', '-')
+
+    def _looks_like_effects_only_spec(self, spec: str) -> bool:
+        """ファイル名なしのエフェクト指定か判定"""
+        text = str(spec or '').strip()
+        if not text:
+            return False
+
+        tokens = [self._normalize_effect_token(token.strip()) for token in text.split(',') if token.strip()]
+        if not tokens:
+            return False
+
+        for token in tokens:
+            upper = token.upper()
+            if upper == 'M':
+                continue
+            if upper.startswith(('S', 'X', 'Y', 'V')):
+                try:
+                    float(token[1:])
+                except ValueError:
+                    return False
+                continue
+            return False
+
+        return True
+
+    def _parse_image_spec(self, spec: str) -> Dict[str, Optional[Dict[str, float]]]:
+        """画像指定を {name, effects} へ分解"""
+        text = str(spec or '').strip()
+        if not text:
+            return {'name': '', 'effects': None}
+
+        if self._looks_like_effects_only_spec(text):
+            text = f"<|{text}>"
+        elif not (text.startswith('<') and text.endswith('>')):
+            return {'name': text, 'effects': None}
+
+        inner = text[1:-1].strip()
+        if not inner:
+            return {'name': '', 'effects': None}
+
+        name_part, effect_part = (inner.split('|', 1) + [''])[:2]
+        name = name_part.strip()
+        if not effect_part.strip():
+            return {'name': name, 'effects': None}
+
+        effects = {
+            'monochrome': False,
+            'scale': 100.0,
+            'offsetX': 0.0,
+            'offsetY': 0.0,
+            'vibration': 0.0
+        }
+
+        tokens = [self._normalize_effect_token(token.strip()) for token in effect_part.split(',') if token.strip()]
+        for token in tokens:
+            upper = token.upper()
+            if upper == 'M':
+                effects['monochrome'] = True
+                continue
+            if upper.startswith('S'):
+                try:
+                    value = float(token[1:])
+                except ValueError:
+                    continue
+                if value > 0:
+                    effects['scale'] = value
+                continue
+            if upper.startswith('X'):
+                try:
+                    effects['offsetX'] = float(token[1:])
+                except ValueError:
+                    pass
+                continue
+            if upper.startswith('Y'):
+                try:
+                    effects['offsetY'] = float(token[1:])
+                except ValueError:
+                    pass
+                continue
+            if upper.startswith('V'):
+                try:
+                    value = float(token[1:])
+                except ValueError:
+                    continue
+                if value > 0:
+                    effects['vibration'] = value
+
+        return {'name': name, 'effects': effects}
+
+    def _has_image_effects(self, effects: Optional[Dict[str, float]]) -> bool:
+        """エフェクト指定があるか判定"""
+        if not effects:
+            return False
+        return (
+            bool(effects.get('monochrome')) or
+            float(effects.get('scale', 100)) != 100 or
+            float(effects.get('offsetX', 0)) != 0 or
+            float(effects.get('offsetY', 0)) != 0 or
+            float(effects.get('vibration', 0)) != 0
+        )
+
+    def _format_image_effect_value(self, value: float) -> str:
+        """数値エフェクトをCSV記法へ戻す"""
+        return str(int(value)) if float(value).is_integer() else f"{value:g}"
+
+    def _compose_image_spec(self, name: str, effects: Optional[Dict[str, float]]) -> str:
+        """画像指定をCSV互換の記法へ組み立て"""
+        clean_name = str(name or '').strip()
+        if not self._has_image_effects(effects):
+            return clean_name
+
+        tokens = []
+        if effects.get('monochrome'):
+            tokens.append('M')
+        scale = float(effects.get('scale', 100))
+        offset_x = float(effects.get('offsetX', 0))
+        offset_y = float(effects.get('offsetY', 0))
+        vibration = float(effects.get('vibration', 0))
+
+        if scale != 100:
+            tokens.append(f"S{self._format_image_effect_value(scale)}")
+        if offset_x != 0:
+            tokens.append(f"X{self._format_image_effect_value(offset_x)}")
+        if offset_y != 0:
+            tokens.append(f"Y{self._format_image_effect_value(offset_y)}")
+        if vibration != 0:
+            tokens.append(f"V{self._format_image_effect_value(vibration)}")
+
+        return f"<{clean_name}|{','.join(tokens)}>"
+
+    def _merge_image_specs(self, base_spec: str, override_spec: str) -> str:
+        """画像指定を重ね掛けで合成"""
+        base = self._parse_image_spec(base_spec)
+        override = self._parse_image_spec(override_spec)
+
+        name = override['name'] or base['name']
+        base_effects = base['effects']
+        override_effects = override['effects']
+
+        if not self._has_image_effects(base_effects) and not self._has_image_effects(override_effects):
+            return name
+
+        merged = {
+            'monochrome': bool(base_effects and base_effects.get('monochrome')) or bool(override_effects and override_effects.get('monochrome')),
+            'scale': float(base_effects['scale']) if base_effects else 100.0,
+            'offsetX': float(base_effects['offsetX']) if base_effects else 0.0,
+            'offsetY': float(base_effects['offsetY']) if base_effects else 0.0,
+            'vibration': float(base_effects['vibration']) if base_effects else 0.0
+        }
+
+        if override_effects:
+            merged['scale'] = merged['scale'] * (float(override_effects['scale']) / 100.0)
+            merged['offsetX'] += float(override_effects['offsetX'])
+            merged['offsetY'] += float(override_effects['offsetY'])
+            merged['vibration'] += float(override_effects['vibration'])
+
+        return self._compose_image_spec(name, merged)
+
+    def _apply_global_standing_portrait_customizations(self) -> None:
+        """config.ymlの立ち絵一括指定を各行へ反映"""
+        if not self.scenario_data:
+            return
+
+        applied_rows = []
+        for row in self.scenario_data:
+            next_row = dict(row)
+            for field, config_key in self.GLOBAL_STANDING_PORTRAIT_CONFIG_MAP.items():
+                global_spec = self.config.get(config_key, '')
+                if global_spec:
+                    next_row[field] = self._merge_image_specs(global_spec, row.get(field, ''))
+            applied_rows.append(next_row)
+
+        self.scenario_data = applied_rows
+
 
     def collect_assets(self) -> Dict[str, Dict[str, str]]:
         """使用されているすべてのアセットを収集してBase64エンコード"""
@@ -406,7 +598,7 @@ class LuminasScript:
         char_dir = self.assets_dir / "characters"
         if char_dir.exists():
             for row in self.scenario_data:
-                for pos in ['center_standing_portrait_image', 'left_standing_portrait_image', 'right_standing_portrait_image']:
+                for pos in self.STANDING_PORTRAIT_FIELDS:
                     char_name_raw = row.get(pos, '').strip()
                     char_name = self._extract_asset_name(char_name_raw)
                     if char_name and char_name not in image_assets:

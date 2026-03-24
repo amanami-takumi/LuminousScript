@@ -6,7 +6,7 @@ adv_sub_title: "あなたとわたしの物語"
 title_bg_image: "start_1.png"
 ### タイトルを画像に変更したい場合は下をコメントアウトしてファイル名を入力する。両方コメントアウトした場合はテキストが優先される。
 adv_title_image: "start_1"
-adv_title_music: "test_01"
+# adv_title_music: "dova_harutsumugukaze"
 adv_text_title_off: "true"
 
 # システム設定
@@ -15,14 +15,18 @@ version: "2026.03.18"
 music_def_volume: "10"
 
 ##  最適化設定
-target_size: "2160"
-optimization: true
-optimization_level: "99"
+# target_size: "2160"
+# optimization: true
+# optimization_level: "99"
 
 
 
 ## カスタム設定
 custom_name: "true"
+custom_all_center_standing_portrait_image: "S170,Y500"
+custom_all_left_standing_portrait_image: "S170,Y500"
+custom_all_right_standing_portrait_image: "S170,Y500"
+
 
 ## 色などの設定。sub_colorはグラデーションやアクセントに使われる色
 theme_color: "#171717"

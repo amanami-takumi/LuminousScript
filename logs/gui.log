@@ -3821,3 +3821,750 @@ ERRORS:
 生成されたファイル: output/test_202603221009.html
 最新版: output/game.html
 ブラウザで開いてゲームをお楽しみください!
+2026-03-24 15:42:52,140 [ERROR] GET error
+Traceback (most recent call last):
+  File "/usr/src/LuminousScript/web_gui.py", line 1927, in do_GET
+    self._send_file(path, inline=inline)
+    ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/src/LuminousScript/web_gui.py", line 1849, in _send_file
+    self.send_header("Content-Disposition", f"{disposition}; filename=\"{path.name}\"")
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.14/http/server.py", line 575, in send_header
+    ("%s: %s\r\n" % (keyword, value)).encode('latin-1', 'strict'))
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^
+UnicodeEncodeError: 'latin-1' codec can't encode characters in position 39-45: ordinal not in range(256)
+2026-03-24 15:43:29,161 [ERROR] GET error
+Traceback (most recent call last):
+  File "/usr/src/LuminousScript/web_gui.py", line 1927, in do_GET
+    self._send_file(path, inline=inline)
+    ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/src/LuminousScript/web_gui.py", line 1849, in _send_file
+    self.send_header("Content-Disposition", f"{disposition}; filename=\"{path.name}\"")
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.14/http/server.py", line 575, in send_header
+    ("%s: %s\r\n" % (keyword, value)).encode('latin-1', 'strict'))
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^
+UnicodeEncodeError: 'latin-1' codec can't encode characters in position 39-41: ordinal not in range(256)
+2026-03-24 15:43:56,293 [ERROR] GET error
+Traceback (most recent call last):
+  File "/usr/src/LuminousScript/web_gui.py", line 1927, in do_GET
+    self._send_file(path, inline=inline)
+    ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/src/LuminousScript/web_gui.py", line 1849, in _send_file
+    self.send_header("Content-Disposition", f"{disposition}; filename=\"{path.name}\"")
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.14/http/server.py", line 575, in send_header
+    ("%s: %s\r\n" % (keyword, value)).encode('latin-1', 'strict'))
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^
+UnicodeEncodeError: 'latin-1' codec can't encode characters in position 39-44: ordinal not in range(256)
+2026-03-24 15:44:09,112 [ERROR] GET error
+Traceback (most recent call last):
+  File "/usr/src/LuminousScript/web_gui.py", line 1927, in do_GET
+    self._send_file(path, inline=inline)
+    ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/src/LuminousScript/web_gui.py", line 1849, in _send_file
+    self.send_header("Content-Disposition", f"{disposition}; filename=\"{path.name}\"")
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.14/http/server.py", line 575, in send_header
+    ("%s: %s\r\n" % (keyword, value)).encode('latin-1', 'strict'))
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^
+UnicodeEncodeError: 'latin-1' codec can't encode characters in position 39-42: ordinal not in range(256)
+2026-03-24 18:37:17,051 [ERROR] GET error
+Traceback (most recent call last):
+  File "/usr/src/LuminousScript/web_gui.py", line 1927, in do_GET
+    self._send_file(path, inline=inline)
+    ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/src/LuminousScript/web_gui.py", line 1849, in _send_file
+    self.send_header("Content-Disposition", f"{disposition}; filename=\"{path.name}\"")
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.14/http/server.py", line 575, in send_header
+    ("%s: %s\r\n" % (keyword, value)).encode('latin-1', 'strict'))
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^
+UnicodeEncodeError: 'latin-1' codec can't encode characters in position 39-45: ordinal not in range(256)
+2026-03-24 18:37:36,878 [ERROR] GET error
+Traceback (most recent call last):
+  File "/usr/src/LuminousScript/web_gui.py", line 1927, in do_GET
+    self._send_file(path, inline=inline)
+    ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/src/LuminousScript/web_gui.py", line 1849, in _send_file
+    self.send_header("Content-Disposition", f"{disposition}; filename=\"{path.name}\"")
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.14/http/server.py", line 575, in send_header
+    ("%s: %s\r\n" % (keyword, value)).encode('latin-1', 'strict'))
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^
+UnicodeEncodeError: 'latin-1' codec can't encode characters in position 39-52: ordinal not in range(256)
+2026-03-24 18:37:56,958 [ERROR] GET error
+Traceback (most recent call last):
+  File "/usr/src/LuminousScript/web_gui.py", line 1927, in do_GET
+    self._send_file(path, inline=inline)
+    ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/src/LuminousScript/web_gui.py", line 1849, in _send_file
+    self.send_header("Content-Disposition", f"{disposition}; filename=\"{path.name}\"")
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.14/http/server.py", line 575, in send_header
+    ("%s: %s\r\n" % (keyword, value)).encode('latin-1', 'strict'))
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^
+UnicodeEncodeError: 'latin-1' codec can't encode characters in position 39-45: ordinal not in range(256)
+2026-03-24 18:48:05,248 [INFO] Build start: common_.csv
+2026-03-24 18:49:34,123 [INFO] Build stdout:
+============================================================
+  LuminasScript - Visual Novel Game Generator
+============================================================
+
+✓ config.ymlを読み込みました
+✓ 212行のシナリオデータを読み込みました (encoding: utf-8)
+✓ 画像44個 / 音声4個のアセットをエンコードしました
+✓ ゲームファイルを生成しました: output/common_202603241848.html
+✓ 最新版を更新しました: output/game.html
+  ファイルサイズ: 45250.6 KB
+
+============================================================
+  ✓ 生成完了!
+============================================================
+
+生成されたファイル: output/common_202603241848.html
+最新版: output/game.html
+ブラウザで開いてゲームをお楽しみください!
+2026-03-24 19:57:40,074 [INFO] Build start: common_A_.csv
+2026-03-24 20:00:44,038 [INFO] Build stdout:
+============================================================
+  LuminasScript - Visual Novel Game Generator
+============================================================
+
+✓ config.ymlを読み込みました
+✓ 206行のシナリオデータを読み込みました (encoding: utf-8)
+✓ 画像62個 / 音声4個のアセットをエンコードしました
+✓ ゲームファイルを生成しました: output/common_A_202603241957.html
+✓ 最新版を更新しました: output/game.html
+  ファイルサイズ: 48437.7 KB
+
+============================================================
+  ✓ 生成完了!
+============================================================
+
+生成されたファイル: output/common_A_202603241957.html
+最新版: output/game.html
+ブラウザで開いてゲームをお楽しみください!
+2026-03-24 20:00:44,062 [ERROR] GET error
+Traceback (most recent call last):
+  File "/usr/src/LuminousScript/web_gui.py", line 1927, in do_GET
+    self._send_file(path, inline=inline)
+    ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/src/LuminousScript/web_gui.py", line 1852, in _send_file
+    self.wfile.write(data)
+    ~~~~~~~~~~~~~~~~^^^^^^
+  File "/usr/local/lib/python3.14/socketserver.py", line 845, in write
+    self._sock.sendall(b)
+    ~~~~~~~~~~~~~~~~~~^^^
+BrokenPipeError: [Errno 32] Broken pipe
+2026-03-24 20:00:44,133 [ERROR] GET error
+Traceback (most recent call last):
+  File "/usr/src/LuminousScript/web_gui.py", line 1927, in do_GET
+    self._send_file(path, inline=inline)
+    ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/src/LuminousScript/web_gui.py", line 1852, in _send_file
+    self.wfile.write(data)
+    ~~~~~~~~~~~~~~~~^^^^^^
+  File "/usr/local/lib/python3.14/socketserver.py", line 845, in write
+    self._sock.sendall(b)
+    ~~~~~~~~~~~~~~~~~~^^^
+BrokenPipeError: [Errno 32] Broken pipe
+2026-03-24 20:12:34,839 [INFO] Build start: common_.csv
+2026-03-24 20:14:02,985 [INFO] Build stdout:
+============================================================
+  LuminasScript - Visual Novel Game Generator
+============================================================
+
+✓ config.ymlを読み込みました
+✓ 212行のシナリオデータを読み込みました (encoding: utf-8)
+✓ 画像44個 / 音声4個のアセットをエンコードしました
+✓ ゲームファイルを生成しました: output/common_202603242012.html
+✓ 最新版を更新しました: output/game.html
+  ファイルサイズ: 45250.6 KB
+
+============================================================
+  ✓ 生成完了!
+============================================================
+
+生成されたファイル: output/common_202603242012.html
+最新版: output/game.html
+ブラウザで開いてゲームをお楽しみください!
+2026-03-24 20:14:03,011 [ERROR] GET error
+Traceback (most recent call last):
+  File "/usr/src/LuminousScript/web_gui.py", line 1927, in do_GET
+    self._send_file(path, inline=inline)
+    ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/src/LuminousScript/web_gui.py", line 1852, in _send_file
+    self.wfile.write(data)
+    ~~~~~~~~~~~~~~~~^^^^^^
+  File "/usr/local/lib/python3.14/socketserver.py", line 845, in write
+    self._sock.sendall(b)
+    ~~~~~~~~~~~~~~~~~~^^^
+BrokenPipeError: [Errno 32] Broken pipe
+2026-03-24 20:14:03,040 [ERROR] GET error
+Traceback (most recent call last):
+  File "/usr/src/LuminousScript/web_gui.py", line 1927, in do_GET
+    self._send_file(path, inline=inline)
+    ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/src/LuminousScript/web_gui.py", line 1852, in _send_file
+    self.wfile.write(data)
+    ~~~~~~~~~~~~~~~~^^^^^^
+  File "/usr/local/lib/python3.14/socketserver.py", line 845, in write
+    self._sock.sendall(b)
+    ~~~~~~~~~~~~~~~~~~^^^
+BrokenPipeError: [Errno 32] Broken pipe
+2026-03-24 20:14:03,069 [ERROR] GET error
+Traceback (most recent call last):
+  File "/usr/src/LuminousScript/web_gui.py", line 1927, in do_GET
+    self._send_file(path, inline=inline)
+    ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/src/LuminousScript/web_gui.py", line 1852, in _send_file
+    self.wfile.write(data)
+    ~~~~~~~~~~~~~~~~^^^^^^
+  File "/usr/local/lib/python3.14/socketserver.py", line 845, in write
+    self._sock.sendall(b)
+    ~~~~~~~~~~~~~~~~~~^^^
+BrokenPipeError: [Errno 32] Broken pipe
+2026-03-24 20:28:10,923 [INFO] Build start: test_.csv
+2026-03-24 20:28:51,996 [INFO] Build stdout:
+============================================================
+  LuminasScript - Visual Novel Game Generator
+============================================================
+
+✓ config.ymlを読み込みました
+✓ 20行のシナリオデータを読み込みました (encoding: utf-8)
+✓ 画像14個 / 音声1個のアセットをエンコードしました
+✓ ゲームファイルを生成しました: output/test_202603242028.html
+✓ 最新版を更新しました: output/game.html
+  ファイルサイズ: 16977.4 KB
+
+============================================================
+  ✓ 生成完了!
+============================================================
+
+生成されたファイル: output/test_202603242028.html
+最新版: output/game.html
+ブラウザで開いてゲームをお楽しみください!
+2026-03-24 20:40:25,976 [INFO] Build start: test_.csv
+2026-03-24 20:41:06,515 [INFO] Build stdout:
+============================================================
+  LuminasScript - Visual Novel Game Generator
+============================================================
+
+✓ config.ymlを読み込みました
+✓ 20行のシナリオデータを読み込みました (encoding: utf-8)
+✓ 画像14個 / 音声1個のアセットをエンコードしました
+✓ ゲームファイルを生成しました: output/test_202603242040.html
+✓ 最新版を更新しました: output/game.html
+  ファイルサイズ: 16977.4 KB
+
+============================================================
+  ✓ 生成完了!
+============================================================
+
+生成されたファイル: output/test_202603242040.html
+最新版: output/game.html
+ブラウザで開いてゲームをお楽しみください!
+2026-03-24 20:43:16,458 [INFO] Scene ID check start: test_.csv
+2026-03-24 20:43:16,559 [INFO] Scene ID check stdout:
+✓ scene_id チェック完了 (encoding: utf-8)
+2026-03-24 20:44:39,286 [INFO] Build start: test_.csv
+2026-03-24 20:45:22,084 [INFO] Build stdout:
+============================================================
+  LuminasScript - Visual Novel Game Generator
+============================================================
+
+✓ config.ymlを読み込みました
+✓ 20行のシナリオデータを読み込みました (encoding: utf-8)
+✓ 画像14個 / 音声1個のアセットをエンコードしました
+✓ ゲームファイルを生成しました: output/test_202603242044.html
+✓ 最新版を更新しました: output/game.html
+  ファイルサイズ: 16977.4 KB
+
+============================================================
+  ✓ 生成完了!
+============================================================
+
+生成されたファイル: output/test_202603242044.html
+最新版: output/game.html
+ブラウザで開いてゲームをお楽しみください!
+2026-03-24 20:46:49,612 [INFO] Build start: test_.csv
+2026-03-24 20:47:30,899 [INFO] Build stdout:
+============================================================
+  LuminasScript - Visual Novel Game Generator
+============================================================
+
+✓ config.ymlを読み込みました
+✓ 20行のシナリオデータを読み込みました (encoding: utf-8)
+✓ 画像14個 / 音声1個のアセットをエンコードしました
+✓ ゲームファイルを生成しました: output/test_202603242046.html
+✓ 最新版を更新しました: output/game.html
+  ファイルサイズ: 16978.3 KB
+
+============================================================
+  ✓ 生成完了!
+============================================================
+
+生成されたファイル: output/test_202603242046.html
+最新版: output/game.html
+ブラウザで開いてゲームをお楽しみください!
+2026-03-24 20:52:41,327 [INFO] Build start: common_B.csv
+2026-03-24 20:53:09,390 [INFO] Build stdout:
+============================================================
+  LuminasScript - Visual Novel Game Generator
+============================================================
+
+✓ config.ymlを読み込みました
+✓ 179行のシナリオデータを読み込みました (encoding: shift-jis)
+✓ 画像8個 / 音声1個のアセットをエンコードしました
+✓ ゲームファイルを生成しました: output/common_B202603242052.html
+✓ 最新版を更新しました: output/game.html
+  ファイルサイズ: 14003.7 KB
+
+============================================================
+  ✓ 生成完了!
+============================================================
+
+生成されたファイル: output/common_B202603242052.html
+最新版: output/game.html
+ブラウザで開いてゲームをお楽しみください!
+2026-03-24 20:54:13,776 [INFO] Build start: test_.csv
+2026-03-24 20:54:18,118 [INFO] Build stdout:
+============================================================
+  LuminasScript - Visual Novel Game Generator
+============================================================
+
+✓ config.ymlを読み込みました
+✓ 1行のシナリオデータを読み込みました (encoding: utf-8)
+✓ 画像2個 / 音声0個のアセットをエンコードしました
+✓ ゲームファイルを生成しました: output/test_202603242054.html
+✓ 最新版を更新しました: output/game.html
+  ファイルサイズ: 1256.2 KB
+
+============================================================
+  ✓ 生成完了!
+============================================================
+
+生成されたファイル: output/test_202603242054.html
+最新版: output/game.html
+ブラウザで開いてゲームをお楽しみください!
+2026-03-24 20:56:19,201 [INFO] Build start: test_.csv
+2026-03-24 20:56:23,608 [INFO] Build stdout:
+============================================================
+  LuminasScript - Visual Novel Game Generator
+============================================================
+
+✓ config.ymlを読み込みました
+✓ 1行のシナリオデータを読み込みました (encoding: utf-8)
+✓ 画像2個 / 音声0個のアセットをエンコードしました
+✓ ゲームファイルを生成しました: output/test_202603242056.html
+✓ 最新版を更新しました: output/game.html
+  ファイルサイズ: 1256.3 KB
+
+============================================================
+  ✓ 生成完了!
+============================================================
+
+生成されたファイル: output/test_202603242056.html
+最新版: output/game.html
+ブラウザで開いてゲームをお楽しみください!
+2026-03-24 20:58:18,115 [INFO] Build start: test_.csv
+2026-03-24 20:58:22,458 [INFO] Build stdout:
+============================================================
+  LuminasScript - Visual Novel Game Generator
+============================================================
+
+✓ config.ymlを読み込みました
+✓ 1行のシナリオデータを読み込みました (encoding: utf-8)
+✓ 画像2個 / 音声0個のアセットをエンコードしました
+✓ ゲームファイルを生成しました: output/test_202603242058.html
+✓ 最新版を更新しました: output/game.html
+  ファイルサイズ: 1256.2 KB
+
+============================================================
+  ✓ 生成完了!
+============================================================
+
+生成されたファイル: output/test_202603242058.html
+最新版: output/game.html
+ブラウザで開いてゲームをお楽しみください!
+2026-03-24 21:02:03,646 [INFO] Build start: test_.csv
+2026-03-24 21:02:11,716 [INFO] Build stdout:
+============================================================
+  LuminasScript - Visual Novel Game Generator
+============================================================
+
+✓ config.ymlを読み込みました
+✓ 2行のシナリオデータを読み込みました (encoding: utf-8)
+✓ 画像3個 / 音声0個のアセットをエンコードしました
+✓ ゲームファイルを生成しました: output/test_202603242102.html
+✓ 最新版を更新しました: output/game.html
+  ファイルサイズ: 1329.3 KB
+
+============================================================
+  ✓ 生成完了!
+============================================================
+
+生成されたファイル: output/test_202603242102.html
+最新版: output/game.html
+ブラウザで開いてゲームをお楽しみください!
+2026-03-24 21:03:31,167 [INFO] Build start: test_.csv
+2026-03-24 21:03:39,169 [INFO] Build stdout:
+============================================================
+  LuminasScript - Visual Novel Game Generator
+============================================================
+
+✓ config.ymlを読み込みました
+✓ 2行のシナリオデータを読み込みました (encoding: utf-8)
+✓ 画像3個 / 音声0個のアセットをエンコードしました
+✓ ゲームファイルを生成しました: output/test_202603242103.html
+✓ 最新版を更新しました: output/game.html
+  ファイルサイズ: 1329.3 KB
+
+============================================================
+  ✓ 生成完了!
+============================================================
+
+生成されたファイル: output/test_202603242103.html
+最新版: output/game.html
+ブラウザで開いてゲームをお楽しみください!
+2026-03-24 21:06:40,539 [INFO] Build start: test_.csv
+2026-03-24 21:06:46,467 [INFO] Build stdout:
+============================================================
+  LuminasScript - Visual Novel Game Generator
+============================================================
+
+✓ config.ymlを読み込みました
+✓ 2行のシナリオデータを読み込みました (encoding: utf-8)
+✓ 画像3個 / 音声0個のアセットをエンコードしました
+✓ ゲームファイルを生成しました: output/test_202603242106.html
+✓ 最新版を更新しました: output/game.html
+  ファイルサイズ: 1329.3 KB
+
+============================================================
+  ✓ 生成完了!
+============================================================
+
+生成されたファイル: output/test_202603242106.html
+最新版: output/game.html
+ブラウザで開いてゲームをお楽しみください!
+2026-03-24 21:11:30,398 [INFO] Build start: test_.csv
+2026-03-24 21:11:39,634 [INFO] Build stdout:
+============================================================
+  LuminasScript - Visual Novel Game Generator
+============================================================
+
+✓ config.ymlを読み込みました
+✓ 2行のシナリオデータを読み込みました (encoding: utf-8)
+✓ 画像4個 / 音声0個のアセットをエンコードしました
+✓ ゲームファイルを生成しました: output/test_202603242111.html
+✓ 最新版を更新しました: output/game.html
+  ファイルサイズ: 1445.0 KB
+
+============================================================
+  ✓ 生成完了!
+============================================================
+
+生成されたファイル: output/test_202603242111.html
+最新版: output/game.html
+ブラウザで開いてゲームをお楽しみください!
+2026-03-24 21:27:37,222 [INFO] Build start: test_.csv
+2026-03-24 21:27:37,391 [INFO] Build stdout:
+============================================================
+  LuminasScript - Visual Novel Game Generator
+============================================================
+
+✓ config.ymlを読み込みました
+✓ 2行のシナリオデータを読み込みました (encoding: utf-8)
+✓ 画像4個 / 音声0個のアセットをエンコードしました
+✓ ゲームファイルを生成しました: output/test_202603242127.html
+✓ 最新版を更新しました: output/game.html
+  ファイルサイズ: 6854.5 KB
+
+============================================================
+  ✓ 生成完了!
+============================================================
+
+生成されたファイル: output/test_202603242127.html
+最新版: output/game.html
+ブラウザで開いてゲームをお楽しみください!
+2026-03-24 21:28:57,463 [INFO] Build start: common_.csv
+2026-03-24 21:29:02,537 [INFO] Build stdout:
+============================================================
+  LuminasScript - Visual Novel Game Generator
+============================================================
+
+✓ config.ymlを読み込みました
+✓ 212行のシナリオデータを読み込みました (encoding: utf-8)
+✓ 画像44個 / 音声3個のアセットをエンコードしました
+✓ ゲームファイルを生成しました: output/common_202603242128.html
+✓ 最新版を更新しました: output/game.html
+  ファイルサイズ: 261623.8 KB
+
+============================================================
+  ✓ 生成完了!
+============================================================
+
+生成されたファイル: output/common_202603242128.html
+最新版: output/game.html
+ブラウザで開いてゲームをお楽しみください!
+2026-03-24 21:29:57,006 [INFO] Build start: test_.csv
+2026-03-24 21:29:57,243 [INFO] Build stdout:
+============================================================
+  LuminasScript - Visual Novel Game Generator
+============================================================
+
+✓ config.ymlを読み込みました
+✓ 2行のシナリオデータを読み込みました (encoding: utf-8)
+✓ 画像4個 / 音声0個のアセットをエンコードしました
+✓ ゲームファイルを生成しました: output/test_202603242129.html
+✓ 最新版を更新しました: output/game.html
+  ファイルサイズ: 6854.5 KB
+
+============================================================
+  ✓ 生成完了!
+============================================================
+
+生成されたファイル: output/test_202603242129.html
+最新版: output/game.html
+ブラウザで開いてゲームをお楽しみください!
+2026-03-24 21:31:06,924 [INFO] Build start: test_.csv
+2026-03-24 21:31:07,076 [INFO] Build stdout:
+============================================================
+  LuminasScript - Visual Novel Game Generator
+============================================================
+
+✓ config.ymlを読み込みました
+✓ 2行のシナリオデータを読み込みました (encoding: utf-8)
+✓ 画像4個 / 音声0個のアセットをエンコードしました
+✓ ゲームファイルを生成しました: output/test_202603242131.html
+✓ 最新版を更新しました: output/game.html
+  ファイルサイズ: 6854.5 KB
+
+============================================================
+  ✓ 生成完了!
+============================================================
+
+生成されたファイル: output/test_202603242131.html
+最新版: output/game.html
+ブラウザで開いてゲームをお楽しみください!
+2026-03-24 21:36:12,960 [INFO] Build start: test_.csv
+2026-03-24 21:36:13,183 [INFO] Build stdout:
+============================================================
+  LuminasScript - Visual Novel Game Generator
+============================================================
+
+✓ config.ymlを読み込みました
+✓ 2行のシナリオデータを読み込みました (encoding: utf-8)
+✓ 画像4個 / 音声0個のアセットをエンコードしました
+✓ ゲームファイルを生成しました: output/test_202603242136.html
+✓ 最新版を更新しました: output/game.html
+  ファイルサイズ: 6854.5 KB
+
+============================================================
+  ✓ 生成完了!
+============================================================
+
+生成されたファイル: output/test_202603242136.html
+最新版: output/game.html
+ブラウザで開いてゲームをお楽しみください!
+2026-03-24 21:38:41,070 [INFO] Build start: test_.csv
+2026-03-24 21:38:41,305 [INFO] Build stdout:
+============================================================
+  LuminasScript - Visual Novel Game Generator
+============================================================
+
+✓ config.ymlを読み込みました
+✓ 2行のシナリオデータを読み込みました (encoding: utf-8)
+✓ 画像6個 / 音声0個のアセットをエンコードしました
+✓ ゲームファイルを生成しました: output/test_202603242138.html
+✓ 最新版を更新しました: output/game.html
+  ファイルサイズ: 9167.1 KB
+
+============================================================
+  ✓ 生成完了!
+============================================================
+
+生成されたファイル: output/test_202603242138.html
+最新版: output/game.html
+ブラウザで開いてゲームをお楽しみください!
+2026-03-24 21:41:38,185 [INFO] Build start: test_.csv
+2026-03-24 21:41:38,508 [INFO] Build stdout:
+============================================================
+  LuminasScript - Visual Novel Game Generator
+============================================================
+
+✓ config.ymlを読み込みました
+✓ 4行のシナリオデータを読み込みました (encoding: utf-8)
+✓ 画像10個 / 音声0個のアセットをエンコードしました
+✓ ゲームファイルを生成しました: output/test_202603242141.html
+✓ 最新版を更新しました: output/game.html
+  ファイルサイズ: 15537.9 KB
+
+============================================================
+  ✓ 生成完了!
+============================================================
+
+生成されたファイル: output/test_202603242141.html
+最新版: output/game.html
+ブラウザで開いてゲームをお楽しみください!
+2026-03-24 21:44:37,854 [INFO] Build start: test_.csv
+2026-03-24 21:44:38,145 [INFO] Build stdout:
+============================================================
+  LuminasScript - Visual Novel Game Generator
+============================================================
+
+✓ config.ymlを読み込みました
+✓ 4行のシナリオデータを読み込みました (encoding: utf-8)
+✓ 画像10個 / 音声0個のアセットをエンコードしました
+✓ ゲームファイルを生成しました: output/test_202603242144.html
+✓ 最新版を更新しました: output/game.html
+  ファイルサイズ: 15537.9 KB
+
+============================================================
+  ✓ 生成完了!
+============================================================
+
+生成されたファイル: output/test_202603242144.html
+最新版: output/game.html
+ブラウザで開いてゲームをお楽しみください!
+2026-03-24 21:46:52,438 [INFO] Build start: test_.csv
+2026-03-24 21:46:52,716 [INFO] Build stdout:
+============================================================
+  LuminasScript - Visual Novel Game Generator
+============================================================
+
+✓ config.ymlを読み込みました
+✓ 4行のシナリオデータを読み込みました (encoding: utf-8)
+✓ 画像10個 / 音声0個のアセットをエンコードしました
+✓ ゲームファイルを生成しました: output/test_202603242146.html
+✓ 最新版を更新しました: output/game.html
+  ファイルサイズ: 15537.9 KB
+
+============================================================
+  ✓ 生成完了!
+============================================================
+
+生成されたファイル: output/test_202603242146.html
+最新版: output/game.html
+ブラウザで開いてゲームをお楽しみください!
+2026-03-24 21:47:33,215 [INFO] Build start: common_.csv
+2026-03-24 21:47:37,526 [INFO] Build stdout:
+============================================================
+  LuminasScript - Visual Novel Game Generator
+============================================================
+
+✓ config.ymlを読み込みました
+✓ 212行のシナリオデータを読み込みました (encoding: utf-8)
+✓ 画像44個 / 音声3個のアセットをエンコードしました
+✓ ゲームファイルを生成しました: output/common_202603242147.html
+✓ 最新版を更新しました: output/game.html
+  ファイルサイズ: 261623.8 KB
+
+============================================================
+  ✓ 生成完了!
+============================================================
+
+生成されたファイル: output/common_202603242147.html
+最新版: output/game.html
+ブラウザで開いてゲームをお楽しみください!
+2026-03-24 21:47:50,584 [INFO] Build start: test_.csv
+2026-03-24 21:47:50,936 [INFO] Build stdout:
+============================================================
+  LuminasScript - Visual Novel Game Generator
+============================================================
+
+✓ config.ymlを読み込みました
+✓ 4行のシナリオデータを読み込みました (encoding: utf-8)
+✓ 画像10個 / 音声0個のアセットをエンコードしました
+✓ ゲームファイルを生成しました: output/test_202603242147.html
+✓ 最新版を更新しました: output/game.html
+  ファイルサイズ: 15537.9 KB
+
+============================================================
+  ✓ 生成完了!
+============================================================
+
+生成されたファイル: output/test_202603242147.html
+最新版: output/game.html
+ブラウザで開いてゲームをお楽しみください!
+2026-03-24 21:49:10,352 [INFO] Build start: test_.csv
+2026-03-24 21:49:10,691 [INFO] Build stdout:
+============================================================
+  LuminasScript - Visual Novel Game Generator
+============================================================
+
+✓ config.ymlを読み込みました
+✓ 4行のシナリオデータを読み込みました (encoding: utf-8)
+✓ 画像10個 / 音声0個のアセットをエンコードしました
+✓ ゲームファイルを生成しました: output/test_202603242149.html
+✓ 最新版を更新しました: output/game.html
+  ファイルサイズ: 15537.9 KB
+
+============================================================
+  ✓ 生成完了!
+============================================================
+
+生成されたファイル: output/test_202603242149.html
+最新版: output/game.html
+ブラウザで開いてゲームをお楽しみください!
+2026-03-24 21:49:58,166 [INFO] Build start: test_.csv
+2026-03-24 21:49:58,455 [INFO] Build stdout:
+============================================================
+  LuminasScript - Visual Novel Game Generator
+============================================================
+
+✓ config.ymlを読み込みました
+✓ 4行のシナリオデータを読み込みました (encoding: utf-8)
+✓ 画像10個 / 音声0個のアセットをエンコードしました
+✓ ゲームファイルを生成しました: output/test_202603242149.html
+✓ 最新版を更新しました: output/game.html
+  ファイルサイズ: 15537.9 KB
+
+============================================================
+  ✓ 生成完了!
+============================================================
+
+生成されたファイル: output/test_202603242149.html
+最新版: output/game.html
+ブラウザで開いてゲームをお楽しみください!
+2026-03-24 22:47:27,404 [INFO] Build start: common_.csv
+2026-03-24 22:47:31,658 [INFO] Build stdout:
+============================================================
+  LuminasScript - Visual Novel Game Generator
+============================================================
+
+✓ config.ymlを読み込みました
+✓ 212行のシナリオデータを読み込みました (encoding: utf-8)
+✓ 画像44個 / 音声3個のアセットをエンコードしました
+✓ ゲームファイルを生成しました: output/common_202603242247.html
+✓ 最新版を更新しました: output/game.html
+  ファイルサイズ: 261623.8 KB
+
+============================================================
+  ✓ 生成完了!
+============================================================
+
+生成されたファイル: output/common_202603242247.html
+最新版: output/game.html
+ブラウザで開いてゲームをお楽しみください!
+2026-03-24 22:47:59,782 [INFO] Build start: common_A_.csv
+2026-03-24 22:48:03,458 [INFO] Build stdout:
+============================================================
+  LuminasScript - Visual Novel Game Generator
+============================================================
+
+✓ config.ymlを読み込みました
+✓ 206行のシナリオデータを読み込みました (encoding: utf-8)
+✓ 画像66個 / 音声3個のアセットをエンコードしました
+✓ ゲームファイルを生成しました: output/common_A_202603242247.html
+✓ 最新版を更新しました: output/game.html
+  ファイルサイズ: 184783.4 KB
+
+============================================================
+  ✓ 生成完了!
+============================================================
+
+生成されたファイル: output/common_A_202603242247.html
+最新版: output/game.html
+ブラウザで開いてゲームをお楽しみください!
