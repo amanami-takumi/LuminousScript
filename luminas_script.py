@@ -767,7 +767,7 @@ class LuminasScript:
     <div id="loading-screen">
         <div class="loading-content">
             <div class="spinner"></div>
-            <p class="loading-text">ローディング中...</p>
+            <p class="loading-text">ロードしてます...</p>
         </div>
     </div>
 
@@ -813,7 +813,11 @@ class LuminasScript:
                 </div>
                 
                 <div id="control-buttons">
-                    <button id="history-button" onclick="toggleHistory()" title="会話履歴">📜</button>
+                    <button id="history-button" onclick="toggleHistory()" title="会話履歴" aria-label="会話履歴">
+                        <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                            <path d="M2.5 5.75C2.5 4.78 3.28 4 4.25 4h5.25c1.18 0 2.3.34 3.25.95.95-.61 2.07-.95 3.25-.95h5.25c.97 0 1.75.78 1.75 1.75v11.5c0 .41-.34.75-.75.75h-5.63c-1.15 0-2.26.34-3.21.97a.75.75 0 0 1-.83 0A5.78 5.78 0 0 0 9.5 18H3.25a.75.75 0 0 1-.75-.75V5.75Zm9.75.03v10.99A7.26 7.26 0 0 0 9.5 16H4V5.78h5.5c1 0 1.96.27 2.75.78Zm1.5 10.99A7.26 7.26 0 0 1 16.5 16H22V5.78h-5.5c-1 0-1.96.27-2.75.78v10.21Z" fill="currentColor"/>
+                        </svg>
+                    </button>
                     <button id="auto-button" onclick="toggleAuto()" title="自動">▶</button>
                     <button id="menu-button" onclick="toggleGameMenu()" title="メニュー">≡</button>
                 </div>
@@ -1268,6 +1272,15 @@ class LuminasScript:
             font-size: 1.2rem;
             cursor: pointer;
             transition: background 0.3s;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+        }}
+
+        #control-buttons button svg {{
+            width: 1.2rem;
+            height: 1.2rem;
+            display: block;
         }}
         
         #control-buttons button:hover {{
