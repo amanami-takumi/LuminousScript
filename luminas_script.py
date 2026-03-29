@@ -48,6 +48,8 @@ class LuminasScript:
             'adv_title_music': '',
             'localstorage_prefix': '',
             'music_def_volume': '70',
+            'AUTO_SCENE_CHANGE_DELAY_def': '3000',
+            'CLICK_DELAY_def': '500',
             'creator_name': '',
             'License': '',
             'custom_name': '',
@@ -876,6 +878,10 @@ class LuminasScript:
                     <label>SE音量</label>
                     <input type="range" id="se-volume" min="0" max="100" value="{default_volume}">
                 </div>
+                <div class="setting-item">
+                    <label>オート送り速度</label>
+                    <input type="range" id="auto-scene-change-delay" min="500" max="10000" step="100" value="3000">
+                </div>
                 <div id="custom-name-setting" class="setting-item hidden">
                     <label>ユーザー名</label>
                     <input type="text" id="custom-name-input" class="text-input" placeholder="ユーザー名を入力">
@@ -1619,8 +1625,17 @@ class LuminasScript:
         const ASSETS = {image_assets_json};
         const AUDIO_ASSETS = {audio_assets_json};
         const CONFIG = {config_json};
+        const AUTO_SCENE_CHANGE_DELAY = parsePositiveInt(
+            CONFIG.AUTO_SCENE_CHANGE_DELAY_def ?? CONFIG.auto_scene_change_delay_def,
+            3000
+        );
+        const CLICK_DELAY = parsePositiveInt(
+            CONFIG.CLICK_DELAY_def ?? CONFIG.click_delay_def,
+            500
+        );
         const DEFAULT_SETTINGS = {{
             textSpeed: 5,
+            autoSceneChangeDelay: AUTO_SCENE_CHANGE_DELAY,
             bgmVolume: {default_volume},
             seVolume: {default_volume},
             customName: ''
@@ -1641,7 +1656,6 @@ class LuminasScript:
         let autoModeTimeout = null;
         let clickDelayTimer = null;
         let canClick = false;
-        const CLICK_DELAY = 500; // クリック可能になるまでの時間（ミリ秒）
         let licenseAccepted = false;
         const LICENSE_ACCEPT_KEY = getStorageKey('luminas_license_accepted');
         let bgmAudio = null;
@@ -1687,14 +1701,15 @@ class LuminasScript:
         }});
         
         // クリック遅延ゲージの更新
-        function startClickDelay() {{
+        function startClickDelay(scene) {{
             canClick = false;
             const gauge = document.getElementById('click-gauge');
             gauge.style.width = '0%';
             
+            const delay = getSceneClickDelay(scene);
             let progress = 0;
             const interval = 10;
-            const increment = (100 / CLICK_DELAY) * interval;
+            const increment = (100 / delay) * interval;
             
             if (clickDelayTimer) clearInterval(clickDelayTimer);
             
@@ -1716,7 +1731,7 @@ class LuminasScript:
             
             if (isAutoMode) {{
                 btn.classList.add('active');
-                autoAdvance();
+                autoAdvance(SCENARIO_DATA[currentSceneIndex]);
             }} else {{
                 btn.classList.remove('active');
                 if (autoModeTimeout) {{
@@ -1726,33 +1741,93 @@ class LuminasScript:
             }}
         }}
         
-        function autoAdvance() {{
+        function autoAdvance(scene) {{
             if (!isAutoMode) return;
             
-            const delay = 3000; // 3秒後に自動で進む
             autoModeTimeout = setTimeout(() => {{
                 if (isAutoMode && canClick) {{
                     loadScene(findNextSceneIndex(currentSceneIndex));
                 }}
-            }}, delay);
+            }}, getSceneAutoSceneChangeDelay(scene));
         }}
 
         function normalizeSceneId(sceneId) {{
             return (sceneId || '').trim();
         }}
 
+        function parseSceneScriptDirectives(scene) {{
+            if (!scene || typeof scene !== 'object') {{
+                return {{ tokens: [], overrides: {{}} }};
+            }}
+
+            const raw = String(scene.script || '');
+            if (scene._parsedScriptSource === raw && scene._parsedScriptDirectives) {{
+                return scene._parsedScriptDirectives;
+            }}
+
+            const segments = [];
+            const outside = raw.replace(/<([^>]*)>/gu, (_, inner) => {{
+                if (inner && inner.trim()) {{
+                    segments.push(inner);
+                }}
+                return ' ';
+            }});
+            if (outside.trim()) {{
+                segments.push(outside);
+            }}
+
+            const tokens = segments.flatMap(segment =>
+                String(segment || '')
+                    .split(/[\\s,;|]+/u)
+                    .map(token => token.trim())
+                    .filter(token => token)
+            );
+            const overrides = {{}};
+
+            tokens.forEach(token => {{
+                const separatorIndex = token.indexOf('=');
+                if (separatorIndex <= 0) return;
+
+                const key = token.slice(0, separatorIndex).trim().toUpperCase();
+                const value = token.slice(separatorIndex + 1).trim();
+                const parsed = parsePositiveInt(value, null);
+                if (parsed === null) return;
+
+                if (key === 'CLICK_DELAY') {{
+                    overrides.clickDelay = parsed;
+                    return;
+                }}
+                if (key === 'AUTO_SCENE_CHANGE_DELAY') {{
+                    overrides.autoSceneChangeDelay = parsed;
+                }}
+            }});
+
+            const parsed = {{ tokens, overrides }};
+            scene._parsedScriptSource = raw;
+            scene._parsedScriptDirectives = parsed;
+            return parsed;
+        }}
+
         function parseSceneScriptTokens(scene) {{
-            const raw = String(scene?.script || '');
-            if (!raw.trim()) return [];
-            return raw
-                .split(/[\\s,;|]+/u)
-                .map(token => token.trim())
-                .filter(token => token);
+            return parseSceneScriptDirectives(scene).tokens;
         }}
 
         function sceneHasDirective(scene, directive) {{
             if (!directive) return false;
             return parseSceneScriptTokens(scene).includes(directive);
+        }}
+
+        function getSceneClickDelay(scene) {{
+            const value = parseSceneScriptDirectives(scene).overrides.clickDelay;
+            return parsePositiveInt(value, CLICK_DELAY);
+        }}
+
+        function getSceneAutoSceneChangeDelay(scene) {{
+            const value = parseSceneScriptDirectives(scene).overrides.autoSceneChangeDelay;
+            return parsePositiveInt(
+                value,
+                parsePositiveInt(gameState.settings.autoSceneChangeDelay, AUTO_SCENE_CHANGE_DELAY)
+            );
         }}
 
         function updateTextBoxAppearance(scene) {{
@@ -2234,7 +2309,7 @@ class LuminasScript:
 
             addToHistory(speaker, text);
 
-            startClickDelay();
+            startClickDelay(scene);
             textBox.onclick = () => {{
                 if (canClick) {{
                     returnToTitle();
@@ -2246,7 +2321,7 @@ class LuminasScript:
                     if (isAutoMode) {{
                         returnToTitle();
                     }}
-                }}, 3000);
+                }}, getSceneAutoSceneChangeDelay(scene));
             }}
         }}
         
@@ -2277,7 +2352,7 @@ class LuminasScript:
             addToHistory(speaker, text);
             
             // クリック遅延を開始
-            startClickDelay();
+            startClickDelay(scene);
             
             // クリックで次へ
             textBox.onclick = () => {{
@@ -2288,7 +2363,7 @@ class LuminasScript:
             
             // 自動モードの場合は自動で進む
             if (isAutoMode) {{
-                autoAdvance();
+                autoAdvance(scene);
             }}
         }}
 
@@ -2882,6 +2957,11 @@ class LuminasScript:
             return ['1', 'true', 'yes', 'on'].includes(text);
         }}
 
+        function parsePositiveInt(value, fallback) {{
+            const parsed = Number.parseInt(value, 10);
+            return Number.isFinite(parsed) && parsed > 0 ? parsed : fallback;
+        }}
+
         function isCustomNameEnabled() {{
             return parseBool(CONFIG.custom_name || CONFIG.customName);
         }}
@@ -3035,6 +3115,10 @@ class LuminasScript:
                 gameState.settings = {{ ...DEFAULT_SETTINGS }};
             }}
             document.getElementById('text-speed').value = gameState.settings.textSpeed;
+            document.getElementById('auto-scene-change-delay').value = parsePositiveInt(
+                gameState.settings.autoSceneChangeDelay,
+                AUTO_SCENE_CHANGE_DELAY
+            );
             document.getElementById('bgm-volume').value = gameState.settings.bgmVolume;
             document.getElementById('se-volume').value = gameState.settings.seVolume;
             syncCustomNameInputs(gameState.settings.customName);
@@ -3045,6 +3129,10 @@ class LuminasScript:
         
         function saveSettings() {{
             gameState.settings.textSpeed = parseInt(document.getElementById('text-speed').value);
+            gameState.settings.autoSceneChangeDelay = parsePositiveInt(
+                document.getElementById('auto-scene-change-delay').value,
+                AUTO_SCENE_CHANGE_DELAY
+            );
             gameState.settings.bgmVolume = parseInt(document.getElementById('bgm-volume').value);
             gameState.settings.seVolume = parseInt(document.getElementById('se-volume').value);
             if (isCustomNameEnabled()) {{
