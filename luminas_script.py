@@ -770,6 +770,10 @@ class LuminasScript:
         <div class="loading-content">
             <div class="spinner"></div>
             <p class="loading-text">ロードしてます...</p>
+            <div class="loading-meta">
+                <p id="loading-image-count">画像: 0 / 0</p>
+                <p id="loading-audio-count">音声: 0 / 0</p>
+            </div>
         </div>
     </div>
 
@@ -1020,6 +1024,14 @@ class LuminasScript:
             font-size: 1.5rem;
             font-weight: bold;
         }}
+
+        .loading-meta {{
+            margin-top: 1rem;
+            font-size: 1rem;
+            line-height: 1.8;
+            opacity: 0.92;
+            font-variant-numeric: tabular-nums;
+        }}
         
         #game-container {{
             width: 100vw;
@@ -1192,7 +1204,7 @@ class LuminasScript:
         }}
         
         #dialogue-text {{
-            font-size: 1.1rem;
+            font-size: 1.2rem;
             line-height: 1.8;
             white-space: pre-wrap;
         }}
@@ -1576,12 +1588,13 @@ class LuminasScript:
             background: linear-gradient(135deg, {theme_color} 0%, {sub_color} 100%);
             color: white;
             border: 2px solid white;
-            padding: 1rem 8rem;
+            padding: 1rem 6rem;
             font-size: 1.1rem;
             border-radius: 8px;
             cursor: pointer;
             transition: all 0.3s;
             width: 100%;
+            white-space: nowrap;
             margin-bottom: 0.8rem;
             backdrop-filter: blur(10px);
         }}
@@ -1664,6 +1677,130 @@ class LuminasScript:
         let saveLoadMode = 'load';
         
         let gameState = createInitialGameState();
+
+        function updateLoadingMessage(message) {{
+            const text = document.querySelector('#loading-screen .loading-text');
+            if (text) {{
+                text.textContent = message;
+            }}
+        }}
+
+        function updateLoadingCounts(imageLoaded, imageTotal, audioLoaded, audioTotal) {{
+            const imageCount = document.getElementById('loading-image-count');
+            const audioCount = document.getElementById('loading-audio-count');
+            if (imageCount) {{
+                imageCount.textContent = `画像: ${{imageLoaded}} / ${{imageTotal}}`;
+            }}
+            if (audioCount) {{
+                audioCount.textContent = `音声: ${{audioLoaded}} / ${{audioTotal}}`;
+            }}
+        }}
+
+        function preloadImageAsset(src) {{
+            return new Promise(resolve => {{
+                if (!src) {{
+                    resolve();
+                    return;
+                }}
+
+                const img = new Image();
+                const finish = () => resolve();
+                img.onload = finish;
+                img.onerror = finish;
+                img.src = src;
+            }});
+        }}
+
+        function preloadAudioAsset(src) {{
+            return new Promise(resolve => {{
+                if (!src) {{
+                    resolve();
+                    return;
+                }}
+
+                const audio = new Audio();
+                let settled = false;
+
+                const finish = () => {{
+                    if (settled) return;
+                    settled = true;
+                    audio.removeEventListener('loadeddata', finish);
+                    audio.removeEventListener('canplaythrough', finish);
+                    audio.removeEventListener('error', finish);
+                    resolve();
+                }};
+
+                audio.preload = 'auto';
+                audio.addEventListener('loadeddata', finish, {{ once: true }});
+                audio.addEventListener('canplaythrough', finish, {{ once: true }});
+                audio.addEventListener('error', finish, {{ once: true }});
+                audio.src = src;
+
+                try {{
+                    audio.load();
+                }} catch (error) {{
+                    finish();
+                }}
+
+                setTimeout(finish, 3000);
+            }});
+        }}
+
+        async function preloadLoadingAssets() {{
+            const imageSources = Object.values(ASSETS);
+            const audioSources = Object.values(AUDIO_ASSETS);
+            const imageTotal = imageSources.length;
+            const audioTotal = audioSources.length;
+            let imageLoaded = 0;
+            let audioLoaded = 0;
+
+            updateLoadingCounts(imageLoaded, imageTotal, audioLoaded, audioTotal);
+            updateLoadingMessage('画像と音声を読み込んでいます...');
+
+            const imageTasks = imageSources.map(src =>
+                preloadImageAsset(src).finally(() => {{
+                    imageLoaded += 1;
+                    updateLoadingCounts(imageLoaded, imageTotal, audioLoaded, audioTotal);
+                }})
+            );
+            const audioTasks = audioSources.map(src =>
+                preloadAudioAsset(src).finally(() => {{
+                    audioLoaded += 1;
+                    updateLoadingCounts(imageLoaded, imageTotal, audioLoaded, audioTotal);
+                }})
+            );
+
+            await Promise.all([...imageTasks, ...audioTasks]);
+        }}
+
+        async function initializeGame() {{
+            updateLoadingMessage('設定を読み込んでいます...');
+
+            loadSettings();
+            loadLicenseAcceptance();
+            initCustomNameUI();
+            migrateLegacySaveData();
+            
+            const titleBg = extractAssetName(CONFIG.title_bg_image);
+            if (titleBg && ASSETS[titleBg]) {{
+                document.getElementById('title-screen').style.backgroundImage = `url(${{ASSETS[titleBg]}})`;
+            }}
+
+            await preloadLoadingAssets();
+            updateLoadingMessage('ロード完了');
+
+            document.getElementById('loading-screen').classList.add('fade-out');
+            setTimeout(() => {{
+                document.getElementById('loading-screen').style.display = 'none';
+                document.getElementById('game-container').classList.remove('hidden');
+                activateTitleScreen();
+                if (isLicenseRequired() && !licenseAccepted) {{
+                    showLicenseModal(true);
+                }} else {{
+                    maybePromptCustomName();
+                }}
+            }}, 500);
+        }}
         
         // 初期化
         document.addEventListener('DOMContentLoaded', () => {{
@@ -1671,33 +1808,10 @@ class LuminasScript:
             console.log(`Loaded ${{SCENARIO_DATA.length}} scenes`);
             console.log(`Loaded ${{Object.keys(ASSETS).length}} assets`);
             console.log(`Loaded ${{Object.keys(AUDIO_ASSETS).length}} bgm assets`);
-            
-            // 設定を読み込み
-            loadSettings();
-            loadLicenseAcceptance();
-            initCustomNameUI();
-            migrateLegacySaveData();
-            
-            // タイトル背景を設定
-            const titleBg = extractAssetName(CONFIG.title_bg_image);
-            if (titleBg && ASSETS[titleBg]) {{
-                document.getElementById('title-screen').style.backgroundImage = `url(${{ASSETS[titleBg]}})`;
-            }}
-            
-            // ローディング完了
-            setTimeout(() => {{
-                document.getElementById('loading-screen').classList.add('fade-out');
-                setTimeout(() => {{
-                    document.getElementById('loading-screen').style.display = 'none';
-                    document.getElementById('game-container').classList.remove('hidden');
-                    activateTitleScreen();
-                    if (isLicenseRequired() && !licenseAccepted) {{
-                        showLicenseModal(true);
-                    }} else {{
-                        maybePromptCustomName();
-                    }}
-                }}, 500);
-            }}, 1000);
+            initializeGame().catch(error => {{
+                console.error('Initialization failed:', error);
+                updateLoadingMessage('ロードに失敗しました');
+            }});
         }});
         
         // クリック遅延ゲージの更新
@@ -2106,7 +2220,7 @@ class LuminasScript:
 
             textBox.style.display = 'block';
             choiceBox.classList.add('hidden');
-            dialogueText.style.fontSize = '1.1rem';
+            dialogueText.style.fontSize = '1.2rem';
             dialogueText.style.textAlign = 'left';
             dialogueText.style.fontWeight = 'normal';
             updateTextBoxAppearance(null);
