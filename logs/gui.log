@@ -7027,3 +7027,159 @@ BrokenPipeError: [Errno 32] Broken pipe
 生成されたファイル: output/FL260401Master_202603311623.html
 最新版: output/game.html
 ブラウザで開いてゲームをお楽しみください!
+2026-03-31 17:46:46,621 [INFO] Build start: ensyutukakunin.csv
+2026-03-31 17:46:47,293 [INFO] Build stdout:
+============================================================
+  LuminasScript - Visual Novel Game Generator
+============================================================
+
+✓ config.ymlを読み込みました
+✓ 20行のシナリオデータを読み込みました (encoding: utf-8)
+✓ 画像14個 / 音声2個のアセットを書き出しました
+✓ ゲームファイルを生成しました: output/ensyutukakunin_20260331174646/game.html
+  ファイルサイズ: 112.3 KB
+
+============================================================
+  ✓ 生成完了!
+============================================================
+
+生成先ディレクトリ: output/ensyutukakunin_20260331174646
+HTML: output/ensyutukakunin_20260331174646/game.html
+assets: output/ensyutukakunin_20260331174646/assets
+ブラウザで開いてゲームをお楽しみください!
+2026-03-31 17:52:16,947 [INFO] Build start: FL260401Master_.csv
+2026-03-31 17:52:21,707 [INFO] Build stdout:
+============================================================
+  LuminasScript - Visual Novel Game Generator
+============================================================
+
+✓ config.ymlを読み込みました
+✓ 701行のシナリオデータを読み込みました (encoding: utf-8)
+✓ 画像146個 / 音声15個のアセットを書き出しました
+✓ ゲームファイルを生成しました: output/FL260401Master__20260331175217/game.html
+  ファイルサイズ: 455.5 KB
+
+============================================================
+  ✓ 生成完了!
+============================================================
+
+生成先ディレクトリ: output/FL260401Master__20260331175217
+HTML: output/FL260401Master__20260331175217/game.html
+assets: output/FL260401Master__20260331175217/assets
+ブラウザで開いてゲームをお楽しみください!
+2026-03-31 18:01:51,147 [ERROR] GET error
+Traceback (most recent call last):
+  File "/usr/src/LuminousScript/web_gui.py", line 1927, in do_GET
+    self._send_file(path, inline=inline)
+    ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/src/LuminousScript/web_gui.py", line 1849, in _send_file
+    self.send_header("Content-Disposition", f"{disposition}; filename=\"{path.name}\"")
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.14/http/server.py", line 575, in send_header
+    ("%s: %s\r\n" % (keyword, value)).encode('latin-1', 'strict'))
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^
+UnicodeEncodeError: 'latin-1' codec can't encode characters in position 39-42: ordinal not in range(256)
+2026-03-31 18:01:52,212 [ERROR] GET error
+Traceback (most recent call last):
+  File "/usr/src/LuminousScript/web_gui.py", line 1927, in do_GET
+    self._send_file(path, inline=inline)
+    ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/src/LuminousScript/web_gui.py", line 1849, in _send_file
+    self.send_header("Content-Disposition", f"{disposition}; filename=\"{path.name}\"")
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.14/http/server.py", line 575, in send_header
+    ("%s: %s\r\n" % (keyword, value)).encode('latin-1', 'strict'))
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^
+UnicodeEncodeError: 'latin-1' codec can't encode characters in position 39-42: ordinal not in range(256)
+2026-03-31 18:03:21,315 [INFO] Build start: FL260401Master_.csv
+2026-03-31 18:03:26,803 [INFO] Build stdout:
+============================================================
+  LuminasScript - Visual Novel Game Generator
+============================================================
+
+✓ config.ymlを読み込みました
+✓ 701行のシナリオデータを読み込みました (encoding: utf-8)
+✓ 画像146個 / 音声15個のアセットを書き出しました
+✓ ゲームファイルを生成しました: output/FL260401Master__20260331180321/game.html
+  ファイルサイズ: 455.6 KB
+
+============================================================
+  ✓ 生成完了!
+============================================================
+
+生成先ディレクトリ: output/FL260401Master__20260331180321
+HTML: output/FL260401Master__20260331180321/game.html
+assets: output/FL260401Master__20260331180321/assets
+ブラウザで開いてゲームをお楽しみください!
+2026-03-31 18:17:15,030 [INFO] Build start: FL260401Master_.csv
+2026-03-31 18:17:21,550 [INFO] Build stdout:
+============================================================
+  LuminasScript - Visual Novel Game Generator
+============================================================
+
+✓ config.ymlを読み込みました
+✓ 701行のシナリオデータを読み込みました (encoding: utf-8)
+✓ 画像146個 / 音声15個のアセットを書き出しました
+✓ ゲームファイルを生成しました: output/FL260401Master__20260331181715/game.html
+  ファイルサイズ: 455.6 KB
+
+============================================================
+  ✓ 生成完了!
+============================================================
+
+生成先ディレクトリ: output/FL260401Master__20260331181715
+HTML: output/FL260401Master__20260331181715/game.html
+assets: output/FL260401Master__20260331181715/assets
+ブラウザで開いてゲームをお楽しみください!
+2026-03-31 18:38:31,533 [INFO] Build start: FL260401Master_.csv
+2026-03-31 18:38:37,421 [INFO] Build stdout:
+============================================================
+  LuminasScript - Visual Novel Game Generator
+============================================================
+
+✓ config.ymlを読み込みました
+✓ 701行のシナリオデータを読み込みました (encoding: utf-8)
+✓ 画像146個 / 音声15個のアセットを書き出しました
+✓ ゲームファイルを生成しました: output/FL260401Master__20260331183831/game.html
+  ファイルサイズ: 455.5 KB
+
+============================================================
+  ✓ 生成完了!
+============================================================
+
+生成先ディレクトリ: output/FL260401Master__20260331183831
+HTML: output/FL260401Master__20260331183831/game.html
+assets: output/FL260401Master__20260331183831/assets
+ブラウザで開いてゲームをお楽しみください!
+2026-03-31 20:27:05,881 [INFO] Build start: FL260401Master_.csv
+2026-03-31 20:27:11,495 [INFO] Build stdout:
+============================================================
+  LuminasScript - Visual Novel Game Generator
+============================================================
+
+✓ config.ymlを読み込みました
+✓ 701行のシナリオデータを読み込みました (encoding: utf-8)
+✓ 画像146個 / 音声15個のアセットを書き出しました
+✓ ゲームファイルを生成しました: output/FL260401Master__20260331202705/game.html
+  ファイルサイズ: 455.5 KB
+
+============================================================
+  ✓ 生成完了!
+============================================================
+
+生成先ディレクトリ: output/FL260401Master__20260331202705
+HTML: output/FL260401Master__20260331202705/game.html
+assets: output/FL260401Master__20260331202705/assets
+ブラウザで開いてゲームをお楽しみください!
+2026-03-31 21:27:58,900 [ERROR] GET error
+Traceback (most recent call last):
+  File "/usr/src/LuminousScript/web_gui.py", line 1927, in do_GET
+    self._send_file(path, inline=inline)
+    ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/src/LuminousScript/web_gui.py", line 1852, in _send_file
+    self.wfile.write(data)
+    ~~~~~~~~~~~~~~~~^^^^^^
+  File "/usr/local/lib/python3.14/socketserver.py", line 845, in write
+    self._sock.sendall(b)
+    ~~~~~~~~~~~~~~~~~~^^^
+BrokenPipeError: [Errno 32] Broken pipe
