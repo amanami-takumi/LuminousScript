@@ -836,12 +836,14 @@ class LuminasScript:
 <body>
     <!-- ローディング画面 -->
     <div id="loading-screen">
-        <div class="loading-content">
-            <div class="spinner"></div>
-            <p class="loading-text">ロードしてます...</p>
-            <div class="loading-meta">
-                <p id="loading-image-count">画像: 0 / 0</p>
-                <p id="loading-audio-count">音声: 0 / 0</p>
+        <div class="loading-frame">
+            <div class="loading-content">
+                <div class="spinner"></div>
+                <p class="loading-text">ロードしてます...</p>
+                <div class="loading-meta">
+                    <p id="loading-image-count">画像: 0 / 0</p>
+                    <p id="loading-audio-count">音声: 0 / 0</p>
+                </div>
             </div>
         </div>
     </div>
@@ -859,6 +861,11 @@ class LuminasScript:
                     <button class="menu-btn" onclick="showCredits()">クレジット</button>
                 </div>
             </div>
+            <button id="title-fullscreen-button" class="fullscreen-button" onclick="toggleFullscreen()" title="最大化" aria-label="最大化">
+                <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                    <path d="M4 9V4h5M15 4h5v5M20 15v5h-5M9 20H4v-5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+            </button>
             {f'<div class="title-version">{self.config.get("version")}</div>' if self.config.get('version') else ''}
         </div>
         
@@ -888,6 +895,11 @@ class LuminasScript:
                 </div>
                 
                 <div id="control-buttons">
+                    <button id="fullscreen-button" class="fullscreen-button" onclick="toggleFullscreen()" title="最大化" aria-label="最大化">
+                        <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+                            <path d="M4 9V4h5M15 4h5v5M20 15v5h-5M9 20H4v-5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        </svg>
+                    </button>
                     <button id="history-button" onclick="toggleHistory()" title="会話履歴" aria-label="会話履歴">
                         <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
                             <path d="M2.5 5.75C2.5 4.78 3.28 4 4.25 4h5.25c1.18 0 2.3.34 3.25.95.95-.61 2.07-.95 3.25-.95h5.25c.97 0 1.75.78 1.75 1.75v11.5c0 .41-.34.75-.75.75h-5.63c-1.15 0-2.26.34-3.21.97a.75.75 0 0 1-.83 0A5.78 5.78 0 0 0 9.5 18H3.25a.75.75 0 0 1-.75-.75V5.75Zm9.75.03v10.99A7.26 7.26 0 0 0 9.5 16H4V5.78h5.5c1 0 1.96.27 2.75.78Zm1.5 10.99A7.26 7.26 0 0 1 16.5 16H22V5.78h-5.5c-1 0-1.96.27-2.75.78v10.21Z" fill="currentColor"/>
@@ -1033,10 +1045,27 @@ class LuminasScript:
         text_color = self.config.get('text_color', '#FFFFFF')
         
         return f"""
+        :root {{
+            --lumina-frame-width: min(100vw, calc(100vh * (16 / 9)));
+            --lumina-frame-height: min(100vh, calc(100vw * (9 / 16)));
+        }}
+
+        @supports (height: 100dvh) {{
+            :root {{
+                --lumina-frame-width: min(100vw, calc(100dvh * (16 / 9)));
+                --lumina-frame-height: min(100dvh, calc(100vw * (9 / 16)));
+            }}
+        }}
+
         * {{
             margin: 0;
             padding: 0;
             box-sizing: border-box;
+        }}
+
+        html {{
+            width: 100%;
+            height: 100%;
         }}
 
         .hidden {{
@@ -1044,10 +1073,17 @@ class LuminasScript:
         }}
         
         body {{
+            width: 100%;
+            height: 100%;
+            min-height: 100vh;
+            min-height: 100dvh;
             font-family: 'Kosugi Maru', 'Hiragino Kaku Gothic Pro', 'Meiryo', sans-serif;
             overflow: hidden;
             background: #000;
             color: {text_color};
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }}
         
         /* ローディング画面 */
@@ -1057,7 +1093,8 @@ class LuminasScript:
             left: 0;
             width: 100vw;
             height: 100vh;
-            background: linear-gradient(135deg, {theme_color} 0%, {sub_color} 100%);
+            height: 100dvh;
+            background: #000;
             display: flex;
             align-items: center;
             justify-content: center;
@@ -1068,6 +1105,18 @@ class LuminasScript:
         #loading-screen.fade-out {{
             opacity: 0;
             pointer-events: none;
+        }}
+
+        .loading-frame {{
+            width: var(--lumina-frame-width);
+            height: var(--lumina-frame-height);
+            aspect-ratio: 16 / 9;
+            background: linear-gradient(135deg, {theme_color} 0%, {sub_color} 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            overflow: hidden;
         }}
         
         .loading-content {{
@@ -1103,10 +1152,12 @@ class LuminasScript:
         }}
         
         #game-container {{
-            width: 100vw;
-            height: 100vh;
+            width: var(--lumina-frame-width);
+            height: var(--lumina-frame-height);
+            aspect-ratio: 16 / 9;
             position: relative;
             overflow: hidden;
+            flex: 0 0 auto;
         }}
         
         #game-container.hidden {{
@@ -1179,13 +1230,20 @@ class LuminasScript:
 
         .title-version {{
             position: absolute;
-            right: 1.5rem;
+            right: 5rem;
             bottom: 1rem;
             color: rgba(255, 255, 255, 0.45);
             font-size: 0.9rem;
             letter-spacing: 0.08em;
             text-shadow: 0 1px 2px rgba(0, 0, 0, 0.35);
             pointer-events: none;
+        }}
+
+        #title-fullscreen-button {{
+            position: absolute;
+            right: 1rem;
+            bottom: 1rem;
+            z-index: 2;
         }}
         
         /* ゲーム画面 */
@@ -1364,14 +1422,40 @@ class LuminasScript:
             justify-content: center;
         }}
 
+        #title-fullscreen-button,
+        #control-buttons .fullscreen-button {{
+            background: rgba(0, 0, 0, 0.7);
+            color: white;
+            border: 2px solid white;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            font-size: 1.2rem;
+            cursor: pointer;
+            transition: background 0.3s;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+        }}
+
+        #title-fullscreen-button svg,
         #control-buttons button svg {{
             width: 1.2rem;
             height: 1.2rem;
             display: block;
         }}
         
+        #title-fullscreen-button:hover,
         #control-buttons button:hover {{
             background: rgba(255, 255, 255, 0.2);
+        }}
+
+        .fullscreen-button.active {{
+            background: rgba(255, 255, 255, 0.2);
+        }}
+
+        .fullscreen-button.hidden {{
+            display: none;
         }}
         
         #auto-button.active {{
@@ -1381,7 +1465,7 @@ class LuminasScript:
         
         /* モーダル */
         .modal {{
-            position: fixed;
+            position: absolute;
             top: 0;
             left: 0;
             width: 100%;
@@ -1402,9 +1486,10 @@ class LuminasScript:
             padding: 3rem;
             border-radius: 15px;
             color: white;
-            min-width: 400px;
+            width: min(92%, 600px);
+            min-width: min(400px, 92%);
             max-width: 600px;
-            max-height: 80vh;
+            max-height: 80%;
             overflow-y: auto;
             box-shadow: 0 10px 40px rgba(0,0,0,0.5);
         }}
@@ -1442,7 +1527,7 @@ class LuminasScript:
 
         .save-load-content {{
             max-width: 920px;
-            width: min(92vw, 920px);
+            width: min(92%, 920px);
         }}
 
         .save-load-summary {{
@@ -1757,8 +1842,77 @@ class LuminasScript:
         const ASSET_FETCH_PROMISES = new Map();
         const LOCAL_ASSET_SCRIPT_PROMISES = new Map();
         let resolvedFaviconHref = '';
+        const FULLSCREEN_EXPAND_ICON = '<path d="M4 9V4h5M15 4h5v5M20 15v5h-5M9 20H4v-5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>';
+        const FULLSCREEN_EXIT_ICON = '<path d="M9 4H4v5M20 9V4h-5M15 20h5v-5M4 15v5h5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>';
         
         let gameState = createInitialGameState();
+
+        function getFullscreenApiTarget() {{
+            return document.documentElement;
+        }}
+
+        function getFullscreenElement() {{
+            return document.fullscreenElement
+                || document.webkitFullscreenElement
+                || document.msFullscreenElement
+                || null;
+        }}
+
+        function isFullscreenSupported() {{
+            const target = getFullscreenApiTarget();
+            return !!(
+                target.requestFullscreen
+                || target.webkitRequestFullscreen
+                || target.msRequestFullscreen
+            );
+        }}
+
+        function updateFullscreenButtons() {{
+            const isFullscreen = !!getFullscreenElement();
+            const label = isFullscreen ? '最大化を解除' : '最大化';
+            const icon = isFullscreen ? FULLSCREEN_EXIT_ICON : FULLSCREEN_EXPAND_ICON;
+
+            document.querySelectorAll('.fullscreen-button').forEach(button => {{
+                button.classList.toggle('active', isFullscreen);
+                button.classList.toggle('hidden', !isFullscreenSupported());
+                button.title = label;
+                button.setAttribute('aria-label', label);
+                const svg = button.querySelector('svg');
+                if (svg) {{
+                    svg.innerHTML = icon;
+                }}
+            }});
+        }}
+
+        async function requestAppFullscreen() {{
+            const target = getFullscreenApiTarget();
+            if (target.requestFullscreen) return target.requestFullscreen();
+            if (target.webkitRequestFullscreen) return target.webkitRequestFullscreen();
+            if (target.msRequestFullscreen) return target.msRequestFullscreen();
+            throw new Error('Fullscreen API is not supported');
+        }}
+
+        async function exitAppFullscreen() {{
+            if (document.exitFullscreen) return document.exitFullscreen();
+            if (document.webkitExitFullscreen) return document.webkitExitFullscreen();
+            if (document.msExitFullscreen) return document.msExitFullscreen();
+            throw new Error('Fullscreen API is not supported');
+        }}
+
+        async function toggleFullscreen() {{
+            if (!isFullscreenSupported()) return;
+            try {{
+                if (getFullscreenElement()) {{
+                    await exitAppFullscreen();
+                }} else {{
+                    await requestAppFullscreen();
+                }}
+            }} catch (error) {{
+                console.warn('Fullscreen toggle failed:', error);
+            }} finally {{
+                updateFullscreenButtons();
+            }}
+        }}
 
         function updateLoadingMessage(message) {{
             const text = document.querySelector('#loading-screen .loading-text');
@@ -2061,6 +2215,10 @@ class LuminasScript:
             console.log(`Loaded ${{SCENARIO_DATA.length}} scenes`);
             console.log(`Loaded ${{Object.keys(ASSETS).length}} assets`);
             console.log(`Loaded ${{Object.keys(AUDIO_ASSETS).length}} bgm assets`);
+            updateFullscreenButtons();
+            document.addEventListener('fullscreenchange', updateFullscreenButtons);
+            document.addEventListener('webkitfullscreenchange', updateFullscreenButtons);
+            document.addEventListener('MSFullscreenChange', updateFullscreenButtons);
             initializeGame().catch(error => {{
                 console.error('Initialization failed:', error);
                 updateLoadingMessage('ロードに失敗しました');
