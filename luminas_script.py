@@ -10,6 +10,7 @@ import base64
 import hashlib
 import json
 import os
+import re
 from datetime import datetime
 from io import BytesIO
 from pathlib import Path
@@ -20,6 +21,8 @@ import yaml
 
 class LuminasScript:
     """CSVからビジュアルノベルゲームを生成するメインクラス"""
+
+    DEPRECATED_CHOICE_JUMP_PATTERN = re.compile(r'(?i)\bJUMP_([ABCD])\s*=\s*([^\s,;|<>]+)')
 
     IMAGE_EXTENSION_MIME_MAP = {
         '.jpg': 'image/jpeg',
@@ -784,6 +787,7 @@ class LuminasScript:
         assets_output_dir.mkdir(parents=True, exist_ok=False)
 
         assets = self.collect_assets(bundle_dir, assets_output_dir)
+        self._log_deprecated_choice_jumps()
         scenario_json = json.dumps(self.scenario_data, ensure_ascii=False, indent=2)
         image_assets_json = json.dumps(assets['images'], ensure_ascii=False)
         audio_assets_json = json.dumps(assets['audio'], ensure_ascii=False)
@@ -806,6 +810,51 @@ class LuminasScript:
         print(f"  ファイルサイズ: {output_path.stat().st_size / 1024:.1f} KB")
 
         return bundle_dir
+
+    def _normalize_scene_id(self, scene_id: Optional[str]) -> str:
+        """scene_idを比較用に正規化"""
+        return str(scene_id or '').strip()
+
+    def _is_choice_scene_id(self, scene_id: Optional[str]) -> bool:
+        """scene_idが選択肢ページかどうか"""
+        parts = self._normalize_scene_id(scene_id).split('-')
+        if len(parts) < 2:
+            return False
+        last = parts[-1]
+        second = parts[1]
+        return last == 'Q' or second == 'Q'
+
+    def _extract_deprecated_choice_jumps(self, script: Optional[str]) -> List[Tuple[str, str]]:
+        """script列からJUMP_A/B/C/D指定を抽出"""
+        if not script:
+            return []
+        return [
+            (branch.upper(), self._normalize_scene_id(target))
+            for branch, target in self.DEPRECATED_CHOICE_JUMP_PATTERN.findall(str(script))
+            if self._normalize_scene_id(target)
+        ]
+
+    def _log_deprecated_choice_jumps(self) -> None:
+        """非推奨のJUMP_A/B/C/D使用箇所を生成ログへ出力"""
+        for scene in self.scenario_data:
+            scene_id = self._normalize_scene_id(scene.get('scene_id'))
+            jumps = self._extract_deprecated_choice_jumps(scene.get('script'))
+            if not jumps:
+                continue
+
+            if not self._is_choice_scene_id(scene_id):
+                for branch, target in jumps:
+                    print(
+                        f"⚠ 非推奨のJUMP_{branch}を検出しましたが、このscene_idでは無効です: "
+                        f"{scene_id or '(scene_idなし)'} -> {target}"
+                    )
+                continue
+
+            for branch, target in jumps:
+                print(
+                    f"⚠ 非推奨のJUMP_{branch}を検出: "
+                    f"scene_id={scene_id} から 選択肢{branch} のジャンプ先として {target} を使用"
+                )
     
     def _generate_html_template(
         self,
@@ -2316,7 +2365,7 @@ class LuminasScript:
 
         function parseSceneScriptDirectives(scene) {{
             if (!scene || typeof scene !== 'object') {{
-                return {{ tokens: [], overrides: {{}}, notice: '' }};
+                return {{ tokens: [], overrides: {{ jumpTargets: {{}} }}, notice: '' }};
             }}
 
             const raw = String(scene.script || '');
@@ -2353,7 +2402,9 @@ class LuminasScript:
                     .map(token => token.trim())
                     .filter(token => token)
             );
-            const overrides = {{}};
+            const overrides = {{
+                jumpTargets: {{}}
+            }};
 
             tokens.forEach(token => {{
                 const separatorIndex = token.indexOf('=');
@@ -2361,6 +2412,14 @@ class LuminasScript:
 
                 const key = token.slice(0, separatorIndex).trim().toUpperCase();
                 const value = token.slice(separatorIndex + 1).trim();
+                const jumpMatch = key.match(/^JUMP_([ABCD])$/u);
+                if (jumpMatch) {{
+                    if (value) {{
+                        overrides.jumpTargets[jumpMatch[1]] = normalizeSceneId(value);
+                    }}
+                    return;
+                }}
+
                 const parsed = parsePositiveInt(value, null);
                 if (parsed === null) return;
 
@@ -2407,6 +2466,11 @@ class LuminasScript:
 
         function getSceneNoticeText(scene) {{
             return parseSceneScriptDirectives(scene).notice || '';
+        }}
+
+        function getChoiceJumpTarget(scene, branchLetter) {{
+            const jumpTargets = parseSceneScriptDirectives(scene).overrides.jumpTargets || {{}};
+            return normalizeSceneId(jumpTargets[branchLetter] || '');
         }}
 
         function isNoticeModalOpen() {{
@@ -2922,8 +2986,10 @@ class LuminasScript:
             const branchLetter = String.fromCharCode(65 + choiceIndex); // A, B, C...
             const parts = normalizeSceneId(sceneId).split('-');
             const baseParts = parts.slice(0, -1);
-            const nextSceneId = baseParts.concat(branchLetter, '1').join('-');
-            
+            const currentScene = SCENARIO_DATA[currentSceneIndex];
+            const customJumpTarget = getChoiceJumpTarget(currentScene, branchLetter);
+            const nextSceneId = customJumpTarget || baseParts.concat(branchLetter, '1').join('-');
+
             // 次のシーンを探す
             const nextIndex = SCENARIO_DATA.findIndex(s => normalizeSceneId(s.scene_id) === nextSceneId);
             if (nextIndex !== -1) {{
