@@ -1004,6 +1004,17 @@ class LuminasScript:
                 </div>
             </div>
         </div>
+
+        <!-- NOTICE ポップアップ -->
+        <div id="notice-modal" class="modal hidden">
+            <div class="modal-content notice-content" onclick="event.stopPropagation()">
+                <h2>お知らせ</h2>
+                <div id="notice-text" class="notice-text"></div>
+                <div class="license-actions">
+                    <button class="menu-btn" onclick="closeNoticeModal()">分かった</button>
+                </div>
+            </div>
+        </div>
         
         <!-- クレジット画面 -->
         <div id="credits-screen" class="modal hidden">
@@ -1512,6 +1523,19 @@ class LuminasScript:
             white-space: pre-wrap;
             max-height: 50vh;
             overflow-y: auto;
+            margin-bottom: 1.5rem;
+        }}
+
+        .notice-content {{
+            max-width: 560px;
+        }}
+
+        .notice-text {{
+            background: rgba(0, 0, 0, 0.25);
+            padding: 1.2rem;
+            border-radius: 10px;
+            line-height: 1.8;
+            white-space: pre-wrap;
             margin-bottom: 1.5rem;
         }}
 
@@ -2270,7 +2294,7 @@ class LuminasScript:
             if (!isAutoMode) return;
             
             autoModeTimeout = setTimeout(() => {{
-                if (isAutoMode && canClick) {{
+                if (isAutoMode && canClick && !isNoticeModalOpen()) {{
                     loadScene(findNextSceneIndex(currentSceneIndex));
                 }}
             }}, getSceneAutoSceneChangeDelay(scene));
@@ -2280,9 +2304,19 @@ class LuminasScript:
             return (sceneId || '').trim();
         }}
 
+        function normalizeNoticeText(value) {{
+            return String(value || '')
+                .replace(/\\r\\n?/g, '\\n')
+                .replace(/\\\\n/g, '\\n')
+                .replace(/\\n/g, '\\n')
+                .replace(/<br\\s*\\/?>/giu, '\\n')
+                .replace(/\\[br\\]/giu, '\\n')
+                .trim();
+        }}
+
         function parseSceneScriptDirectives(scene) {{
             if (!scene || typeof scene !== 'object') {{
-                return {{ tokens: [], overrides: {{}} }};
+                return {{ tokens: [], overrides: {{}}, notice: '' }};
             }}
 
             const raw = String(scene.script || '');
@@ -2301,7 +2335,19 @@ class LuminasScript:
                 segments.push(outside);
             }}
 
-            const tokens = segments.flatMap(segment =>
+            const noticeMessages = [];
+            const cleanedSegments = segments.map(segment => {{
+                const noticePattern = /NOTICE\\s*=(.*?)(?=(?:[\\s,;|]+(?:CLICK_DELAY|AUTO_SCENE_CHANGE_DELAY|NOTICE)\\s*=)|(?:[\\s,;|]+text_back_off\\b)|$)/giu;
+                return String(segment || '').replace(noticePattern, (_, value) => {{
+                    const normalizedValue = normalizeNoticeText(value);
+                    if (normalizedValue) {{
+                        noticeMessages.push(normalizedValue);
+                    }}
+                    return ' ';
+                }});
+            }});
+
+            const tokens = cleanedSegments.flatMap(segment =>
                 String(segment || '')
                     .split(/[\\s,;|]+/u)
                     .map(token => token.trim())
@@ -2327,7 +2373,11 @@ class LuminasScript:
                 }}
             }});
 
-            const parsed = {{ tokens, overrides }};
+            const parsed = {{
+                tokens,
+                overrides,
+                notice: noticeMessages.join('\\n\\n')
+            }};
             scene._parsedScriptSource = raw;
             scene._parsedScriptDirectives = parsed;
             return parsed;
@@ -2353,6 +2403,63 @@ class LuminasScript:
                 value,
                 parsePositiveInt(gameState.settings.autoSceneChangeDelay, AUTO_SCENE_CHANGE_DELAY)
             );
+        }}
+
+        function getSceneNoticeText(scene) {{
+            return parseSceneScriptDirectives(scene).notice || '';
+        }}
+
+        function isNoticeModalOpen() {{
+            const modal = document.getElementById('notice-modal');
+            return !!(modal && !modal.classList.contains('hidden'));
+        }}
+
+        function showNoticeModal(message) {{
+            const modal = document.getElementById('notice-modal');
+            const textEl = document.getElementById('notice-text');
+            if (!modal || !textEl) return;
+            textEl.textContent = String(message || '');
+            modal.classList.remove('hidden');
+        }}
+
+        function closeNoticeModal(options = {{}}) {{
+            const resumeAuto = options.resumeAuto !== false;
+            const modal = document.getElementById('notice-modal');
+            if (modal) {{
+                modal.classList.add('hidden');
+            }}
+
+            if (!resumeAuto || !isAutoMode) return;
+
+            const scene = SCENARIO_DATA[currentSceneIndex];
+            if (!scene) return;
+
+            if (autoModeTimeout) {{
+                clearTimeout(autoModeTimeout);
+                autoModeTimeout = null;
+            }}
+
+            if (getSceneType(scene.scene_id) === 'ending') {{
+                autoModeTimeout = setTimeout(() => {{
+                    if (isAutoMode && canClick && !isNoticeModalOpen()) {{
+                        returnToTitle();
+                    }}
+                }}, getSceneAutoSceneChangeDelay(scene));
+                return;
+            }}
+
+            if (getSceneType(scene.scene_id) === 'dialogue') {{
+                autoAdvance(scene);
+            }}
+        }}
+
+        function showSceneNotice(scene) {{
+            const message = getSceneNoticeText(scene);
+            if (!message) {{
+                return false;
+            }}
+            showNoticeModal(message);
+            return true;
         }}
 
         function updateTextBoxAppearance(scene) {{
@@ -2652,6 +2759,7 @@ class LuminasScript:
             }}
             
             currentSceneIndex = index;
+            closeNoticeModal({{ resumeAuto: false }});
             const scene = SCENARIO_DATA[index];
             const sceneId = normalizeSceneId(scene.scene_id);
             gameState.currentSceneId = sceneId;
@@ -2741,11 +2849,26 @@ class LuminasScript:
             updateBackground(scene.background_image);
             clearCharacters();
             updateEffectOverlay(scene.effect);
+            showSceneNotice(scene);
             
             addToHistory('', chapterText);
             
             // 自動で次へ
             setTimeout(() => {{
+                if (isNoticeModalOpen()) {{
+                    const waitForNoticeToClose = () => {{
+                        if (isNoticeModalOpen()) {{
+                            setTimeout(waitForNoticeToClose, 100);
+                            return;
+                        }}
+                        dialogueText.style.fontSize = '1.1rem';
+                        dialogueText.style.textAlign = 'left';
+                        dialogueText.style.fontWeight = 'normal';
+                        loadScene(currentSceneIndex + 1);
+                    }};
+                    waitForNoticeToClose();
+                    return;
+                }}
                 dialogueText.style.fontSize = '1.1rem';
                 dialogueText.style.textAlign = 'left';
                 dialogueText.style.fontWeight = 'normal';
@@ -2780,6 +2903,7 @@ class LuminasScript:
             
             updateBackground(scene.background_image);
             updateEffectOverlay(scene.effect);
+            showSceneNotice(scene);
         }}
         
         // 選択肢を選ぶ
@@ -2831,6 +2955,7 @@ class LuminasScript:
             updateBackground(scene.background_image);
             updateCharacters(scene);
             updateEffectOverlay(scene.effect);
+            showSceneNotice(scene);
 
             addToHistory(speaker, text);
 
@@ -2843,7 +2968,7 @@ class LuminasScript:
 
             if (isAutoMode) {{
                 autoModeTimeout = setTimeout(() => {{
-                    if (isAutoMode) {{
+                    if (isAutoMode && canClick && !isNoticeModalOpen()) {{
                         returnToTitle();
                     }}
                 }}, getSceneAutoSceneChangeDelay(scene));
@@ -2873,6 +2998,7 @@ class LuminasScript:
             updateBackground(scene.background_image);
             updateCharacters(scene);
             updateEffectOverlay(scene.effect);
+            showSceneNotice(scene);
             
             addToHistory(speaker, text);
             
