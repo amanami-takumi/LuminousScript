@@ -193,6 +193,14 @@ INDEX_HTML = r"""<!DOCTYPE html>
       font-variant-numeric: tabular-nums;
     }
 
+    .list-item-meta {
+      min-width: 132px;
+      text-align: right;
+      color: var(--muted);
+      font-variant-numeric: tabular-nums;
+      white-space: nowrap;
+    }
+
     .list-action-btn {
       padding: 4px 8px;
       font-size: 11px;
@@ -555,6 +563,7 @@ INDEX_HTML = r"""<!DOCTYPE html>
 
     <section class="card input-card">
       <h2>CSV / config.yml</h2>
+      <div class="muted">単クリックで選択、ダブルクリックで編集します。最終更新日時と削除操作を表示します。</div>
       <div class="list" id="inputList"></div>
       <div class="row">
         <span class="badge" id="inputSelectedName">未選択</span>
@@ -571,8 +580,11 @@ INDEX_HTML = r"""<!DOCTYPE html>
     <section class="card output-card">
       <h2>Output</h2>
       <div class="path" id="outputPath"></div>
+      <div class="muted">単クリックで選択、ダブルクリックでフォルダを開きます。ダウンロードは下のボタンから実行します。</div>
       <div class="list" id="outputList"></div>
       <div class="row">
+        <span class="badge" id="outputSelectedName">未選択</span>
+        <button class="secondary" onclick="downloadSelectedOutput()">ダウンロード</button>
         <button class="secondary" onclick="refreshOutput()">更新</button>
       </div>
     </section>
@@ -611,6 +623,7 @@ INDEX_HTML = r"""<!DOCTYPE html>
       assetsPreview: null,
       assetsDragging: [],
       inputSelected: null,
+      outputSelected: null,
       assetsCopyEnabled: false,
       assetsIconSize: 96,
     };
@@ -683,6 +696,10 @@ INDEX_HTML = r"""<!DOCTYPE html>
           </span>
         `;
         parent.onclick = () => {
+          state.outputSelected = null;
+          updateOutputSelectionInfo();
+        };
+        parent.ondblclick = () => {
           state.outputDir = parentPath(currentDir);
           refreshOutput();
         };
@@ -698,6 +715,8 @@ INDEX_HTML = r"""<!DOCTYPE html>
       entries.forEach((entry) => {
         const row = document.createElement("div");
         row.className = "list-item";
+        row.dataset.relPath = entry.rel_path;
+        row.classList.toggle("active", state.outputSelected?.rel_path === entry.rel_path);
 
         const name = document.createElement("span");
         name.className = "list-item-main";
@@ -728,14 +747,35 @@ INDEX_HTML = r"""<!DOCTYPE html>
 
         row.appendChild(side);
         row.onclick = () => {
-          if (entry.type === "dir") {
-            state.outputDir = entry.rel_path;
-            refreshOutput();
-          } else {
-            window.open(`/api/download?base=output&path=${encodeURIComponent(entry.rel_path)}`, "_blank");
-          }
+          state.outputSelected = entry;
+          updateOutputSelectionInfo();
+          updateOutputSelectionStyles(el);
+        };
+        row.ondblclick = () => {
+          if (entry.type !== "dir") return;
+          state.outputDir = entry.rel_path;
+          refreshOutput();
         };
         el.appendChild(row);
+      });
+    }
+
+    function updateOutputSelectionInfo() {
+      const el = document.getElementById("outputSelectedName");
+      if (!el) return;
+      if (!state.outputSelected) {
+        el.textContent = "未選択";
+        return;
+      }
+      const entry = state.outputSelected;
+      el.textContent = `${entry.type === "dir" ? "dir" : "file"}: ${entry.name}`;
+    }
+
+    function updateOutputSelectionStyles(el = document.getElementById("outputList")) {
+      if (!el) return;
+      const selectedPath = state.outputSelected?.rel_path || "";
+      el.querySelectorAll(".list-item[data-rel-path]").forEach((row) => {
+        row.classList.toggle("active", row.dataset.relPath === selectedPath);
       });
     }
 
@@ -773,6 +813,19 @@ INDEX_HTML = r"""<!DOCTYPE html>
       }
       const precision = value >= 10 || index === 0 ? 0 : 1;
       return `${value.toFixed(precision)} ${units[index]}`;
+    }
+
+    function formatDateTime(unixSeconds) {
+      if (!Number.isFinite(unixSeconds)) return "-";
+      return new Date(unixSeconds * 1000).toLocaleString("ja-JP", {
+        year: "numeric",
+        month: "2-digit",
+        day: "2-digit",
+        hour: "2-digit",
+        minute: "2-digit",
+        second: "2-digit",
+        hour12: false,
+      });
     }
 
     function updateAssetCopyButton() {
@@ -1229,7 +1282,8 @@ INDEX_HTML = r"""<!DOCTYPE html>
     async function openInputEditorModal(entry = null) {
       if (entry) {
         state.inputSelected = entry;
-        document.getElementById("inputSelectedName").textContent = entry.name;
+        updateInputSelectionInfo();
+        updateInputSelectionStyles();
         if (entry.name === "config.yml" || entry.name.endsWith(".csv")) {
           await loadInputText(entry.name);
         }
@@ -1435,16 +1489,13 @@ INDEX_HTML = r"""<!DOCTYPE html>
     async function refreshInput() {
       const data = await apiGet("/api/input/list");
       const list = document.getElementById("inputList");
-      renderList(list, data.entries, (entry) => {
-        if (entry.type === "file") {
-          selectInput(entry);
-        }
-      }, { onDoubleClick: (entry) => {
-        if (entry.type === "file") {
-          openInputEditorModal(entry);
-        }
-      }});
+      if (state.inputSelected) {
+        state.inputSelected = data.entries.find((entry) => entry.rel_path === state.inputSelected.rel_path) || null;
+      }
+      renderInputList(list, data.entries);
+      updateInputSelectionInfo();
       const select = document.getElementById("buildCsv");
+      const currentValue = select.value;
       select.innerHTML = "";
       data.entries
         .filter((entry) => entry.name.endsWith(".csv"))
@@ -1454,14 +1505,85 @@ INDEX_HTML = r"""<!DOCTYPE html>
           option.textContent = entry.name;
           select.appendChild(option);
         });
+      if (Array.from(select.options).some((option) => option.value === currentValue)) {
+        select.value = currentValue;
+      }
     }
 
     function selectInput(entry) {
       state.inputSelected = entry;
-      document.getElementById("inputSelectedName").textContent = entry.name;
+      updateInputSelectionInfo();
+      updateInputSelectionStyles();
       if (entry.name === "config.yml" || entry.name.endsWith(".csv")) {
         loadInputText(entry.name);
       }
+    }
+
+    function renderInputList(el, entries) {
+      el.innerHTML = "";
+      if (!entries.length) {
+        const empty = document.createElement("div");
+        empty.className = "muted";
+        empty.textContent = "空";
+        el.appendChild(empty);
+        return;
+      }
+      entries.forEach((entry) => {
+        const row = document.createElement("div");
+        row.className = "list-item";
+        row.dataset.relPath = entry.rel_path;
+        row.classList.toggle("active", state.inputSelected?.rel_path === entry.rel_path);
+
+        const name = document.createElement("span");
+        name.className = "list-item-main";
+        name.textContent = `📄 ${entry.name}`;
+        row.appendChild(name);
+
+        const side = document.createElement("span");
+        side.className = "list-item-side";
+
+        const mtime = document.createElement("span");
+        mtime.className = "list-item-meta";
+        mtime.textContent = formatDateTime(entry.mtime);
+        side.appendChild(mtime);
+
+        const badge = document.createElement("span");
+        badge.className = "badge";
+        badge.textContent = entry.type;
+        side.appendChild(badge);
+
+        const deleteButton = document.createElement("button");
+        deleteButton.className = "danger list-action-btn";
+        deleteButton.textContent = "削除";
+        deleteButton.onclick = async (event) => {
+          event.stopPropagation();
+          await deleteInputEntry(entry);
+        };
+        side.appendChild(deleteButton);
+
+        row.appendChild(side);
+        row.onclick = () => {
+          selectInput(entry);
+        };
+        row.ondblclick = () => {
+          openInputEditorModal(entry);
+        };
+        el.appendChild(row);
+      });
+    }
+
+    function updateInputSelectionInfo() {
+      const el = document.getElementById("inputSelectedName");
+      if (!el) return;
+      el.textContent = state.inputSelected ? state.inputSelected.name : "未選択";
+    }
+
+    function updateInputSelectionStyles(el = document.getElementById("inputList")) {
+      if (!el) return;
+      const selectedPath = state.inputSelected?.rel_path || "";
+      el.querySelectorAll(".list-item[data-rel-path]").forEach((row) => {
+        row.classList.toggle("active", row.dataset.relPath === selectedPath);
+      });
     }
 
     async function loadInputText(filename) {
@@ -1499,6 +1621,17 @@ INDEX_HTML = r"""<!DOCTYPE html>
       window.open(`/api/download?base=input&path=${encodeURIComponent(state.inputSelected.rel_path)}`, "_blank");
     }
 
+    async function deleteInputEntry(entry) {
+      if (!entry) return;
+      if (!window.confirm(`ファイル「${entry.name}」を削除します。よろしいですか？`)) return;
+      await apiPost("/api/delete/input", { path: entry.rel_path });
+      if (state.inputSelected?.rel_path === entry.rel_path) {
+        state.inputSelected = null;
+        document.getElementById("inputEditor").value = "";
+      }
+      await refreshInput();
+    }
+
     async function saveInputText() {
       if (!state.inputSelected) return alert("ファイルを選択してください");
       const filename = state.inputSelected.name;
@@ -1510,8 +1643,12 @@ INDEX_HTML = r"""<!DOCTYPE html>
     async function refreshOutput() {
       const data = await apiGet("/api/output/list", { dir: state.outputDir });
       state.outputDir = data.dir || "";
+      if (state.outputSelected) {
+        state.outputSelected = data.entries.find((entry) => entry.rel_path === state.outputSelected.rel_path) || null;
+      }
       document.getElementById("outputPath").textContent = `output/${data.dir || ""}`;
       renderOutputList(document.getElementById("outputList"), data.entries, data.dir || "");
+      updateOutputSelectionInfo();
     }
 
     async function deleteOutputEntry(entry) {
@@ -1519,7 +1656,15 @@ INDEX_HTML = r"""<!DOCTYPE html>
       const targetLabel = entry.type === "dir" ? `フォルダ「${entry.name}」` : `ファイル「${entry.name}」`;
       if (!window.confirm(`${targetLabel}を削除します。よろしいですか？`)) return;
       await apiPost("/api/delete/output", { path: entry.rel_path });
+      if (state.outputSelected?.rel_path === entry.rel_path) {
+        state.outputSelected = null;
+      }
       await refreshOutput();
+    }
+
+    async function downloadSelectedOutput() {
+      if (!state.outputSelected) return alert("ファイルまたはフォルダを選択してください");
+      window.open(`/api/download?base=output&path=${encodeURIComponent(state.outputSelected.rel_path)}`, "_blank");
     }
 
     async function buildGame() {
@@ -1674,16 +1819,16 @@ def prune_nested_rel_paths(paths) -> list[str]:
     return pruned
 
 
-def build_assets_archive(paths) -> tuple[bytes, str]:
+def build_archive(base_dir: Path, paths, default_bundle_name: str = "bundle.zip") -> tuple[bytes, str]:
     rel_paths = prune_nested_rel_paths(paths)
     if not rel_paths:
         raise ValueError("No paths")
 
-    archive_name = "assets_bundle.zip" if len(rel_paths) > 1 else f"{Path(rel_paths[0]).name}.zip"
+    archive_name = default_bundle_name if len(rel_paths) > 1 else f"{Path(rel_paths[0]).name}.zip"
     buffer = io.BytesIO()
     with zipfile.ZipFile(buffer, "w", compression=zipfile.ZIP_DEFLATED) as archive:
         for rel in rel_paths:
-            source = safe_path(ASSETS_DIR, rel)
+            source = safe_path(base_dir, rel)
             if not source.exists():
                 raise FileNotFoundError(rel)
             if source.is_dir():
@@ -1692,7 +1837,7 @@ def build_assets_archive(paths) -> tuple[bytes, str]:
                     archive.writestr(f"{rel}/", b"")
                     continue
                 for child in children:
-                    arcname = child.relative_to(ASSETS_DIR).as_posix()
+                    arcname = child.relative_to(base_dir).as_posix()
                     if child.is_dir():
                         if not any(child.iterdir()):
                             archive.writestr(f"{arcname}/", b"")
@@ -1701,6 +1846,10 @@ def build_assets_archive(paths) -> tuple[bytes, str]:
             else:
                 archive.write(source, arcname=rel)
     return buffer.getvalue(), archive_name
+
+
+def build_assets_archive(paths) -> tuple[bytes, str]:
+    return build_archive(ASSETS_DIR, paths, default_bundle_name="assets_bundle.zip")
 
 
 def move_assets(paths, target_dir: str) -> int:
@@ -1924,6 +2073,10 @@ class GUIHandler(BaseHTTPRequestHandler):
                     self._send_text("Invalid base", status=400)
                     return
                 path = safe_path(base_dir, rel)
+                if path.is_dir():
+                    archive, filename = build_archive(base_dir, [rel], default_bundle_name=f"{base}_bundle.zip")
+                    self._send_bytes(archive, filename, content_type="application/zip")
+                    return
                 self._send_file(path, inline=inline)
                 return
 
@@ -2071,6 +2224,24 @@ class GUIHandler(BaseHTTPRequestHandler):
                         shutil.rmtree(target)
                     else:
                         target.unlink()
+                self._send_json({"ok": True})
+                return
+
+            if parsed.path == "/api/delete/input":
+                data = self._parse_json()
+                rel = data.get("path", "")
+                if not rel:
+                    self._send_text("Missing fields", status=400)
+                    return
+                if rel != "config.yml" and not rel.endswith(".csv"):
+                    self._send_text("Forbidden", status=403)
+                    return
+                target = safe_path(INPUT_DIR, rel)
+                if target.exists():
+                    if target.is_dir():
+                        self._send_text("Forbidden", status=403)
+                        return
+                    target.unlink()
                 self._send_json({"ok": True})
                 return
 

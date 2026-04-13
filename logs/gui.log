@@ -7223,3 +7223,72 @@ assets: output/FL260401Master__20260331215411/assets
 HTML: output/FL260401Master__20260331220129/game.html
 assets: output/FL260401Master__20260331220129/assets
 ブラウザで開いてゲームをお楽しみください!
+2026-04-01 22:25:39,100 [INFO] Build start: FL260401Master_.csv
+2026-04-01 22:25:46,594 [INFO] Build stdout:
+============================================================
+  LuminasScript - Visual Novel Game Generator
+============================================================
+
+✓ config.ymlを読み込みました
+✓ 692行のシナリオデータを読み込みました (encoding: utf-8)
+✓ 画像146個 / 音声15個のアセットを書き出しました
+✓ ゲームファイルを生成しました: output/FL260401Master__20260401222539/game.html
+  ファイルサイズ: 458.1 KB
+
+============================================================
+  ✓ 生成完了!
+============================================================
+
+生成先ディレクトリ: output/FL260401Master__20260401222539
+HTML: output/FL260401Master__20260401222539/game.html
+assets: output/FL260401Master__20260401222539/assets
+ブラウザで開いてゲームをお楽しみください!
+2026-04-07 21:42:12,685 [ERROR] GET error
+Traceback (most recent call last):
+  File "/usr/src/LuminousScript/web_gui.py", line 1927, in do_GET
+    rel = params.get("dir", [""])[0]
+  File "/usr/src/LuminousScript/web_gui.py", line 1852, in _send_file
+  File "/usr/local/lib/python3.14/socketserver.py", line 845, in write
+    self._sock.sendall(b)
+    ~~~~~~~~~~~~~~~~~~^^^
+BrokenPipeError: [Errno 32] Broken pipe
+2026-04-07 22:16:23,312 [INFO] Build start: memo.csv
+2026-04-07 22:16:23,583 [INFO] Build stdout:
+============================================================
+  LuminasScript - Visual Novel Game Generator
+============================================================
+
+✓ config.ymlを読み込みました
+✓ 10行のシナリオデータを読み込みました (encoding: utf-16)
+✓ 画像1個 / 音声1個のアセットを書き出しました
+✓ ゲームファイルを生成しました: output/memo_20260407221623/game.html
+  ファイルサイズ: 111.7 KB
+
+============================================================
+  ✓ 生成完了!
+============================================================
+
+生成先ディレクトリ: output/memo_20260407221623
+HTML: output/memo_20260407221623/game.html
+assets: output/memo_20260407221623/assets
+ブラウザで開いてゲームをお楽しみください!
+2026-04-07 22:16:28,233 [INFO] Build start: FL260401Master_.csv
+2026-04-07 22:16:34,932 [INFO] Build stdout:
+============================================================
+  LuminasScript - Visual Novel Game Generator
+============================================================
+
+✓ config.ymlを読み込みました
+✓ 692行のシナリオデータを読み込みました (encoding: utf-8)
+✓ 画像146個 / 音声15個のアセットを書き出しました
+✓ ゲームファイルを生成しました: output/FL260401Master__20260407221628/game.html
+  ファイルサイズ: 458.1 KB
+
+============================================================
+  ✓ 生成完了!
+============================================================
+
+生成先ディレクトリ: output/FL260401Master__20260407221628
+HTML: output/FL260401Master__20260407221628/game.html
+assets: output/FL260401Master__20260407221628/assets
+ブラウザで開いてゲームをお楽しみください!

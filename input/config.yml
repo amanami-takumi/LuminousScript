@@ -11,7 +11,7 @@ adv_text_title_off: "true"
 
 # システム設定
 localstorage_prefix: "festival_luminasm"
-version: "2026.04.01.000"
+version: "2026.04.01.001"
 music_def_volume: "10"
 text_def_speed: "3" ## 1～10
 CLICK_DELAY_def: "500" ## クリックインターバル
