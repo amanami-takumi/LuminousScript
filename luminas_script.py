@@ -2829,6 +2829,7 @@ class LuminasScript:
             gameState.currentSceneId = sceneId;
             gameState.visitedScenes.push(sceneId);
             resetSceneUI();
+            clearCharacters();
             updateTextBoxAppearance(scene);
             updateBgm(scene.bgm);
             
