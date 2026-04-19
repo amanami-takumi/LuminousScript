@@ -1081,7 +1081,7 @@ class LuminasScript:
             <div class="modal-content history-content">
                 <h2>会話履歴</h2>
                 <div id="history-list"></div>
-                <button id="history-back-button" class="menu-btn" onclick="goBackFromHistory()">1つ戻る</button>
+                <div id="history-help-text" class="history-help-text"></div>
                 <button class="menu-btn" onclick="closeHistory()">閉じる</button>
             </div>
         </div>
@@ -1838,11 +1838,40 @@ class LuminasScript:
             max-height: 60vh;
             overflow-y: auto;
         }}
+
+        .history-help-text {{
+            margin-bottom: 1rem;
+            text-align: center;
+            font-size: 0.95rem;
+            opacity: 0.85;
+        }}
         
         .history-item {{
             margin-bottom: 1.5rem;
             padding-bottom: 1.5rem;
             border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+            transition: background 0.2s, border-color 0.2s, transform 0.2s, opacity 0.2s;
+        }}
+
+        .history-item.jumpable {{
+            cursor: pointer;
+        }}
+
+        .history-item.jumpable:hover,
+        .history-item.jumpable:focus {{
+            background: rgba(255, 255, 255, 0.08);
+            border-color: rgba(255, 255, 255, 0.45);
+            transform: translateY(-1px);
+            outline: none;
+        }}
+
+        .history-item.locked {{
+            opacity: 0.5;
+        }}
+
+        .history-item.current {{
+            border-left: 3px solid rgba(255, 215, 0, 0.8);
+            padding-left: 1rem;
         }}
         
         .history-item:last-child {{
@@ -2686,6 +2715,17 @@ class LuminasScript:
             }};
         }}
 
+        function normalizeConversationHistoryEntry(entry) {{
+            const speaker = entry && typeof entry.speaker === 'string' ? entry.speaker : '';
+            const text = entry && typeof entry.text === 'string' ? entry.text : '';
+            const sceneHistoryPosition = Number.parseInt(entry?.sceneHistoryPosition, 10);
+            return {{
+                speaker,
+                text,
+                sceneHistoryPosition: Number.isInteger(sceneHistoryPosition) ? sceneHistoryPosition : -1
+            }};
+        }}
+
         function recordSceneNavigation(index) {{
             const lastEntry = sceneNavigationHistory[sceneNavigationHistory.length - 1];
             if (lastEntry && lastEntry.sceneIndex === index) {{
@@ -2709,24 +2749,67 @@ class LuminasScript:
             return -1;
         }}
 
+        function getCurrentSceneHistoryPosition() {{
+            return sceneNavigationHistory.length - 1;
+        }}
+
+        function inferHistoryEntryScenePosition(historyIndex) {{
+            if (!Number.isInteger(historyIndex) || historyIndex < 0) {{
+                return -1;
+            }}
+
+            let resolvedPosition = -1;
+            for (let i = 0; i < sceneNavigationHistory.length; i += 1) {{
+                const entry = sceneNavigationHistory[i];
+                if (!entry || historyIndex < entry.historyLengthBefore) {{
+                    break;
+                }}
+                resolvedPosition = i;
+            }}
+            return resolvedPosition;
+        }}
+
+        function getHistoryEntryScenePosition(item, historyIndex) {{
+            const normalizedPosition = Number.parseInt(item?.sceneHistoryPosition, 10);
+            if (
+                Number.isInteger(normalizedPosition) &&
+                normalizedPosition >= 0 &&
+                normalizedPosition < sceneNavigationHistory.length
+            ) {{
+                return normalizedPosition;
+            }}
+            return inferHistoryEntryScenePosition(historyIndex);
+        }}
+
+        function canGoBackToSceneHistoryPosition(targetPosition) {{
+            if (!Number.isInteger(targetPosition) || targetPosition < 0 || targetPosition >= sceneNavigationHistory.length) {{
+                return false;
+            }}
+
+            if (targetPosition >= getCurrentSceneHistoryPosition()) {{
+                return false;
+            }}
+
+            const choiceBoundary = getLatestChoiceHistoryPosition();
+            if (choiceBoundary !== -1 && targetPosition <= choiceBoundary) {{
+                return false;
+            }}
+
+            return true;
+        }}
+
         function canGoBackOneScene() {{
             if (sceneNavigationHistory.length < 2) {{
                 return false;
             }}
             const targetPosition = sceneNavigationHistory.length - 2;
-            const choiceBoundary = getLatestChoiceHistoryPosition();
-            if (choiceBoundary !== -1 && targetPosition <= choiceBoundary) {{
-                return false;
-            }}
-            return true;
+            return canGoBackToSceneHistoryPosition(targetPosition);
         }}
 
-        function goBackOneScene() {{
-            if (!canGoBackOneScene()) {{
+        function goBackToSceneHistoryPosition(targetPosition) {{
+            if (!canGoBackToSceneHistoryPosition(targetPosition)) {{
                 return false;
             }}
-
-            const targetPosition = sceneNavigationHistory.length - 2;
 
             const targetEntry = sceneNavigationHistory[targetPosition];
             if (!targetEntry) {{
@@ -2737,6 +2820,13 @@ class LuminasScript:
             conversationHistory = conversationHistory.slice(0, targetEntry.historyLengthBefore);
             loadScene(targetEntry.sceneIndex, {{ recordHistory: false }});
             return true;
+        }}
+
+        function goBackOneScene() {{
+            if (sceneNavigationHistory.length < 2) {{
+                return false;
+            }}
+            return goBackToSceneHistoryPosition(sceneNavigationHistory.length - 2);
         }}
 
         function goBackFromHistory() {{
@@ -2993,22 +3083,64 @@ class LuminasScript:
         }}
         
         // 会話履歴の追加
-        function addToHistory(speaker, text) {{
+        function addToHistory(speaker, text, options = {{}}) {{
             if (text && text.trim()) {{
-                conversationHistory.push({{ speaker: applyCustomName(speaker), text }});
+                const requestedSceneHistoryPosition = Number.parseInt(options?.sceneHistoryPosition, 10);
+                const sceneHistoryPosition = Number.isInteger(requestedSceneHistoryPosition)
+                    ? requestedSceneHistoryPosition
+                    : getCurrentSceneHistoryPosition();
+                conversationHistory.push({{
+                    speaker: applyCustomName(speaker),
+                    text,
+                    sceneHistoryPosition
+                }});
             }}
+        }}
+
+        function jumpToHistoryEntry(historyIndex) {{
+            const item = conversationHistory[historyIndex];
+            const targetPosition = getHistoryEntryScenePosition(item, historyIndex);
+            if (!goBackToSceneHistoryPosition(targetPosition)) {{
+                return;
+            }}
+            closeHistory();
         }}
         
         // 会話履歴の表示
         function toggleHistory() {{
             const historyScreen = document.getElementById('history-screen');
             const historyList = document.getElementById('history-list');
-            const historyBackButton = document.getElementById('history-back-button');
+            const historyHelpText = document.getElementById('history-help-text');
+            const currentPosition = getCurrentSceneHistoryPosition();
             
             historyList.innerHTML = '';
-            conversationHistory.forEach(item => {{
+            conversationHistory.forEach((item, index) => {{
                 const div = document.createElement('div');
                 div.className = 'history-item';
+                const targetPosition = getHistoryEntryScenePosition(item, index);
+                const isJumpable = canGoBackToSceneHistoryPosition(targetPosition);
+                const isCurrentSceneItem = targetPosition === currentPosition;
+
+                if (isJumpable) {{
+                    div.classList.add('jumpable');
+                    div.tabIndex = 0;
+                    div.setAttribute('role', 'button');
+                    div.setAttribute('aria-label', 'この位置に戻る');
+                    div.title = 'クリックでこの位置に戻る';
+                    div.onclick = () => jumpToHistoryEntry(index);
+                    div.onkeydown = (event) => {{
+                        if (event.key === 'Enter' || event.key === ' ') {{
+                            event.preventDefault();
+                            jumpToHistoryEntry(index);
+                        }}
+                    }};
+                }} else {{
+                    div.classList.add('locked');
+                }}
+
+                if (isCurrentSceneItem) {{
+                    div.classList.add('current');
+                }}
                 
                 if (item.speaker) {{
                     const speaker = document.createElement('div');
@@ -3025,8 +3157,10 @@ class LuminasScript:
                 historyList.appendChild(div);
             }});
 
-            if (historyBackButton) {{
-                historyBackButton.disabled = !canGoBackOneScene();
+            if (historyHelpText) {{
+                historyHelpText.textContent = canGoBackOneScene()
+                    ? '戻りたい履歴をクリックしてください。選択肢より前には戻れません。'
+                    : '現在の位置から戻れる履歴はありません。';
             }}
             
             historyScreen.classList.remove('hidden');
@@ -3924,7 +4058,9 @@ class LuminasScript:
                     choices: loadedState.choices && typeof loadedState.choices === 'object' ? loadedState.choices : {{}},
                     settings: {{ ...DEFAULT_SETTINGS, ...(loadedState.settings || {{}}) }}
                 }};
-                conversationHistory = Array.isArray(data.history) ? data.history : [];
+                conversationHistory = Array.isArray(data.history)
+                    ? data.history.map(entry => normalizeConversationHistoryEntry(entry))
+                    : [];
                 const loadedSceneNavigationHistory = Array.isArray(data.sceneNavigationHistory)
                     ? data.sceneNavigationHistory.map(normalizeSceneNavigationEntry).filter(Boolean)
                     : [];
