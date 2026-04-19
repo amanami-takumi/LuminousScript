@@ -2763,7 +2763,6 @@ class LuminasScript:
 
             if (sceneType === 'choice') {{
                 event.preventDefault();
-                loadScene(currentSceneIndex + 1);
                 return;
             }}
 
@@ -3221,10 +3220,16 @@ class LuminasScript:
             const choiceBox = document.getElementById('choice-box');
             const choicesContainer = document.getElementById('choices-container');
             const textBox = document.getElementById('text-box');
+            const activeElement = document.activeElement;
             
             textBox.style.display = 'none';
             choiceBox.classList.remove('hidden');
             choicesContainer.innerHTML = '';
+
+            // 選択肢ページでは、Tabで選択肢にフォーカスするまでEnterを無効にする
+            if (activeElement && typeof activeElement.blur === 'function') {{
+                activeElement.blur();
+            }}
             
             // テキストを選択肢に分割
             const choiceText = applyCustomName(scene.text || '');
