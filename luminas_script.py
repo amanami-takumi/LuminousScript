@@ -5,6 +5,7 @@ LuminasScript - Visual Novel Game Generator
 CSVファイルからビジュアルノベル形式のウェブゲームを生成します。
 """
 
+import argparse
 import csv
 import base64
 import hashlib
@@ -398,39 +399,61 @@ class LuminasScript:
         header = payload[:header_size][::-1]
         return header + payload[header_size:], header_size
 
-    def _write_obfuscated_asset(
+    def _build_obfuscated_asset_meta(
         self,
-        output_assets_dir: Path,
         asset_category: str,
         logical_name: str,
         payload: bytes,
         mime_type: str
-    ) -> Tuple[Dict[str, object], str]:
-        """難読化済みアセットを書き出し、ブラウザ用メタ情報を返す"""
+    ) -> Tuple[Dict[str, object], bytes]:
+        """難読化済みアセットのメタ情報とペイロードを組み立てる"""
         digest_source = f"{asset_category}:{logical_name}:{mime_type}".encode('utf-8') + payload
         hashed_name = hashlib.sha256(digest_source).hexdigest()
         output_name = f"{hashed_name}{self.OBFUSCATED_ASSET_EXTENSION}"
-        output_path = output_assets_dir / output_name
 
         obfuscated_payload, header_swap_size = self._obfuscate_asset_payload(payload)
-        with open(output_path, 'wb') as f:
-            f.write(obfuscated_payload)
-
         meta = {
             'path': f"assets/{output_name}",
             'mimeType': mime_type,
             'headerSwapSize': header_swap_size
         }
+        return meta, obfuscated_payload
+
+    def _write_obfuscated_asset(
+        self,
+        output_assets_dir: Optional[Path],
+        asset_category: str,
+        logical_name: str,
+        payload: bytes,
+        mime_type: str,
+        write_asset_file: bool = True
+    ) -> Tuple[Dict[str, object], str]:
+        """難読化済みアセットのメタ情報を返し、必要ならファイルも書き出す"""
+        meta, obfuscated_payload = self._build_obfuscated_asset_meta(
+            asset_category,
+            logical_name,
+            payload,
+            mime_type
+        )
+
+        if write_asset_file:
+            if output_assets_dir is None:
+                raise ValueError("アセット出力先が指定されていません")
+            output_path = output_assets_dir / Path(meta['path']).name
+            with open(output_path, 'wb') as f:
+                f.write(obfuscated_payload)
+
         payload_b64 = base64.b64encode(obfuscated_payload).decode('ascii')
         return meta, payload_b64
 
     def _register_file_asset(
         self,
-        output_assets_dir: Path,
+        output_assets_dir: Optional[Path],
         asset_category: str,
         logical_name: str,
         source_path: Path,
-        asset_type: str
+        asset_type: str,
+        write_asset_file: bool = True
     ) -> Optional[Tuple[Dict[str, object], str]]:
         """画像・音声・その他ファイルを出力アセットとして登録"""
         if asset_type == 'image':
@@ -445,7 +468,14 @@ class LuminasScript:
             return None
 
         payload, mime_type = built
-        return self._write_obfuscated_asset(output_assets_dir, asset_category, logical_name, payload, mime_type)
+        return self._write_obfuscated_asset(
+            output_assets_dir,
+            asset_category,
+            logical_name,
+            payload,
+            mime_type,
+            write_asset_file=write_asset_file
+        )
 
     def _normalize_asset_reference(self, filename: str) -> str:
         """CSV上のアセット参照を安全な相対パスへ正規化"""
@@ -647,12 +677,24 @@ class LuminasScript:
 
         self.scenario_data = applied_rows
 
-    def collect_assets(self, bundle_dir: Path, output_assets_dir: Path) -> Dict[str, object]:
-        """使用アセットを収集し、難読化済みファイルとして書き出す"""
+    def collect_assets(
+        self,
+        output_assets_dir: Optional[Path] = None,
+        write_asset_files: bool = True,
+        write_local_scripts: bool = True
+    ) -> Dict[str, object]:
+        """使用アセットを収集し、必要に応じて難読化済みファイルを書き出す"""
         image_assets: Dict[str, Dict[str, object]] = {}
         audio_assets: Dict[str, Dict[str, object]] = {}
-        local_scripts_dir = output_assets_dir / self.LOCAL_ASSET_SCRIPT_DIRNAME
-        local_scripts_dir.mkdir(parents=True, exist_ok=True)
+
+        if write_asset_files and output_assets_dir is None:
+            raise ValueError("アセットファイルを書き出すには出力先が必要です")
+        if write_local_scripts and output_assets_dir is None:
+            raise ValueError("ローカルアセットスクリプトを書き出すには出力先が必要です")
+
+        if write_local_scripts and output_assets_dir is not None:
+            local_scripts_dir = output_assets_dir / self.LOCAL_ASSET_SCRIPT_DIRNAME
+            local_scripts_dir.mkdir(parents=True, exist_ok=True)
 
         def register_image(directory: Path, asset_name: str, category: str) -> None:
             if not asset_name or asset_name in image_assets or not directory.exists():
@@ -660,10 +702,18 @@ class LuminasScript:
             asset_path = self._find_asset_path(directory, asset_name, ['.png', '.jpg', '.jpeg', '.webp', '.gif'])
             if not asset_path:
                 return
-            registered = self._register_file_asset(output_assets_dir, category, asset_name, asset_path, 'image')
+            registered = self._register_file_asset(
+                output_assets_dir,
+                category,
+                asset_name,
+                asset_path,
+                'image',
+                write_asset_file=write_asset_files
+            )
             if registered:
                 meta, payload_b64 = registered
-                self._write_local_asset_script(output_assets_dir, meta['path'], payload_b64)
+                if write_local_scripts and output_assets_dir is not None:
+                    self._write_local_asset_script(output_assets_dir, meta['path'], payload_b64)
                 image_assets[asset_name] = meta
 
         def register_audio(directory: Path, asset_name: str, category: str) -> None:
@@ -672,10 +722,18 @@ class LuminasScript:
             asset_path = self._find_asset_path(directory, asset_name, ['.mp3', '.wav', '.ogg', '.m4a'])
             if not asset_path:
                 return
-            registered = self._register_file_asset(output_assets_dir, category, asset_name, asset_path, 'audio')
+            registered = self._register_file_asset(
+                output_assets_dir,
+                category,
+                asset_name,
+                asset_path,
+                'audio',
+                write_asset_file=write_asset_files
+            )
             if registered:
                 meta, payload_b64 = registered
-                self._write_local_asset_script(output_assets_dir, meta['path'], payload_b64)
+                if write_local_scripts and output_assets_dir is not None:
+                    self._write_local_asset_script(output_assets_dir, meta['path'], payload_b64)
                 audio_assets[asset_name] = meta
 
         bg_dir = self.assets_dir / "backgrounds"
@@ -701,11 +759,16 @@ class LuminasScript:
                 register_audio(bgm_dir, self._extract_asset_name(row.get('bgm', '').strip()), 'bgm')
             register_audio(bgm_dir, self._extract_asset_name(str(self.config.get('adv_title_music', '')).strip()), 'bgm')
 
-        favicon = self._resolve_favicon_asset(output_assets_dir)
+        favicon = self._resolve_favicon_asset(output_assets_dir, write_asset_file=write_asset_files)
         if favicon and favicon.get('path') and favicon.get('payloadBase64'):
-            self._write_local_asset_script(output_assets_dir, favicon['path'], favicon['payloadBase64'])
+            if write_local_scripts and output_assets_dir is not None:
+                self._write_local_asset_script(output_assets_dir, favicon['path'], favicon['payloadBase64'])
             favicon = {k: v for k, v in favicon.items() if k != 'payloadBase64'}
-        print(f"✓ 画像{len(image_assets)}個 / 音声{len(audio_assets)}個のアセットを書き出しました")
+
+        if write_asset_files:
+            print(f"✓ 画像{len(image_assets)}個 / 音声{len(audio_assets)}個のアセットを書き出しました")
+        else:
+            print(f"✓ 画像{len(image_assets)}個 / 音声{len(audio_assets)}個のアセット情報を作成しました")
         return {
             'images': image_assets,
             'audio': audio_assets,
@@ -724,7 +787,11 @@ class LuminasScript:
             return inner
         return text
 
-    def _resolve_favicon_asset(self, output_assets_dir: Path) -> Dict[str, object]:
+    def _resolve_favicon_asset(
+        self,
+        output_assets_dir: Optional[Path],
+        write_asset_file: bool = True
+    ) -> Dict[str, object]:
         """favicon_urlを出力アセットへ解決"""
         raw = str(self.config.get('favicon_url') or '').strip()
         if not raw:
@@ -752,7 +819,14 @@ class LuminasScript:
             print(f"⚠ favicon が見つかりません: {raw}")
             return {}
 
-        registered = self._register_file_asset(output_assets_dir, 'favicon', raw, favicon_path, 'file')
+        registered = self._register_file_asset(
+            output_assets_dir,
+            'favicon',
+            raw,
+            favicon_path,
+            'file',
+            write_asset_file=write_asset_file
+        )
         if not registered:
             return {}
 
@@ -772,6 +846,33 @@ class LuminasScript:
         with open(script_path, 'w', encoding='utf-8') as f:
             f.write(script)
     
+    def _build_html_content(
+        self,
+        output_assets_dir: Optional[Path],
+        write_asset_files: bool,
+        write_local_scripts: bool
+    ) -> str:
+        """HTML文字列を組み立てる"""
+        assets = self.collect_assets(
+            output_assets_dir=output_assets_dir,
+            write_asset_files=write_asset_files,
+            write_local_scripts=write_local_scripts
+        )
+        self._log_deprecated_choice_jumps()
+        scenario_json = json.dumps(self.scenario_data, ensure_ascii=False, indent=2)
+        image_assets_json = json.dumps(assets['images'], ensure_ascii=False)
+        audio_assets_json = json.dumps(assets['audio'], ensure_ascii=False)
+        favicon_asset_json = json.dumps(assets['favicon'], ensure_ascii=False)
+        config_json = json.dumps(self.config, ensure_ascii=False)
+
+        return self._generate_html_template(
+            scenario_json,
+            image_assets_json,
+            audio_assets_json,
+            favicon_asset_json,
+            config_json
+        )
+
     def generate_html(self, csv_filename: str = "scenario.csv") -> Path:
         """HTMLとassetsディレクトリを生成し、出力ディレクトリを返す"""
         if not self.scenario_data:
@@ -786,20 +887,10 @@ class LuminasScript:
         bundle_dir.mkdir(parents=True, exist_ok=False)
         assets_output_dir.mkdir(parents=True, exist_ok=False)
 
-        assets = self.collect_assets(bundle_dir, assets_output_dir)
-        self._log_deprecated_choice_jumps()
-        scenario_json = json.dumps(self.scenario_data, ensure_ascii=False, indent=2)
-        image_assets_json = json.dumps(assets['images'], ensure_ascii=False)
-        audio_assets_json = json.dumps(assets['audio'], ensure_ascii=False)
-        favicon_asset_json = json.dumps(assets['favicon'], ensure_ascii=False)
-        config_json = json.dumps(self.config, ensure_ascii=False)
-
-        html_content = self._generate_html_template(
-            scenario_json,
-            image_assets_json,
-            audio_assets_json,
-            favicon_asset_json,
-            config_json
+        html_content = self._build_html_content(
+            output_assets_dir=assets_output_dir,
+            write_asset_files=True,
+            write_local_scripts=True
         )
 
         output_path = bundle_dir / "game.html"
@@ -810,6 +901,31 @@ class LuminasScript:
         print(f"  ファイルサイズ: {output_path.stat().st_size / 1024:.1f} KB")
 
         return bundle_dir
+
+    def generate_replacement_html(self, csv_filename: str = "scenario.csv") -> Path:
+        """差し替え用にHTMLのみをoutput直下へ出力する"""
+        if not self.scenario_data:
+            raise ValueError("シナリオデータが読み込まれていません")
+
+        csv_base_name = Path(csv_filename).stem
+        timestamp = datetime.now().strftime("%Y%m%d%H%M%S")
+        output_path = self.output_dir / f"{csv_base_name}_{timestamp}.html"
+
+        self.output_dir.mkdir(parents=True, exist_ok=True)
+
+        html_content = self._build_html_content(
+            output_assets_dir=None,
+            write_asset_files=False,
+            write_local_scripts=False
+        )
+
+        with open(output_path, 'w', encoding='utf-8') as f:
+            f.write(html_content)
+
+        print(f"✓ 差し替え用HTMLを生成しました: {output_path}")
+        print(f"  ファイルサイズ: {output_path.stat().st_size / 1024:.1f} KB")
+
+        return output_path
 
     def _normalize_scene_id(self, scene_id: Optional[str]) -> str:
         """scene_idを比較用に正規化"""
@@ -965,6 +1081,7 @@ class LuminasScript:
             <div class="modal-content history-content">
                 <h2>会話履歴</h2>
                 <div id="history-list"></div>
+                <button id="history-back-button" class="menu-btn" onclick="goBackFromHistory()">1つ戻る</button>
                 <button class="menu-btn" onclick="closeHistory()">閉じる</button>
             </div>
         </div>
@@ -1900,6 +2017,7 @@ class LuminasScript:
         // ゲーム状態
         let currentSceneIndex = 0;
         let conversationHistory = [];
+        let sceneNavigationHistory = [];
         let isAutoMode = false;
         let autoModeTimeout = null;
         let clickDelayTimer = null;
@@ -2292,6 +2410,7 @@ class LuminasScript:
             document.addEventListener('fullscreenchange', updateFullscreenButtons);
             document.addEventListener('webkitfullscreenchange', updateFullscreenButtons);
             document.addEventListener('MSFullscreenChange', updateFullscreenButtons);
+            document.addEventListener('keydown', handleSceneNavigationKeydown);
             initializeGame().catch(error => {{
                 console.error('Initialization failed:', error);
                 updateLoadingMessage('ロードに失敗しました');
@@ -2514,6 +2633,150 @@ class LuminasScript:
 
             if (getSceneType(scene.scene_id) === 'dialogue') {{
                 autoAdvance(scene);
+            }}
+        }}
+
+        function isSceneAdvanceBlockedModalOpen() {{
+            return [
+                'history-screen',
+                'game-menu',
+                'save-load-screen',
+                'settings-screen',
+                'license-modal',
+                'custom-name-modal',
+                'credits-screen'
+            ].some(id => {{
+                const element = document.getElementById(id);
+                return element && !element.classList.contains('hidden');
+            }});
+        }}
+
+        function isInteractiveElementFocused() {{
+            const activeElement = document.activeElement;
+            if (!activeElement || activeElement === document.body) {{
+                return false;
+            }}
+
+            const tagName = String(activeElement.tagName || '').toUpperCase();
+            if (['BUTTON', 'INPUT', 'TEXTAREA', 'SELECT', 'OPTION', 'A'].includes(tagName)) {{
+                return true;
+            }}
+
+            return !!activeElement.isContentEditable;
+        }}
+
+        function isSceneNavigationKeyEventAllowed() {{
+            const gameScreen = document.getElementById('game-screen');
+            if (!gameScreen || !gameScreen.classList.contains('active')) return false;
+            if (isNoticeModalOpen() || isSceneAdvanceBlockedModalOpen() || isInteractiveElementFocused()) return false;
+            return true;
+        }}
+
+        function normalizeSceneNavigationEntry(entry) {{
+            const sceneIndex = Number.parseInt(entry?.sceneIndex, 10);
+            const historyLengthBefore = Number.parseInt(entry?.historyLengthBefore, 10);
+            if (!Number.isInteger(sceneIndex) || sceneIndex < 0 || sceneIndex >= SCENARIO_DATA.length) {{
+                return null;
+            }}
+            return {{
+                sceneIndex,
+                historyLengthBefore: Number.isInteger(historyLengthBefore) && historyLengthBefore >= 0
+                    ? historyLengthBefore
+                    : 0
+            }};
+        }}
+
+        function recordSceneNavigation(index) {{
+            const lastEntry = sceneNavigationHistory[sceneNavigationHistory.length - 1];
+            if (lastEntry && lastEntry.sceneIndex === index) {{
+                return;
+            }}
+
+            sceneNavigationHistory.push({{
+                sceneIndex: index,
+                historyLengthBefore: conversationHistory.length
+            }});
+        }}
+
+        function getLatestChoiceHistoryPosition() {{
+            for (let i = sceneNavigationHistory.length - 1; i >= 0; i -= 1) {{
+                const entry = sceneNavigationHistory[i];
+                const scene = SCENARIO_DATA[entry.sceneIndex];
+                if (scene && getSceneType(scene.scene_id) === 'choice') {{
+                    return i;
+                }}
+            }}
+            return -1;
+        }}
+
+        function canGoBackOneScene() {{
+            if (sceneNavigationHistory.length < 2) {{
+                return false;
+            }}
+            const targetPosition = sceneNavigationHistory.length - 2;
+            const choiceBoundary = getLatestChoiceHistoryPosition();
+            if (choiceBoundary !== -1 && targetPosition <= choiceBoundary) {{
+                return false;
+            }}
+            return true;
+        }}
+
+        function goBackOneScene() {{
+            if (!canGoBackOneScene()) {{
+                return false;
+            }}
+
+            const targetPosition = sceneNavigationHistory.length - 2;
+
+            const targetEntry = sceneNavigationHistory[targetPosition];
+            if (!targetEntry) {{
+                return false;
+            }}
+
+            sceneNavigationHistory = sceneNavigationHistory.slice(0, targetPosition + 1);
+            conversationHistory = conversationHistory.slice(0, targetEntry.historyLengthBefore);
+            loadScene(targetEntry.sceneIndex, {{ recordHistory: false }});
+            return true;
+        }}
+
+        function goBackFromHistory() {{
+            if (!goBackOneScene()) {{
+                return;
+            }}
+            closeHistory();
+        }}
+
+        function handleSceneNavigationKeydown(event) {{
+            if (event.repeat) return;
+            if (event.key !== 'Enter' && event.key !== 'Backspace') return;
+            if (!isSceneNavigationKeyEventAllowed()) return;
+
+            const scene = SCENARIO_DATA[currentSceneIndex];
+            if (!scene) return;
+
+            const sceneType = getSceneType(scene.scene_id);
+            if (event.key === 'Backspace') {{
+                event.preventDefault();
+                goBackOneScene();
+                return;
+            }}
+
+            if (sceneType === 'choice') {{
+                event.preventDefault();
+                loadScene(currentSceneIndex + 1);
+                return;
+            }}
+
+            if (!canClick) return;
+
+            event.preventDefault();
+            if (sceneType === 'ending') {{
+                returnToTitle();
+                return;
+            }}
+
+            if (sceneType === 'dialogue') {{
+                loadScene(findNextSceneIndex(currentSceneIndex));
             }}
         }}
 
@@ -2741,6 +3004,7 @@ class LuminasScript:
         function toggleHistory() {{
             const historyScreen = document.getElementById('history-screen');
             const historyList = document.getElementById('history-list');
+            const historyBackButton = document.getElementById('history-back-button');
             
             historyList.innerHTML = '';
             conversationHistory.forEach(item => {{
@@ -2761,6 +3025,10 @@ class LuminasScript:
                 
                 historyList.appendChild(div);
             }});
+
+            if (historyBackButton) {{
+                historyBackButton.disabled = !canGoBackOneScene();
+            }}
             
             historyScreen.classList.remove('hidden');
             // 最新の履歴までスクロール
@@ -2786,6 +3054,7 @@ class LuminasScript:
             }}
             currentSceneIndex = 0;
             conversationHistory = [];
+            sceneNavigationHistory = [];
             gameState.visitedScenes = [];
             gameState.choices = {{}};
             isAutoMode = false;
@@ -2809,7 +3078,10 @@ class LuminasScript:
         }}
         
         // シーンを読み込み
-        function loadScene(index) {{
+        function loadScene(index, options = {{}}) {{
+            if (index < 0) {{
+                return;
+            }}
             if (index >= SCENARIO_DATA.length) {{
                 console.log('Game finished');
                 returnToTitle();
@@ -2825,6 +3097,9 @@ class LuminasScript:
             currentSceneIndex = index;
             closeNoticeModal({{ resumeAuto: false }});
             const scene = SCENARIO_DATA[index];
+            if (options.recordHistory !== false) {{
+                recordSceneNavigation(index);
+            }}
             const sceneId = normalizeSceneId(scene.scene_id);
             gameState.currentSceneId = sceneId;
             gameState.visitedScenes.push(sceneId);
@@ -3587,6 +3862,7 @@ class LuminasScript:
                 sceneIndex: currentSceneIndex,
                 state: gameState,
                 history: conversationHistory,
+                sceneNavigationHistory,
                 meta: {{
                     sceneId: gameState.currentSceneId || normalizeSceneId(scene?.scene_id),
                     speaker: getSceneSpeakerName(scene),
@@ -3644,10 +3920,19 @@ class LuminasScript:
                     settings: {{ ...DEFAULT_SETTINGS, ...(loadedState.settings || {{}}) }}
                 }};
                 conversationHistory = Array.isArray(data.history) ? data.history : [];
+                const loadedSceneNavigationHistory = Array.isArray(data.sceneNavigationHistory)
+                    ? data.sceneNavigationHistory.map(normalizeSceneNavigationEntry).filter(Boolean)
+                    : [];
+                sceneNavigationHistory = loadedSceneNavigationHistory.length
+                    ? loadedSceneNavigationHistory
+                    : [{{
+                        sceneIndex: currentSceneIndex,
+                        historyLengthBefore: Math.max(conversationHistory.length - 1, 0)
+                    }}];
 
                 closeSaveLoadModal();
                 showScreen('game-screen');
-                loadScene(currentSceneIndex);
+                loadScene(currentSceneIndex, {{ recordHistory: false }});
             }} catch (e) {{
                 alert('ロードに失敗しました: ' + e.message);
             }}
@@ -3910,6 +4195,7 @@ class LuminasScript:
         function returnToTitle() {{
             activateTitleScreen();
             closeGameMenu();
+            sceneNavigationHistory = [];
             isAutoMode = false;
             document.getElementById('auto-button').classList.remove('active');
         }}
@@ -3925,13 +4211,25 @@ def main():
     print("=" * 60)
     print()
     
-    # コマンドライン引数の処理
+    parser = argparse.ArgumentParser(
+        description="CSVファイルからビジュアルノベル形式のウェブゲームを生成します。"
+    )
+    parser.add_argument(
+        "csv_file",
+        nargs="?",
+        default="scenario.csv",
+        help="入力CSVファイル名（inputディレクトリ配下）"
+    )
+    parser.add_argument(
+        "--replacement-html-only",
+        action="store_true",
+        help="assetsディレクトリを生成せず、差し替え用HTMLのみをoutput直下へ出力する"
+    )
+    args = parser.parse_args()
+
     input_dir = "input"
     output_dir = "output"
-    csv_file = "scenario.csv"
-    
-    if len(sys.argv) > 1:
-        csv_file = sys.argv[1]
+    csv_file = args.csv_file
     
     try:
         # ジェネレーターを初期化
@@ -3940,17 +4238,23 @@ def main():
         # CSVを読み込み
         generator.load_csv(csv_file)
         
-        # HTMLを生成
-        bundle_dir = generator.generate_html(csv_file)
+        if args.replacement_html_only:
+            output_path = generator.generate_replacement_html(csv_file)
+        else:
+            output_path = generator.generate_html(csv_file)
         
         print()
         print("=" * 60)
         print("  ✓ 生成完了!")
         print("=" * 60)
         print()
-        print(f"生成先ディレクトリ: {bundle_dir}")
-        print(f"HTML: {bundle_dir / 'game.html'}")
-        print(f"assets: {bundle_dir / 'assets'}")
+        if args.replacement_html_only:
+            print(f"差し替え用HTML: {output_path}")
+            print("このHTMLは既存の通常生成物へ差し替えて使用してください。")
+        else:
+            print(f"生成先ディレクトリ: {output_path}")
+            print(f"HTML: {output_path / 'game.html'}")
+            print(f"assets: {output_path / 'assets'}")
         print("ブラウザで開いてゲームをお楽しみください!")
         
     except Exception as e:

@@ -594,6 +594,7 @@ INDEX_HTML = r"""<!DOCTYPE html>
       <div class="row">
         <select id="buildCsv"></select>
         <button onclick="buildGame()">ゲームをビルド</button>
+        <button class="secondary" onclick="buildReplacementGame()">差し替えビルド</button>
       </div>
       <div class="row">
         <button class="secondary" onclick="checkSceneId()">scene_idチェック</button>
@@ -1667,18 +1668,26 @@ INDEX_HTML = r"""<!DOCTYPE html>
       window.open(`/api/download?base=output&path=${encodeURIComponent(state.outputSelected.rel_path)}`, "_blank");
     }
 
-    async function buildGame() {
+    async function runBuild(replacementHtmlOnly = false) {
       const csv = document.getElementById("buildCsv").value;
       if (!csv) return alert("CSVを選択してください");
-      setStatus("ビルド中...");
+      setStatus(replacementHtmlOnly ? "差し替えビルド中..." : "ビルド中...");
       try {
-        const result = await apiPost("/api/build", { csv });
+        const result = await apiPost("/api/build", { csv, replacement_html_only: replacementHtmlOnly });
         setStatus(result.message || "完了");
         refreshOutput();
         refreshLogs();
       } catch (err) {
         setStatus(`失敗: ${err.message}`);
       }
+    }
+
+    async function buildGame() {
+      await runBuild(false);
+    }
+
+    async function buildReplacementGame() {
+      await runBuild(true);
     }
 
     async function checkSceneId() {
@@ -2269,6 +2278,7 @@ class GUIHandler(BaseHTTPRequestHandler):
             if parsed.path == "/api/build":
                 data = self._parse_json()
                 csv_name = data.get("csv", "scenario.csv")
+                replacement_html_only = bool(data.get("replacement_html_only", False))
                 csv_path = safe_path(INPUT_DIR, csv_name)
                 if not csv_path.exists():
                     self._send_text("CSV not found", status=404)
@@ -2279,7 +2289,13 @@ class GUIHandler(BaseHTTPRequestHandler):
                     str(PROJECT_ROOT / "luminas_script.py"),
                     csv_name,
                 ]
-                logging.info("Build start: %s", csv_name)
+                if replacement_html_only:
+                    cmd.insert(2, "--replacement-html-only")
+                logging.info(
+                    "Build start: %s (replacement_html_only=%s)",
+                    csv_name,
+                    replacement_html_only
+                )
                 result = subprocess.run(cmd, cwd=str(PROJECT_ROOT), capture_output=True, text=True)
                 logging.info("Build stdout:\n%s", result.stdout.strip())
                 if result.stderr:
@@ -2287,7 +2303,8 @@ class GUIHandler(BaseHTTPRequestHandler):
                 if result.returncode != 0:
                     self._send_text("Build failed", status=500)
                     return
-                self._send_json({"ok": True, "message": "ビルド完了"})
+                message = "差し替えビルド完了" if replacement_html_only else "ビルド完了"
+                self._send_json({"ok": True, "message": message})
                 return
 
             if parsed.path == "/api/check_scene_id":
