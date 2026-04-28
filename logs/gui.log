@@ -7609,3 +7609,121 @@ assets: output/sample_20260413220739/assets
 差し替え用HTML: output/sample_20260420000200.html
 このHTMLは既存の通常生成物へ差し替えて使用してください。
 ブラウザで開いてゲームをお楽しみください!
+2026-04-21 00:45:03,828 [ERROR] POST error
+Traceback (most recent call last):
+  File "/usr/src/LuminousScript/web_gui.py", line 2261, in do_POST
+    moved = move_assets(paths, target_dir)
+  File "/usr/src/LuminousScript/web_gui.py", line 1892, in move_assets
+    raise ValueError(f"Cannot move directory into itself: {rel}")
+ValueError: Cannot move directory into itself: bgms
+2026-04-21 00:45:03,951 [ERROR] POST error
+Traceback (most recent call last):
+  File "/usr/src/LuminousScript/web_gui.py", line 2261, in do_POST
+    moved = move_assets(paths, target_dir)
+  File "/usr/src/LuminousScript/web_gui.py", line 1892, in move_assets
+    raise ValueError(f"Cannot move directory into itself: {rel}")
+ValueError: Cannot move directory into itself: bgms
+2026-04-21 00:45:07,438 [ERROR] POST error
+Traceback (most recent call last):
+  File "/usr/src/LuminousScript/web_gui.py", line 2261, in do_POST
+    moved = move_assets(paths, target_dir)
+  File "/usr/src/LuminousScript/web_gui.py", line 1892, in move_assets
+    raise ValueError(f"Cannot move directory into itself: {rel}")
+ValueError: Cannot move directory into itself: characters
+2026-04-21 00:45:09,054 [ERROR] POST error
+Traceback (most recent call last):
+  File "/usr/src/LuminousScript/web_gui.py", line 2261, in do_POST
+    moved = move_assets(paths, target_dir)
+  File "/usr/src/LuminousScript/web_gui.py", line 1892, in move_assets
+    raise ValueError(f"Cannot move directory into itself: {rel}")
+ValueError: Cannot move directory into itself: characters/ametori
+2026-04-26 01:41:02,054 [ERROR] GET error
+Traceback (most recent call last):
+  File "/usr/src/LuminousScript/web_gui.py", line 2089, in do_GET
+    self._send_file(path, inline=inline)
+    ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/src/LuminousScript/web_gui.py", line 2007, in _send_file
+    self.send_header("Content-Disposition", f"{disposition}; filename=\"{path.name}\"")
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.14/http/server.py", line 575, in send_header
+    ("%s: %s\r\n" % (keyword, value)).encode('latin-1', 'strict'))
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^
+UnicodeEncodeError: 'latin-1' codec can't encode characters in position 39-42: ordinal not in range(256)
+2026-04-27 10:00:22,601 [ERROR] GET error
+Traceback (most recent call last):
+  File "/usr/src/LuminousScript/web_gui.py", line 2089, in do_GET
+    self._send_file(path, inline=inline)
+    ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/src/LuminousScript/web_gui.py", line 2010, in _send_file
+    self.wfile.write(data)
+    ~~~~~~~~~~~~~~~~^^^^^^
+  File "/usr/local/lib/python3.14/socketserver.py", line 845, in write
+    self._sock.sendall(b)
+    ~~~~~~~~~~~~~~~~~~^^^
+BrokenPipeError: [Errno 32] Broken pipe
+2026-04-28 23:43:42,704 [INFO] Build start: sample.csv (replacement_html_only=True)
+2026-04-28 23:43:43,585 [INFO] Build stdout:
+============================================================
+  LuminasScript - Visual Novel Game Generator
+============================================================
+
+✓ config.ymlを読み込みました
+✓ 60行のシナリオデータを読み込みました (encoding: utf-16)
+✓ 画像18個 / 音声3個のアセット情報を作成しました
+⚠ 非推奨のJUMP_Aを検出: scene_id=1-B-Q から 選択肢A のジャンプ先として 1-1 を使用
+⚠ 非推奨のJUMP_Bを検出: scene_id=1-B-Q から 選択肢B のジャンプ先として 1-B-24 を使用
+✓ 差し替え用HTMLを生成しました: output/sample_20260428234342.html
+  ファイルサイズ: 167.3 KB
+
+============================================================
+  ✓ 生成完了!
+============================================================
+
+差し替え用HTML: output/sample_20260428234342.html
+このHTMLは既存の通常生成物へ差し替えて使用してください。
+ブラウザで開いてゲームをお楽しみください!
+2026-04-28 23:51:40,201 [INFO] Build start: sample.csv (replacement_html_only=True)
+2026-04-28 23:51:40,719 [INFO] Build stdout:
+============================================================
+  LuminasScript - Visual Novel Game Generator
+============================================================
+
+✓ config.ymlを読み込みました
+✓ 63行のシナリオデータを読み込みました (encoding: utf-16)
+✓ 画像18個 / 音声3個のアセット情報を作成しました
+⚠ 非推奨のJUMP_Aを検出: scene_id=1-B-Q から 選択肢A のジャンプ先として 1-1 を使用
+⚠ 非推奨のJUMP_Bを検出: scene_id=1-B-Q から 選択肢B のジャンプ先として 1-B-24 を使用
+✓ 差し替え用HTMLを生成しました: output/sample_20260428235140.html
+  ファイルサイズ: 168.8 KB
+
+============================================================
+  ✓ 生成完了!
+============================================================
+
+差し替え用HTML: output/sample_20260428235140.html
+このHTMLは既存の通常生成物へ差し替えて使用してください。
+ブラウザで開いてゲームをお楽しみください!
+2026-04-28 23:54:28,066 [INFO] Scene ID check start: sample.csv
+2026-04-28 23:54:28,116 [INFO] Scene ID check stdout:
+WARNINGS:
+  line 41: '1-C-A-1' - 分岐ルートの追加パーツは数字のみを推奨します
+  line 42: '1-C-A-2' - 分岐ルートの追加パーツは数字のみを推奨します
+  line 43: '1-C-A-3' - 分岐ルートの追加パーツは数字のみを推奨します
+  line 44: '1-C-B-1' - 分岐ルートの追加パーツは数字のみを推奨します
+  line 45: '1-C-B-2' - 分岐ルートの追加パーツは数字のみを推奨します
+  line 46: '1-C-M-1' - 分岐ルートの追加パーツは数字のみを推奨します
+  line 47: '1-C-M-2' - 分岐ルートの追加パーツは数字のみを推奨します
+  line 48: '1-C-M-3' - 分岐ルートの追加パーツは数字のみを推奨します
+  line 49: '1-C-M-4' - 分岐ルートの追加パーツは数字のみを推奨します
+ERRORS:
+  line 33: '1-B-Q' - 分岐ルートの3番目は数字を想定しています (例: 1-A-1)
+  line 40: '1-C-Q' - 分岐ルートの3番目は数字を想定しています (例: 1-A-1)
+  line 41: '1-C-A-1' - 分岐ルートの3番目は数字を想定しています (例: 1-A-1)
+  line 42: '1-C-A-2' - 分岐ルートの3番目は数字を想定しています (例: 1-A-1)
+  line 43: '1-C-A-3' - 分岐ルートの3番目は数字を想定しています (例: 1-A-1)
+  line 44: '1-C-B-1' - 分岐ルートの3番目は数字を想定しています (例: 1-A-1)
+  line 45: '1-C-B-2' - 分岐ルートの3番目は数字を想定しています (例: 1-A-1)
+  line 46: '1-C-M-1' - 分岐ルートの3番目は数字を想定しています (例: 1-A-1)
+  line 47: '1-C-M-2' - 分岐ルートの3番目は数字を想定しています (例: 1-A-1)
+  line 48: '1-C-M-3' - 分岐ルートの3番目は数字を想定しています (例: 1-A-1)
+  line 49: '1-C-M-4' - 分岐ルートの3番目は数字を想定しています (例: 1-A-1)

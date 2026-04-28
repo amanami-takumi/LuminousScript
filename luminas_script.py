@@ -23,7 +23,7 @@ import yaml
 class LuminasScript:
     """CSVからビジュアルノベルゲームを生成するメインクラス"""
 
-    DEPRECATED_CHOICE_JUMP_PATTERN = re.compile(r'(?i)\bJUMP_([ABCD])\s*=\s*([^\s,;|<>]+)')
+    DEPRECATED_CHOICE_JUMP_PATTERN = re.compile(r'(?i)\bJUMP_([ABCD])\s*\(\s*([^()\s,;|<>]+)\s*\)')
 
     IMAGE_EXTENSION_MIME_MAP = {
         '.jpg': 'image/jpeg',
@@ -2042,6 +2042,7 @@ class LuminasScript:
         const SAVE_SLOT_KEY_PREFIX = getStorageKey('luminas_save_');
         const SAVE_SLOT_COUNT = 99;
         const SETTINGS_KEY = getStorageKey('luminas_settings');
+        const STATE_STORE_KEY = getStorageKey('luminas_state_store');
         
         // ゲーム状態
         let currentSceneIndex = 0;
@@ -2064,6 +2065,7 @@ class LuminasScript:
         let resolvedFaviconHref = '';
         const FULLSCREEN_EXPAND_ICON = '<path d="M4 9V4h5M15 4h5v5M20 15v5h-5M9 20H4v-5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>';
         const FULLSCREEN_EXIT_ICON = '<path d="M9 4H4v5M20 9V4h-5M15 20h5v-5M4 15v5h5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>';
+        let currentSceneScriptRuntimeId = 0;
         
         let gameState = createInitialGameState();
 
@@ -2511,14 +2513,179 @@ class LuminasScript:
                 .trim();
         }}
 
-        function parseSceneScriptDirectives(scene) {{
+        function normalizeStateStoreKey(value) {{
+            return String(value || '').trim();
+        }}
+
+        function createEmptySceneScriptDirectives() {{
+            return {{
+                tokens: [],
+                overrides: {{ jumpTargets: {{}} }},
+                noticeMessages: []
+            }};
+        }}
+
+        function loadStateStore() {{
+            const raw = safeStorageGet(STATE_STORE_KEY);
+            if (!raw) {{
+                return {{}};
+            }}
+
+            try {{
+                const parsed = JSON.parse(raw);
+                if (parsed && typeof parsed === 'object' && !Array.isArray(parsed)) {{
+                    return parsed;
+                }}
+            }} catch (e) {{
+                console.warn('状態ストアの読み込みに失敗しました:', e);
+            }}
+
+            return {{}};
+        }}
+
+        function saveStateStore(stateStore) {{
+            return safeStorageSet(STATE_STORE_KEY, JSON.stringify(stateStore || {{}}));
+        }}
+
+        function getStateStoreValue(stateStore, key) {{
+            if (!stateStore || typeof stateStore !== 'object') return undefined;
+            if (!key || !Object.prototype.hasOwnProperty.call(stateStore, key)) return undefined;
+            return stateStore[key];
+        }}
+
+        function splitTopLevelScriptTokens(text, delimiters) {{
+            const tokens = [];
+            let current = '';
+            let parenDepth = 0;
+
+            for (const char of String(text || '')) {{
+                if (char === '(') {{
+                    parenDepth += 1;
+                    current += char;
+                    continue;
+                }}
+                if (char === ')') {{
+                    parenDepth = Math.max(0, parenDepth - 1);
+                    current += char;
+                    continue;
+                }}
+                if (parenDepth === 0 && delimiters.has(char)) {{
+                    const trimmed = current.trim();
+                    if (trimmed) {{
+                        tokens.push(trimmed);
+                    }}
+                    current = '';
+                    continue;
+                }}
+                current += char;
+            }}
+
+            const trimmed = current.trim();
+            if (trimmed) {{
+                tokens.push(trimmed);
+            }}
+
+            return tokens;
+        }}
+
+        function splitSceneScriptSegment(segment) {{
+            const primaryChunks = splitTopLevelScriptTokens(
+                segment,
+                new Set([',', ';', '|', '\\n', '\\r'])
+            );
+
+            return primaryChunks.flatMap(chunk => {{
+                const trimmed = chunk.trim();
+                if (!trimmed) return [];
+                if (
+                    /^NOTICE\\s*\\(/iu.test(trimmed)
+                    || /^STATE_(?:EQ|LEN_GTE|CONTAINS)\\([^)]*\\)\\s*=\\s*NOTICE\\s*\\(/iu.test(trimmed)
+                ) {{
+                    return [trimmed];
+                }}
+                return splitTopLevelScriptTokens(trimmed, new Set([' ', '\\t']));
+            }});
+        }}
+
+        function parseStateStoreValueSpec(value) {{
+            return String(value || '').trim();
+        }}
+
+        function parseStateStoreKeyValueArgs(args) {{
+            const raw = String(args || '').trim();
+            const separatorIndex = raw.indexOf(':');
+            if (separatorIndex <= 0) return null;
+
+            const key = normalizeStateStoreKey(raw.slice(0, separatorIndex));
+            const value = parseStateStoreValueSpec(raw.slice(separatorIndex + 1));
+            if (!key) return null;
+            return {{ key, value }};
+        }}
+
+        function parseStateActionToken(token) {{
+            const match = String(token || '').trim().match(/^STATE_(SET|REMOVE|APPEND)\\((.*)\\)$/iu);
+            if (!match) return null;
+
+            const action = match[1].toUpperCase();
+            const args = match[2];
+            if (action === 'REMOVE') {{
+                const key = normalizeStateStoreKey(args);
+                return key ? {{ type: 'stateAction', action, key }} : null;
+            }}
+
+            const parsedArgs = parseStateStoreKeyValueArgs(args);
+            if (!parsedArgs) return null;
+            return {{
+                type: 'stateAction',
+                action,
+                key: parsedArgs.key,
+                value: parsedArgs.value
+            }};
+        }}
+
+        function parseStateConditionToken(token) {{
+            const match = String(token || '').trim().match(/^STATE_(EQ|LEN_GTE|CONTAINS)\\((.*)\\)\\s*=\\s*(.+)$/iu);
+            if (!match) return null;
+
+            const condition = match[1].toUpperCase();
+            const args = match[2];
+            const directive = String(match[3] || '').trim();
+            if (!directive) return null;
+
+            const parsedArgs = parseStateStoreKeyValueArgs(args);
+            if (!parsedArgs) return null;
+
+            if (condition === 'LEN_GTE') {{
+                const threshold = Number.parseInt(parsedArgs.value, 10);
+                if (!Number.isFinite(threshold) || threshold < 0) {{
+                    return null;
+                }}
+                return {{
+                    type: 'conditionalDirective',
+                    condition,
+                    key: parsedArgs.key,
+                    value: threshold,
+                    directive
+                }};
+            }}
+
+            return {{
+                type: 'conditionalDirective',
+                condition,
+                key: parsedArgs.key,
+                value: parsedArgs.value,
+                directive
+            }};
+        }}
+
+        function parseSceneScriptEntries(scene) {{
             if (!scene || typeof scene !== 'object') {{
-                return {{ tokens: [], overrides: {{ jumpTargets: {{}} }}, notice: '' }};
+                return {{ entries: [] }};
             }}
 
             const raw = String(scene.script || '');
-            if (scene._parsedScriptSource === raw && scene._parsedScriptDirectives) {{
-                return scene._parsedScriptDirectives;
+            if (scene._parsedScriptSource === raw && scene._parsedScriptEntries) {{
+                return scene._parsedScriptEntries;
             }}
 
             const segments = [];
@@ -2532,80 +2699,212 @@ class LuminasScript:
                 segments.push(outside);
             }}
 
-            const noticeMessages = [];
-            const cleanedSegments = segments.map(segment => {{
-                const noticePattern = /NOTICE\\s*=(.*?)(?=(?:[\\s,;|]+(?:CLICK_DELAY|AUTO_SCENE_CHANGE_DELAY|NOTICE)\\s*=)|(?:[\\s,;|]+text_back_off\\b)|$)/giu;
-                return String(segment || '').replace(noticePattern, (_, value) => {{
-                    const normalizedValue = normalizeNoticeText(value);
-                    if (normalizedValue) {{
-                        noticeMessages.push(normalizedValue);
-                    }}
-                    return ' ';
-                }});
-            }});
-
-            const tokens = cleanedSegments.flatMap(segment =>
-                String(segment || '')
-                    .split(/[\\s,;|]+/u)
-                    .map(token => token.trim())
-                    .filter(token => token)
-            );
-            const overrides = {{
-                jumpTargets: {{}}
-            }};
-
-            tokens.forEach(token => {{
-                const separatorIndex = token.indexOf('=');
-                if (separatorIndex <= 0) return;
-
-                const key = token.slice(0, separatorIndex).trim().toUpperCase();
-                const value = token.slice(separatorIndex + 1).trim();
-                const jumpMatch = key.match(/^JUMP_([ABCD])$/u);
-                if (jumpMatch) {{
-                    if (value) {{
-                        overrides.jumpTargets[jumpMatch[1]] = normalizeSceneId(value);
-                    }}
-                    return;
-                }}
-
-                const parsed = parsePositiveInt(value, null);
-                if (parsed === null) return;
-
-                if (key === 'CLICK_DELAY') {{
-                    overrides.clickDelay = parsed;
-                    return;
-                }}
-                if (key === 'AUTO_SCENE_CHANGE_DELAY') {{
-                    overrides.autoSceneChangeDelay = parsed;
-                }}
-            }});
-
             const parsed = {{
-                tokens,
-                overrides,
-                notice: noticeMessages.join('\\n\\n')
+                entries: segments
+                    .flatMap(segment => splitSceneScriptSegment(segment))
+                    .map(token => parseStateConditionToken(token) || parseStateActionToken(token) || {{
+                        type: 'directive',
+                        directive: String(token || '').trim()
+                    }})
+                    .filter(entry => entry && (entry.directive || entry.key))
             }};
             scene._parsedScriptSource = raw;
-            scene._parsedScriptDirectives = parsed;
+            scene._parsedScriptEntries = parsed;
             return parsed;
         }}
 
+        function applySceneDirectiveText(target, directiveText) {{
+            const raw = String(directiveText || '').trim();
+            if (!raw) return;
+
+            const noticeFunctionMatch = raw.match(/^NOTICE\\((.*)\\)$/iu);
+            if (noticeFunctionMatch) {{
+                const normalizedValue = normalizeNoticeText(noticeFunctionMatch[1]);
+                if (normalizedValue) {{
+                    target.noticeMessages.push(normalizedValue);
+                }}
+                return;
+            }}
+
+            const jumpFunctionMatch = raw.match(/^JUMP_([ABCD])\\((.*)\\)$/iu);
+            if (jumpFunctionMatch) {{
+                const branch = jumpFunctionMatch[1].trim().toUpperCase();
+                const targetSceneId = normalizeSceneId(jumpFunctionMatch[2]);
+                if (targetSceneId) {{
+                    target.overrides.jumpTargets[branch] = targetSceneId;
+                }}
+                return;
+            }}
+
+            const functionStyleMatch = raw.match(/^(CLICK_DELAY|AUTO_SCENE_CHANGE_DELAY)\\((.*)\\)$/iu);
+            if (functionStyleMatch) {{
+                const key = functionStyleMatch[1].trim().toUpperCase();
+                const value = functionStyleMatch[2].trim();
+                const parsed = parsePositiveInt(value, null);
+                if (key === 'CLICK_DELAY') {{
+                    if (parsed !== null) {{
+                        target.overrides.clickDelay = parsed;
+                    }}
+                    return;
+                }}
+                if (key === 'AUTO_SCENE_CHANGE_DELAY') {{
+                    if (parsed !== null) {{
+                        target.overrides.autoSceneChangeDelay = parsed;
+                    }}
+                    return;
+                }}
+            }}
+
+            const separatorIndex = raw.indexOf('=');
+            if (separatorIndex <= 0) {{
+                target.tokens.push(raw.toUpperCase());
+                return;
+            }}
+
+            const key = raw.slice(0, separatorIndex).trim().toUpperCase();
+            const value = raw.slice(separatorIndex + 1).trim();
+            if (!key) return;
+
+            const parsed = parsePositiveInt(value, null);
+            if (key === 'CLICK_DELAY') {{
+                if (parsed !== null) {{
+                    target.overrides.clickDelay = parsed;
+                }}
+                return;
+            }}
+            if (key === 'AUTO_SCENE_CHANGE_DELAY') {{
+                if (parsed !== null) {{
+                    target.overrides.autoSceneChangeDelay = parsed;
+                }}
+                return;
+            }}
+
+            target.tokens.push(`${{key}}=${{value}}`);
+        }}
+
+        function applyStateActionToStore(stateStore, entry) {{
+            if (!entry || entry.type !== 'stateAction' || !entry.key) {{
+                return false;
+            }}
+
+            if (entry.action === 'SET') {{
+                stateStore[entry.key] = String(entry.value || '');
+                return true;
+            }}
+
+            if (entry.action === 'REMOVE') {{
+                if (!Object.prototype.hasOwnProperty.call(stateStore, entry.key)) {{
+                    return false;
+                }}
+                delete stateStore[entry.key];
+                return true;
+            }}
+
+            if (entry.action === 'APPEND') {{
+                const currentValue = getStateStoreValue(stateStore, entry.key);
+                if (currentValue === undefined) {{
+                    stateStore[entry.key] = [String(entry.value || '')];
+                    return true;
+                }}
+                if (!Array.isArray(currentValue)) {{
+                    console.warn(`STATE_APPEND requires an array value: ${{entry.key}}`);
+                    return false;
+                }}
+                currentValue.push(String(entry.value || ''));
+                return true;
+            }}
+
+            return false;
+        }}
+
+        function evaluateStateCondition(stateStore, entry) {{
+            if (!entry || entry.type !== 'conditionalDirective' || !entry.key) {{
+                return false;
+            }}
+
+            const currentValue = getStateStoreValue(stateStore, entry.key);
+            if (entry.condition === 'EQ') {{
+                if (Array.isArray(currentValue) || currentValue === undefined) {{
+                    return false;
+                }}
+                return String(currentValue) === String(entry.value);
+            }}
+
+            if (entry.condition === 'LEN_GTE') {{
+                return Array.isArray(currentValue) && currentValue.length >= entry.value;
+            }}
+
+            if (entry.condition === 'CONTAINS') {{
+                return Array.isArray(currentValue)
+                    && currentValue.some(value => String(value) === String(entry.value));
+            }}
+
+            return false;
+        }}
+
+        function resolveSceneScriptDirectives(scene) {{
+            if (!scene || typeof scene !== 'object') {{
+                return {{ tokens: [], overrides: {{ jumpTargets: {{}} }}, notice: '' }};
+            }}
+
+            if (
+                scene._resolvedScriptRuntimeId === currentSceneScriptRuntimeId
+                && scene._resolvedScriptDirectives
+            ) {{
+                return scene._resolvedScriptDirectives;
+            }}
+
+            const parsed = parseSceneScriptEntries(scene);
+            const target = createEmptySceneScriptDirectives();
+            const stateStore = loadStateStore();
+            let stateStoreDirty = false;
+
+            parsed.entries.forEach(entry => {{
+                if (entry.type === 'stateAction') {{
+                    stateStoreDirty = applyStateActionToStore(stateStore, entry) || stateStoreDirty;
+                    return;
+                }}
+
+                if (entry.type === 'conditionalDirective') {{
+                    if (evaluateStateCondition(stateStore, entry)) {{
+                        applySceneDirectiveText(target, entry.directive);
+                    }}
+                    return;
+                }}
+
+                applySceneDirectiveText(target, entry.directive);
+            }});
+
+            if (stateStoreDirty) {{
+                saveStateStore(stateStore);
+            }}
+
+            const resolved = {{
+                tokens: target.tokens,
+                overrides: target.overrides,
+                notice: target.noticeMessages.join('\\n\\n')
+            }};
+            scene._resolvedScriptRuntimeId = currentSceneScriptRuntimeId;
+            scene._resolvedScriptDirectives = resolved;
+            return resolved;
+        }}
+
         function parseSceneScriptTokens(scene) {{
-            return parseSceneScriptDirectives(scene).tokens;
+            return resolveSceneScriptDirectives(scene).tokens;
         }}
 
         function sceneHasDirective(scene, directive) {{
             if (!directive) return false;
-            return parseSceneScriptTokens(scene).includes(directive);
+            return parseSceneScriptTokens(scene).includes(String(directive).trim().toUpperCase());
         }}
 
         function getSceneClickDelay(scene) {{
-            const value = parseSceneScriptDirectives(scene).overrides.clickDelay;
+            const value = resolveSceneScriptDirectives(scene).overrides.clickDelay;
             return parsePositiveInt(value, CLICK_DELAY);
         }}
 
         function getSceneAutoSceneChangeDelay(scene) {{
-            const value = parseSceneScriptDirectives(scene).overrides.autoSceneChangeDelay;
+            const value = resolveSceneScriptDirectives(scene).overrides.autoSceneChangeDelay;
             return parsePositiveInt(
                 value,
                 parsePositiveInt(gameState.settings.autoSceneChangeDelay, AUTO_SCENE_CHANGE_DELAY)
@@ -2613,11 +2912,11 @@ class LuminasScript:
         }}
 
         function getSceneNoticeText(scene) {{
-            return parseSceneScriptDirectives(scene).notice || '';
+            return resolveSceneScriptDirectives(scene).notice || '';
         }}
 
         function getChoiceJumpTarget(scene, branchLetter) {{
-            const jumpTargets = parseSceneScriptDirectives(scene).overrides.jumpTargets || {{}};
+            const jumpTargets = resolveSceneScriptDirectives(scene).overrides.jumpTargets || {{}};
             return normalizeSceneId(jumpTargets[branchLetter] || '');
         }}
 
@@ -2882,7 +3181,7 @@ class LuminasScript:
             const textBox = document.getElementById('text-box');
             const gaugeContainer = document.getElementById('click-gauge-container');
             const gauge = document.getElementById('click-gauge');
-            const isTextBackOff = sceneHasDirective(scene, 'text_back_off');
+            const isTextBackOff = sceneHasDirective(scene, 'TEXT_BACK_OFF');
 
             textBox.classList.toggle('text-back-off', isTextBackOff);
             gaugeContainer.classList.toggle('text-back-off', isTextBackOff);
@@ -3228,11 +3527,13 @@ class LuminasScript:
             }}
             
             currentSceneIndex = index;
+            currentSceneScriptRuntimeId += 1;
             closeNoticeModal({{ resumeAuto: false }});
             const scene = SCENARIO_DATA[index];
             if (options.recordHistory !== false) {{
                 recordSceneNavigation(index);
             }}
+            resolveSceneScriptDirectives(scene);
             const sceneId = normalizeSceneId(scene.scene_id);
             gameState.currentSceneId = sceneId;
             gameState.visitedScenes.push(sceneId);
