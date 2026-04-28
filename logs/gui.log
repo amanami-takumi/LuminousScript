@@ -7758,3 +7758,6 @@ ERRORS:
   line 59: '1-M-A-A-E' - 分岐ルートの末尾パーツは数字を想定しています (例: 1-A-1, 1-C-A-1)
   line 62: '1-M-A-B-E' - 分岐ルートの末尾パーツは数字を想定しています (例: 1-A-1, 1-C-A-1)
   line 64: '1-M-B-E' - 分岐ルートの末尾パーツは数字を想定しています (例: 1-A-1, 1-C-A-1)
+2026-04-29 00:11:03,208 [INFO] Scene ID check start: sample.csv
+2026-04-29 00:11:03,256 [INFO] Scene ID check stdout:
+✓ scene_id チェック完了 (encoding: utf-16)
