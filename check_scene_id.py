@@ -109,7 +109,7 @@ def validate_scene_id(scene_id_raw, line_no, errors, warnings):
                 return scene_id
             errors.append((line_no, scene_id_raw, "分岐ルートは末尾に数字が必要です (例: 1-A-1, 1-C-A-1)"))
             return scene_id
-        if numeric_parts[-1] in {"Q", "E"}:
+        if numeric_parts[-1] in {"Q", "E", "T"}:
             trailing_parts = numeric_parts[:-1]
             if not trailing_parts or all(RE_DIGITS.match(p) for p in trailing_parts):
                 return scene_id
