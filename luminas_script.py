@@ -3571,11 +3571,64 @@ class LuminasScript:
             return 'dialogue';
         }}
 
+        function parseSceneRouteInfo(sceneId) {{
+            const parts = normalizeSceneId(sceneId).split('-').filter(Boolean);
+            if (parts.length < 2) {{
+                return null;
+            }}
+
+            const chapter = parts[0];
+            const routeParts = [];
+            let index = 1;
+
+            while (index < parts.length && /^[A-Z]$/.test(parts[index]) && !['T', 'Q', 'E'].includes(parts[index])) {{
+                routeParts.push(parts[index]);
+                index += 1;
+            }}
+
+            return {{
+                chapter,
+                routeParts,
+                tailParts: parts.slice(index)
+            }};
+        }}
+
+        function sceneRoutePartsEqual(left, right) {{
+            if (left.length !== right.length) {{
+                return false;
+            }}
+            for (let i = 0; i < left.length; i += 1) {{
+                if (left[i] !== right[i]) {{
+                    return false;
+                }}
+            }}
+            return true;
+        }}
+
+        function buildSceneRouteId(chapter, routeParts) {{
+            return routeParts.length ? `${{chapter}}-${{routeParts.join('-')}}` : `${{chapter}}`;
+        }}
+
+        function getParentMergeRouteParts(routeParts) {{
+            if (!Array.isArray(routeParts) || routeParts.length === 0) {{
+                return [];
+            }}
+
+            const nextRouteParts = routeParts.slice();
+            if (nextRouteParts[nextRouteParts.length - 1] === 'M') {{
+                nextRouteParts.pop();
+            }}
+            if (nextRouteParts.length === 0) {{
+                return [];
+            }}
+
+            nextRouteParts[nextRouteParts.length - 1] = 'M';
+            return nextRouteParts;
+        }}
+
         function isBranchRoute(sceneId) {{
-            const parts = normalizeSceneId(sceneId).split('-');
-            if (parts.length < 3) return false;
-            const branch = parts[1];
-            return /^[A-Z]$/.test(branch) && branch !== 'M' && branch !== 'Q' && branch !== 'T' && branch !== 'E';
+            const routeInfo = parseSceneRouteInfo(sceneId);
+            return Boolean(routeInfo && routeInfo.routeParts.length > 0 && routeInfo.tailParts.length > 0);
         }}
 
         function findNextSceneIndex(currentIndex) {{
@@ -3584,24 +3637,39 @@ class LuminasScript:
             
             const sceneId = normalizeSceneId(currentScene.scene_id);
             if (!isBranchRoute(sceneId)) return currentIndex + 1;
-            
-            const parts = sceneId.split('-');
-            const chapter = parts[0];
-            const branch = parts[1];
-            const branchPrefix = `${{chapter}}-${{branch}}-`;
+
+            const currentRoute = parseSceneRouteInfo(sceneId);
+            if (!currentRoute) return currentIndex + 1;
             
             for (let i = currentIndex + 1; i < SCENARIO_DATA.length; i++) {{
-                const id = normalizeSceneId(SCENARIO_DATA[i].scene_id);
-                if (id.startsWith(branchPrefix)) return i;
+                const candidateRoute = parseSceneRouteInfo(SCENARIO_DATA[i].scene_id);
+                if (
+                    candidateRoute
+                    && candidateRoute.chapter === currentRoute.chapter
+                    && candidateRoute.tailParts.length > 0
+                    && sceneRoutePartsEqual(candidateRoute.routeParts, currentRoute.routeParts)
+                ) {{
+                    return i;
+                }}
             }}
-            
-            const mergePrefix = `${{chapter}}-M-`;
-            const mergeIndex = SCENARIO_DATA.findIndex(s => {{
-                const id = normalizeSceneId(s.scene_id);
-                return id === `${{chapter}}-M` || id.startsWith(mergePrefix);
-            }});
-            if (mergeIndex !== -1 && mergeIndex > currentIndex) {{
-                return mergeIndex;
+
+            const mergeRouteParts = getParentMergeRouteParts(currentRoute.routeParts);
+            if (mergeRouteParts.length > 0) {{
+                const mergeRouteId = buildSceneRouteId(currentRoute.chapter, mergeRouteParts);
+                for (let i = currentIndex + 1; i < SCENARIO_DATA.length; i++) {{
+                    const candidateId = normalizeSceneId(SCENARIO_DATA[i].scene_id);
+                    const candidateRoute = parseSceneRouteInfo(candidateId);
+                    if (
+                        candidateId === mergeRouteId
+                        || (
+                            candidateRoute
+                            && candidateRoute.chapter === currentRoute.chapter
+                            && sceneRoutePartsEqual(candidateRoute.routeParts, mergeRouteParts)
+                        )
+                    ) {{
+                        return i;
+                    }}
+                }}
             }}
             
             return currentIndex + 1;

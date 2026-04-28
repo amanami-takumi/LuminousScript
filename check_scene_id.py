@@ -96,14 +96,21 @@ def validate_scene_id(scene_id_raw, line_no, errors, warnings):
             errors.append((line_no, scene_id_raw, "T/Q/E は 2 パーツ構成のみを想定しています (例: 1-T)"))
         return scene_id
 
-    if RE_LETTER.match(second) and second not in RESERVED_BRANCH:
-        if len(parts) < 3:
-            errors.append((line_no, scene_id_raw, "分岐ルートは 3 パーツ以上が必要です (例: 1-A-1)"))
+    route_parts = []
+    index = 1
+    while index < len(parts) and RE_LETTER.match(parts[index]) and parts[index] not in SPECIAL_TYPES:
+        route_parts.append(parts[index])
+        index += 1
+
+    if route_parts:
+        numeric_parts = parts[index:]
+        if not numeric_parts:
+            if route_parts[-1] == "M":
+                return scene_id
+            errors.append((line_no, scene_id_raw, "分岐ルートは末尾に数字が必要です (例: 1-A-1, 1-C-A-1)"))
             return scene_id
-        if not RE_DIGITS.match(parts[2]):
-            errors.append((line_no, scene_id_raw, "分岐ルートの3番目は数字を想定しています (例: 1-A-1)"))
-        if len(parts) > 3 and not all(RE_DIGITS.match(p) for p in parts[2:]):
-            warnings.append((line_no, scene_id_raw, "分岐ルートの追加パーツは数字のみを推奨します"))
+        if not all(RE_DIGITS.match(p) for p in numeric_parts):
+            errors.append((line_no, scene_id_raw, "分岐ルートの末尾パーツは数字を想定しています (例: 1-A-1, 1-C-A-1)"))
         return scene_id
 
     if RE_DIGITS.match(second):
